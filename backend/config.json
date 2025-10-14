@@ -1,0 +1,45 @@
+{
+    "hw": {
+        "show_dev": false,
+        "url": "ftdi://ftdi:232:AB0OXCQ4/1"
+    },
+    "http": {
+        "port": 8080
+    },
+    "dmx": {
+        "target_ch": [
+            11,
+            12
+        ],
+        "target_additional_ch": [
+            9,
+            10
+        ],
+        "target_max": {
+            "11": 180,
+            "12": 180,
+            "9": 255,
+            "10": 255
+        },
+        "fadeInterval": 0.7,
+        "delay": 0.0,
+        "fps": 30,
+        "preStatus": false
+    },
+    "serial": {
+        "dev": "/dev/ttyUSB0",
+        "speed": 115200
+    },
+    "tcp": {
+        "ip": "",
+        "port": 50000
+    },
+    "osc": {
+        "ip": "192.168.101.110",
+        "port": 49900,
+        "format": "/yosc:req/set/MIXER:Current/InCh/Fader/On/{}/1",
+        "type": "int",
+        "inverse": true,
+        "mic": [9, 10, 11, 12, 13]
+    }
+}
