@@ -2,10 +2,14 @@ package main
 
 import (
 	"backend/config"
+	dmxserver "backend/dmxServer"
+	"backend/httpServer"
 	"backend/message"
 	"backend/packageModule"
 	tcpserver "backend/tcpServer"
+	"fmt"
 	"log/slog"
+	"maps"
 	"os"
 	"os/signal"
 	"sync"
@@ -14,62 +18,58 @@ import (
 var channel chan message.Message
 var wg sync.WaitGroup
 var log *slog.Logger
-var logHandler slog.Handler
-var modules map[string]*packageModule.PackageModule
+var logHandler slog.Handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+	Level: slog.LevelDebug,
+})
+var modules map[string]*packageModule.PackageModule = make(map[string]*packageModule.PackageModule)
 
 func registerModule() {
-	modules = make(map[string]*packageModule.PackageModule)
-	//modules["http"] = &httpServer.HttpServer
+	modules["http"] = &httpServer.HttpServer
 	modules["tcp"] = &tcpserver.TcpServer
-}
-func moduleInitialize() {
-	wg = sync.WaitGroup{}
-	channel = make(chan message.Message)
-	for name, module := range modules {
-		if !module.Initialize(packageModule.PackageModuleParam{
-			Logger:  *registerLog(name),
-			Config:  config.ConfigData,
-			Wg:      &wg,
-			Channel: channel,
-		}) {
-			log.Error("Failed to initialize", "module", name)
+
+	for k, v := range config.ConfigData.Modules {
+		if !v {
+			continue
+		}
+		if module, ok := modules[k]; ok {
+			packageModule.ModuleManager.RegisterModule(k, module)
+		} else {
+			log.Error(fmt.Sprintf("Module %s is not support.\nSupport modules are %v", k, maps.Keys(modules)))
 		}
 	}
+	packageModule.ModuleManager.RegisterModule("dmx", &dmxserver.DMXServer)
 }
-func moduleStart() {
-	for _, module := range modules {
-		go module.Run()
-	}
-}
+
 func handleMessage(mes message.Message) int {
 	res := 0
-	log.Info("Process message", "mes", mes)
+	log.Debug("Process message", "mes", mes)
 	switch mes.Arg.Action {
 	case "stop":
-		for k := range modules {
-			channel <- message.Message{
-				To: k,
-				Arg: message.MessageBody{
-					Action: "stop",
-					Arg:    nil,
-				},
+		go func() {
+			for k, v := range modules {
+				v.Channel <- message.Message{
+					To: k,
+					Arg: message.MessageBody{
+						Action: "stop",
+						Arg:    nil,
+					},
+				}
 			}
-		}
+		}()
 		res = -1
 	}
 	return res
 }
 func mainProcess() {
 	for {
-		mes := <-channel
-		log.Info("Receive message", "mes", mes)
-		if mes.To == "main" {
-			if handleMessage(mes) < 0 {
+		msg := <-channel
+		log.Info("Receive message", "mes", msg)
+		if msg.To == "main" {
+			if handleMessage(msg) < 0 {
 				break
 			}
 			continue
 		}
-		channel <- mes
 	}
 	log.Info("Stopping main process.")
 	wg.Wait()
@@ -89,18 +89,18 @@ func signalProcess() {
 }
 
 func registerLog(module string) *slog.Logger {
-	req := slog.Group("base", "module", module)
-	return slog.New(logHandler).With(req)
+	return slog.New(logHandler).With("base", module)
 }
 
 func main() {
-	logHandler = slog.NewJSONHandler(os.Stdout, nil)
+	channel = make(chan message.Message, 10)
+	packageModule.ModuleManager.Initialize(registerLog("manager"))
 	log = registerLog("main")
 	log.Info("Start Main process")
 	config.Load(registerLog("config"))
 	registerModule()
-	moduleInitialize()
-	moduleStart()
+	packageModule.ModuleManager.ModuleInitialize(&logHandler)
 	go signalProcess()
+	packageModule.ModuleManager.ModuleRun()
 	mainProcess()
 }

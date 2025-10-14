@@ -12,6 +12,7 @@ type Hardware struct {
 	URL     string `json:"url"`
 }
 type HttpServer struct {
+	IP   string `json:"ip"`
 	Port uint16 `json:"port"`
 }
 type TCPServer struct {
@@ -20,24 +21,33 @@ type TCPServer struct {
 }
 
 type Config struct {
-	Hardware Hardware   `json:"hw"`
-	Http     HttpServer `json:"http"`
-	Tcp      TCPServer  `json:"tcp"`
+	Modules  map[string]bool `json:"modules"`
+	Output   []string        `json:"output"`
+	Hardware Hardware        `json:"hw"`
+	Http     HttpServer      `json:"http"`
+	Tcp      TCPServer       `json:"tcp"`
 }
 
 var ConfigData Config
 
 func InitializeConfig() {
 	ConfigData = Config{
+		Modules: map[string]bool{
+			"http": false,
+			"tcp":  false,
+			"dmx":  false,
+		},
+		Output: []string{"dmx", "artnet"},
 		Hardware: Hardware{
 			ShowDev: false,
 			URL:     "ftdi://ftdi:232:AB0OXCQ4/1",
 		},
 		Http: HttpServer{
+			IP:   "127.0.0.1",
 			Port: 8000,
 		},
 		Tcp: TCPServer{
-			IP:   "0.0.0.0",
+			IP:   "127.0.0.1",
 			Port: 50000,
 		},
 	}

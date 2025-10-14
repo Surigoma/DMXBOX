@@ -1,76 +1,83 @@
 package tcpserver
 
 import (
+	"backend/config"
 	"backend/message"
 	"backend/packageModule"
 	"fmt"
 	"io"
 	"log/slog"
 	"net"
-	"strings"
+	"regexp"
 	"sync"
 	"time"
 )
 
-type TCPParams struct {
-	logger     slog.Logger
-	listenAddr *net.TCPAddr
-}
-
-var p TCPParams
-var channel chan message.Message
+var logger *slog.Logger
+var listenAddr *net.TCPAddr
 var wg *sync.WaitGroup
-var running bool = true
+var running bool = false
 
 var TcpServer packageModule.PackageModule = packageModule.PackageModule{
-	Initialize: Initialize,
-	Run:        StartTCP,
+	ModuleName:     "tcp",
+	Initialize:     Initialize,
+	Run:            StartTCP,
+	MessageHandler: handleMessage,
 }
 
-func Initialize(param packageModule.PackageModuleParam) bool {
+func Initialize(module *packageModule.PackageModule, config *config.Config) bool {
 	var err error
-	p.logger = param.Logger
-	wg = param.Wg
-	p.listenAddr, err = net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", param.Config.Tcp.IP, param.Config.Tcp.Port))
+	logger = module.Logger
+	wg = module.Wg
+	running = true
+	listenAddr, err = net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", config.Tcp.IP, config.Tcp.Port))
 	if err != nil {
-		p.logger.Error("Failed to setup TCP", "error", err)
+		logger.Error("Failed to setup TCP", "error", err)
 		return false
 	}
 	return true
 }
 func handleRequest(conn *net.TCPConn) {
-	p.logger.Info("Connect", "remote", conn.RemoteAddr().Network())
+	logger.Info("Connect", "remote", conn.RemoteAddr())
 	defer conn.Close()
 	buf := make([]byte, 512)
 	for {
-		_, err := conn.Read(buf)
+		len, err := conn.Read(buf)
 		if err != nil {
 			if err != io.EOF {
-				p.logger.Warn("Invalid close", "error", err)
+				logger.Warn("Invalid close", "error", err)
 			}
 			break
 		}
-		msgs := strings.Split(string(buf), "\n")
+		msgs := regexp.MustCompile("\r\n|\n|\r").Split(string(buf[:len]), -1)
+		fmt.Println(msgs)
 		for _, msg := range msgs {
 			switch msg {
 			case "test":
-				p.logger.Info("test")
+				logger.Debug("test")
+				go packageModule.ModuleManager.SendMessage(message.Message{
+					To: "test",
+				})
 			}
-			conn.Write([]byte("ack\n"))
+			conn.Write([]byte("ack\r\n"))
 		}
 	}
+	logger.Info("Disconnect", "remote", conn.RemoteAddr())
 }
 func tcpThread(ln *net.TCPListener) {
 	defer wg.Done()
+	defer ln.Close()
 	for running {
-		err := ln.SetDeadline(time.Now().Add(time.Second * 10))
+		err := ln.SetDeadline(time.Now().Add(time.Second))
 		if err != nil {
-			p.logger.Error("Failed to set Dead line.", "error", err)
+			logger.Error("Failed to set Dead line.", "error", err)
 			break
 		}
 		conn, err := ln.AcceptTCP()
 		if err != nil {
-			p.logger.Error("Failed setup connection", "error", err)
+			if opErr, ok := err.(*net.OpError); !ok {
+				logger.Error("Failed setup connection", "error", opErr)
+			}
 			continue
 		}
 		go handleRequest(conn)
@@ -86,26 +93,12 @@ func handleMessage(mes message.Message) int {
 	return 0
 }
 
-func messageProcess() {
-	for {
-		mes := <-channel
-		if mes.To == "tcp" {
-			if handleMessage(mes) < 0 {
-				break
-			}
-		}
-	}
-}
-
 func StartTCP() {
-	p.logger.Info("Hello TCP server", "listenAddr", p.listenAddr)
-	ln, err := net.ListenTCP("tcp", p.listenAddr)
+	logger.Info("Hello TCP server", "listenAddr", listenAddr)
+	ln, err := net.ListenTCP("tcp", listenAddr)
 	if err != nil {
-		p.logger.Error("Failed to start a tcp server", "error", err)
+		logger.Error("Failed to start a tcp server", "error", err)
 		return
 	}
-	wg.Add(1)
-	defer ln.Close()
 	go tcpThread(ln)
-	go messageProcess()
 }

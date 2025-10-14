@@ -1,9 +1,15 @@
 {
+    "modules": {
+        "http": true,
+        "tcp": true,
+        "art": false
+    },
     "hw": {
         "show_dev": false,
         "url": "ftdi://ftdi:232:AB0OXCQ4/1"
     },
     "http": {
+        "ip": "127.0.0.1",
         "port": 8080
     },
     "dmx": {
@@ -31,7 +37,7 @@
         "speed": 115200
     },
     "tcp": {
-        "ip": "",
+        "ip": "127.0.0.1",
         "port": 50000
     },
     "osc": {
@@ -40,6 +46,12 @@
         "format": "/yosc:req/set/MIXER:Current/InCh/Fader/On/{}/1",
         "type": "int",
         "inverse": true,
-        "mic": [9, 10, 11, 12, 13]
+        "mic": [
+            9,
+            10,
+            11,
+            12,
+            13
+        ]
     }
 }

@@ -1,31 +1,31 @@
 package httpServer
 
 import (
+	"backend/config"
 	"backend/docs"
 	"backend/httpServer/controller"
+	"backend/message"
 	"backend/packageModule"
 	"fmt"
 	"log/slog"
 	"sync"
-	"time"
 
 	"github.com/gin-gonic/gin"
+	sloggin "github.com/samber/slog-gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-type HTTPParams struct {
-	logger     slog.Logger
-	engine     *gin.Engine
-	listenAddr string
-}
-
-var p HTTPParams
 var wg *sync.WaitGroup
+var logger *slog.Logger
+var engine *gin.Engine
+var listenAddr string
 
 var HttpServer packageModule.PackageModule = packageModule.PackageModule{
-	Initialize: Initialize,
-	Run:        StartHTTP,
+	ModuleName:     "http",
+	Initialize:     Initialize,
+	Run:            StartHTTP,
+	MessageHandler: handleMessage,
 }
 
 //	@title			DMX BOX
@@ -39,20 +39,19 @@ var HttpServer packageModule.PackageModule = packageModule.PackageModule{
 //	@host		localhost:8080
 //	@BasePath	/api/v1
 
-func Initialize(param packageModule.PackageModuleParam) bool {
-	p = HTTPParams{
-		listenAddr: fmt.Sprintf("0.0.0.0:%d", param.Config.Http.Port),
-		logger:     param.Logger,
-		engine:     registerEndPoints(),
-	}
-	wg = param.Wg
-	p.logger.Info("Hello http server", "addr", "http://"+p.listenAddr)
+func Initialize(module *packageModule.PackageModule, config *config.Config) bool {
+	listenAddr = fmt.Sprintf("%s:%d", config.Http.IP, config.Http.Port)
+	logger = module.Logger
+	engine = registerEndPoints()
+	wg = module.Wg
+	logger.Info("Hello http server", "addr", "http://"+listenAddr)
 	return true
 }
 
 func registerEndPoints() *gin.Engine {
 	route := gin.Default()
-	route.Use(ginLogFormat(&p.logger))
+	route.Use(sloggin.New(logger))
+	route.Use(gin.Recovery())
 	route.GET("/", controller.HelloWorld)
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	v1 := route.Group("/api/v1")
@@ -66,25 +65,18 @@ func registerEndPoints() *gin.Engine {
 	return route
 }
 
-func ginLogFormat(logger *slog.Logger) gin.HandlerFunc {
-	return gin.LoggerWithFormatter(func(param gin.LogFormatterParams) string {
-		logger.Info("gin-request",
-			slog.String("time", param.TimeStamp.Format(time.RFC3339)),
-			slog.Int("status", param.StatusCode),
-			slog.String("latency", param.Latency.String()),
-			slog.String("client_ip", param.ClientIP),
-			slog.String("method", param.Method),
-			slog.String("path", param.Path),
-			slog.String("error", param.ErrorMessage),
-		)
-		return ""
-	})
+func handleMessage(mes message.Message) int {
+	switch mes.Arg.Action {
+	case "stop":
+		return -1
+	}
+	return 0
 }
 
 func StartHTTP() {
 	wg.Add(1)
 	defer wg.Done()
-	err := p.engine.Run(p.listenAddr)
+	err := engine.Run(listenAddr)
 	if err != nil {
 		slog.Error("Failed to setup error", "error", err)
 		return

@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"backend/message"
+	"backend/packageModule"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,4 +21,7 @@ import (
 // @Router /hello [get]
 func HelloWorld(g *gin.Context) {
 	g.JSON(http.StatusOK, "helloworld")
+	packageModule.ModuleManager.SendMessage(message.Message{
+		To: "test",
+	})
 }
