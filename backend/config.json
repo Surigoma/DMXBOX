@@ -4,6 +4,7 @@
         "tcp": true,
         "art": false
     },
+    "output": ["ftdi"],
     "hw": {
         "show_dev": false,
         "url": "ftdi://ftdi:232:AB0OXCQ4/1"

@@ -2,10 +2,9 @@ package dimmer
 
 import device "backend/dmxServer/devices"
 
-type Dimmer struct {
-	device.DMXDevice
-}
-
-func (dim *Dimmer) Render() {
-
+func NewDimmer() *device.DMXDevice {
+	return &device.DMXDevice{
+		Model:      "dimmer",
+		UseChannel: 1,
+	}
 }

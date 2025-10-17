@@ -19,13 +19,24 @@ type TCPServer struct {
 	IP   string `json:"ip"`
 	Port uint16 `json:"port"`
 }
-
+type DMXDevice struct {
+	Model    string  `json:"model"`
+	Channel  uint8   `json:"channel"`
+	MaxValue []uint8 `json:"max"`
+}
+type DMXServer struct {
+	Devices      []DMXDevice `json:"devices"`
+	FadeInterval float32     `json:"fadeInterval"`
+	Delay        float32     `json:"delay"`
+	Fps          float32     `json:"fps"`
+}
 type Config struct {
 	Modules  map[string]bool `json:"modules"`
 	Output   []string        `json:"output"`
 	Hardware Hardware        `json:"hw"`
 	Http     HttpServer      `json:"http"`
 	Tcp      TCPServer       `json:"tcp"`
+	Dmx      DMXServer       `json:"dmx"`
 }
 
 var ConfigData Config
@@ -37,7 +48,7 @@ func InitializeConfig() {
 			"tcp":  false,
 			"dmx":  false,
 		},
-		Output: []string{"dmx", "artnet"},
+		Output: []string{"console"},
 		Hardware: Hardware{
 			ShowDev: false,
 			URL:     "ftdi://ftdi:232:AB0OXCQ4/1",
@@ -49,6 +60,12 @@ func InitializeConfig() {
 		Tcp: TCPServer{
 			IP:   "127.0.0.1",
 			Port: 50000,
+		},
+		Dmx: DMXServer{
+			Devices:      make([]DMXDevice, 0),
+			FadeInterval: 0.7,
+			Delay:        0.0,
+			Fps:          0.0,
 		},
 	}
 }

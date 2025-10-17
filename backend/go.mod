@@ -61,4 +61,7 @@ require (
 	golang.org/x/tools v0.38.0 // indirect
 	google.golang.org/protobuf v1.36.10 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	periph.io/x/conn/v3 v3.7.2 // indirect
+	periph.io/x/d2xx v0.1.1 // indirect
+	periph.io/x/host/v3 v3.8.5 // indirect
 )
