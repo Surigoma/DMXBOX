@@ -36,7 +36,7 @@ func (dev *DMXDevice) Initialize(channel uint8, maxValue []byte, target *[]byte)
 	for i := range dev.Target {
 		dev.Target[i] = 0
 	}
-	return false
+	return true
 }
 
 func (dev *DMXDevice) Fade(isIn bool) {
@@ -44,7 +44,7 @@ func (dev *DMXDevice) Fade(isIn bool) {
 	dev.effectEnd = dev.effectStart.Add(time.Duration(*dev.Duration * float32(time.Second)))
 
 	for i := range dev.Before {
-		dev.Before[i] = (*dev.Output)[i+int(dev.Channel)-1]
+		dev.Before[i] = (*dev.Output)[i+int(dev.Channel)]
 	}
 	for i := range dev.Target {
 		if isIn {
@@ -66,7 +66,7 @@ func (dev *DMXDevice) Update(wg *sync.WaitGroup) bool {
 		return true
 	}
 	for i := range dev.Target {
-		(*dev.Output)[i+int(dev.Channel)-1] = byte(math.Max(0, math.Min(255, math.Round(float64(dev.Target[i]-dev.Before[i])*float64(percent))+float64(dev.Before[i]))))
+		(*dev.Output)[i+int(dev.Channel)] = byte(math.Max(0, math.Min(255, math.Round(float64(dev.Target[i]-dev.Before[i])*float64(percent))+float64(dev.Before[i]))))
 	}
 	return true
 }

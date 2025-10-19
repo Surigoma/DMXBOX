@@ -59,6 +59,7 @@ func registerEndPoints() *gin.Engine {
 		eg := v1.Group("/")
 		{
 			eg.GET("/hello", controller.HelloWorld)
+			eg.POST("/fade", controller.Fade)
 		}
 	}
 	route.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
@@ -68,6 +69,8 @@ func registerEndPoints() *gin.Engine {
 func handleMessage(mes message.Message) int {
 	switch mes.Arg.Action {
 	case "stop":
+		logger.Error("Finalize")
+		wg.Done()
 		return -1
 	}
 	return 0
@@ -75,10 +78,9 @@ func handleMessage(mes message.Message) int {
 
 func StartHTTP() {
 	wg.Add(1)
-	defer wg.Done()
 	err := engine.Run(listenAddr)
 	if err != nil {
-		slog.Error("Failed to setup error", "error", err)
+		logger.Error("Failed to setup error", "error", err)
 		return
 	}
 }

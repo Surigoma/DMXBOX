@@ -1,15 +1,45 @@
-basePath: /api/v1
-host: localhost:8080
+definitions:
+  controller.FadeResult:
+    properties:
+      err:
+        additionalProperties:
+          type: string
+        type: object
+      result:
+        type: string
+    type: object
 info:
   contact: {}
-  description: For my frendz.
-  license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
-  termsOfService: http://swagger.io/terms/
-  title: DMX BOX
-  version: "0.1"
 paths:
+  /fade:
+    post:
+      consumes:
+      - application/json
+      description: Control a DXM using fade in/out
+      parameters:
+      - description: Name of DMX group
+        in: query
+        name: group
+        required: true
+        type: string
+      - description: Name of DMX group
+        in: query
+        name: isIn
+        type: boolean
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controller.FadeResult'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/controller.FadeResult'
+      summary: Control a DMX
+      tags:
+      - DMX
   /hello:
     get:
       consumes:

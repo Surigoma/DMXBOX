@@ -24,12 +24,20 @@ type ModuleManagerType struct {
 }
 
 var ModuleManager ModuleManagerType = ModuleManagerType{}
+var channel chan message.Message
+var running bool
 
 func (mgr *ModuleManagerType) Initialize(log *slog.Logger) bool {
 	mgr.logger = log
 	mgr.modules = make(map[string]*PackageModule)
 	mgr.wg = sync.WaitGroup{}
+	running = true
 	return true
+}
+
+func (mgr *ModuleManagerType) Finalize() {
+	running = false
+	mgr.wg.Wait()
 }
 
 func (mgr *ModuleManagerType) RegisterModule(name string, module *PackageModule) bool {
@@ -67,15 +75,24 @@ func (mgr *ModuleManagerType) SendMessage(msg message.Message) bool {
 		mgr.logger.Warn("Module not found.", "msg", msg)
 		return false
 	}
+	mgr.logger.Debug("Send message", "to", msg.To, "msg", msg)
 	go func() {
 		module.Channel <- msg
 	}()
 	return true
 }
 
+func (mgr *ModuleManagerType) GetModules() []string {
+	result := make([]string, 0)
+	for k := range mgr.modules {
+		result = append(result, k)
+	}
+	return result
+}
+
 func (module *PackageModule) MessageProcess(name string, handler func(msg message.Message) int) {
 	module.Logger.Debug("Enter message process.")
-	for {
+	for running {
 		msg := <-module.Channel
 		module.Logger.Debug("Catch message", "mes", msg)
 		if msg.To == module.ModuleName {

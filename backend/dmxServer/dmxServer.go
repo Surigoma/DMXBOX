@@ -3,25 +3,21 @@ package dmxserver
 import (
 	"backend/config"
 	"backend/dmxServer/controller"
-	"backend/dmxServer/controller/console"
-	ftdi_controller "backend/dmxServer/controller/ftdi"
+	ctrlModule "backend/dmxServer/controller/module"
 	device "backend/dmxServer/devices"
-	wclight "backend/dmxServer/devices/WCLight"
-	"backend/dmxServer/devices/dimmer"
+	deviceSpec "backend/dmxServer/devices/spec"
 	"backend/dmxServer/fps"
 	"backend/message"
 	"backend/packageModule"
 	"log/slog"
 	"sync"
-
-	"github.com/google/uuid"
 )
 
 var logger *slog.Logger
 var wg *sync.WaitGroup
 var renderWg sync.WaitGroup
 var deviceTypes map[string]func() *device.DMXDevice = make(map[string]func() *device.DMXDevice)
-var devices map[uuid.UUID]device.DMXDevice = make(map[uuid.UUID]device.DMXDevice)
+var devices map[string][]*device.DMXDevice = make(map[string][]*device.DMXDevice)
 var renderTypes map[string]func() *controller.Controller = make(map[string]func() *controller.Controller)
 var renderers map[string]*controller.Controller = make(map[string]*controller.Controller)
 var rendered []byte = make([]byte, 513)
@@ -54,16 +50,22 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	param.Delay = config.Dmx.Delay
 	param.Fps = config.Dmx.Fps
 
-	deviceTypes["dimmer"] = dimmer.NewDimmer
-	deviceTypes["wclight"] = wclight.NewWCLight
-	renderTypes["console"] = console.NewConsole
-	renderTypes["ftdi"] = ftdi_controller.NewFTDI
+	deviceTypes["dimmer"] = deviceSpec.NewDimmer
+	deviceTypes["wclight"] = deviceSpec.NewWCLight
+	renderTypes["console"] = ctrlModule.NewConsole
+	renderTypes["ftdi"] = ctrlModule.NewFTDI
 
 	for _, controller := range config.Output {
 		AddController(controller, config)
 	}
-	for _, device := range config.Dmx.Devices {
-		AddDevice(device.Model, device.Channel, device.MaxValue)
+	for name, groupDevices := range config.Dmx.Devices {
+		devices[name] = make([]*device.DMXDevice, len(groupDevices))
+		for i, device := range groupDevices {
+			devices[name][i] = MakeDevice(device.Model, device.Channel, device.MaxValue)
+			if devices[name][i] == nil {
+				return false
+			}
+		}
 	}
 	return true
 }
@@ -73,22 +75,36 @@ func handleMessage(mes message.Message) int {
 	case "stop":
 		fpsController.Stop()
 		return -1
+	case "fade":
+		id := mes.Arg.Arg["id"]
+		isInStr, ok := mes.Arg.Arg["isIn"]
+		isIn := true
+		if ok {
+			isIn = isInStr == "true"
+		}
+		targetGroup, ok := devices[id]
+		if !ok {
+			return 0
+		}
+		for _, d := range targetGroup {
+			d.Fade(isIn)
+		}
 	}
 	return 0
 }
 
-func AddDevice(deviceType string, channel uint8, maxValue []uint8) bool {
+func MakeDevice(deviceType string, channel uint8, maxValue []uint8) *device.DMXDevice {
 	generator, ok := deviceTypes[deviceType]
 	if !ok {
 		logger.Warn("Unsupported type", "type", deviceType)
-		return false
+		return nil
 	}
 	dev := generator()
 	if !dev.Initialize(channel, maxValue, &rendered) {
 		logger.Error("Failed to initialize device.", "dev", dev)
-		return false
+		return nil
 	}
-	return true
+	return dev
 }
 
 func AddController(model string, config *config.Config) bool {
@@ -111,8 +127,10 @@ func AddController(model string, config *config.Config) bool {
 
 func Render() {
 	renderWg.Add(len(devices))
-	for _, device := range devices {
-		device.Update(&renderWg)
+	for _, deviceGroup := range devices {
+		for _, device := range deviceGroup {
+			device.Update(&renderWg)
+		}
 	}
 	renderWg.Wait()
 }
@@ -129,6 +147,11 @@ func DMXThread() bool {
 }
 
 func Finalize() {
+	logger.Debug("Finalize dmx service")
+	for k, r := range renderers {
+		logger.Debug("Finalize", "k", k)
+		r.Finalize()
+	}
 	wg.Done()
 }
 

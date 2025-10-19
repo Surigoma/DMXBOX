@@ -45,17 +45,18 @@ func handleMessage(mes message.Message) int {
 	log.Debug("Process message", "mes", mes)
 	switch mes.Arg.Action {
 	case "stop":
-		go func() {
-			for k, v := range modules {
-				v.Channel <- message.Message{
+		for _, k := range packageModule.ModuleManager.GetModules() {
+			log.Debug("Stopping Module", "target", k)
+			packageModule.ModuleManager.SendMessage(
+				message.Message{
 					To: k,
 					Arg: message.MessageBody{
 						Action: "stop",
 						Arg:    nil,
 					},
-				}
-			}
-		}()
+				},
+			)
+		}
 		res = -1
 	}
 	return res
@@ -101,6 +102,7 @@ func main() {
 	registerModule()
 	packageModule.ModuleManager.ModuleInitialize(&logHandler)
 	go signalProcess()
+	defer packageModule.ModuleManager.Finalize()
 	packageModule.ModuleManager.ModuleRun()
 	mainProcess()
 }

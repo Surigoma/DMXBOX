@@ -1,4 +1,4 @@
-package dimmer
+package spec
 
 import device "backend/dmxServer/devices"
 

@@ -3,7 +3,6 @@ package controller
 import (
 	"backend/config"
 	"log/slog"
-	"sync"
 )
 
 type Controller struct {
@@ -12,7 +11,6 @@ type Controller struct {
 	ModOutput     func(*[]byte) bool
 	ModFinalize   func()
 	logger        *slog.Logger
-	wg            *sync.WaitGroup
 }
 
 func (c *Controller) Initialize(FPS float32, config *config.Config, log *slog.Logger) bool {
@@ -20,7 +18,7 @@ func (c *Controller) Initialize(FPS float32, config *config.Config, log *slog.Lo
 		return false
 	}
 	c.logger = log
-	result := c.ModInitialize(config, log)
+	result := c.ModInitialize(config, log.With("module_dmx", c.Model))
 	return result
 }
 
@@ -28,7 +26,6 @@ func (c *Controller) Finalize() {
 	if c.ModFinalize != nil {
 		c.ModFinalize()
 	}
-	c.wg.Done()
 }
 
 func (c *Controller) Output(output *[]byte) bool {

@@ -1,4 +1,4 @@
-package wclight
+package spec
 
 import device "backend/dmxServer/devices"
 

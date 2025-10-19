@@ -9,7 +9,7 @@ import (
 
 type Hardware struct {
 	ShowDev bool   `json:"show_dev"`
-	URL     string `json:"url"`
+	Port    string `json:"port"`
 }
 type HttpServer struct {
 	IP   string `json:"ip"`
@@ -25,10 +25,10 @@ type DMXDevice struct {
 	MaxValue []uint8 `json:"max"`
 }
 type DMXServer struct {
-	Devices      []DMXDevice `json:"devices"`
-	FadeInterval float32     `json:"fadeInterval"`
-	Delay        float32     `json:"delay"`
-	Fps          float32     `json:"fps"`
+	Devices      map[string][]DMXDevice `json:"devices"`
+	FadeInterval float32                `json:"fadeInterval"`
+	Delay        float32                `json:"delay"`
+	Fps          float32                `json:"fps"`
 }
 type Config struct {
 	Modules  map[string]bool `json:"modules"`
@@ -51,7 +51,7 @@ func InitializeConfig() {
 		Output: []string{"console"},
 		Hardware: Hardware{
 			ShowDev: false,
-			URL:     "ftdi://ftdi:232:AB0OXCQ4/1",
+			Port:    "COM1",
 		},
 		Http: HttpServer{
 			IP:   "127.0.0.1",
@@ -62,7 +62,7 @@ func InitializeConfig() {
 			Port: 50000,
 		},
 		Dmx: DMXServer{
-			Devices:      make([]DMXDevice, 0),
+			Devices:      make(map[string][]DMXDevice),
 			FadeInterval: 0.7,
 			Delay:        0.0,
 			Fps:          0.0,

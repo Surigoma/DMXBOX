@@ -1,13 +1,13 @@
 {
     "modules": {
         "http": true,
-        "tcp": true,
+        "tcp": false,
         "art": false
     },
     "output": ["ftdi"],
     "hw": {
         "show_dev": false,
-        "url": "ftdi://ftdi:232:AB0OXCQ4/1"
+        "port": "COM3"
     },
     "http": {
         "ip": "127.0.0.1",
@@ -27,6 +27,16 @@
             "12": 180,
             "9": 255,
             "10": 255
+        },
+        "devices": {
+            "Stage": [
+                {"model": "wclight", "channel": 50, "max": [255, 255, 0]},
+                {"model": "wclight", "channel": 53, "max": [255, 255, 0]}
+            ],
+            "Audience": [
+                {"model": "dimmer", "channel": 7, "max": [255]},
+                {"model": "dimmer", "channel": 8, "max": [255]}
+            ]
         },
         "fadeInterval": 0.7,
         "delay": 0.0,

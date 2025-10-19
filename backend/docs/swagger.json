@@ -1,19 +1,53 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "For my frendz.",
-        "title": "DMX BOX",
-        "termsOfService": "http://swagger.io/terms/",
-        "contact": {},
-        "license": {
-            "name": "Apache 2.0",
-            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-        },
-        "version": "0.1"
+        "contact": {}
     },
-    "host": "localhost:8080",
-    "basePath": "/api/v1",
     "paths": {
+        "/fade": {
+            "post": {
+                "description": "Control a DXM using fade in/out",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "DMX"
+                ],
+                "summary": "Control a DMX",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Name of DMX group",
+                        "name": "group",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "Name of DMX group",
+                        "name": "isIn",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/controller.FadeResult"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/controller.FadeResult"
+                        }
+                    }
+                }
+            }
+        },
         "/hello": {
             "get": {
                 "description": "do ping",
@@ -34,6 +68,22 @@
                             "type": "string"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "controller.FadeResult": {
+            "type": "object",
+            "properties": {
+                "err": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    }
+                },
+                "result": {
+                    "type": "string"
                 }
             }
         }
