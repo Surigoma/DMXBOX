@@ -84,8 +84,10 @@ func handleMessage(mes message.Message) int {
 		}
 		targetGroup, ok := devices[id]
 		if !ok {
+			logger.Error("group is not found", "id", id)
 			return 0
 		}
+		logger.Debug("action fade", "fade", isIn)
 		for _, d := range targetGroup {
 			d.Fade(isIn)
 		}
@@ -100,10 +102,11 @@ func MakeDevice(deviceType string, channel uint8, maxValue []uint8) *device.DMXD
 		return nil
 	}
 	dev := generator()
-	if !dev.Initialize(channel, maxValue, &rendered) {
+	if !dev.Initialize(channel, maxValue, &rendered, &param.Duration) {
 		logger.Error("Failed to initialize device.", "dev", dev)
 		return nil
 	}
+	logger.Debug("Add device", "dev", dev)
 	return dev
 }
 
@@ -126,9 +129,9 @@ func AddController(model string, config *config.Config) bool {
 }
 
 func Render() {
-	renderWg.Add(len(devices))
 	for _, deviceGroup := range devices {
 		for _, device := range deviceGroup {
+			renderWg.Add(1)
 			device.Update(&renderWg)
 		}
 	}
@@ -139,7 +142,8 @@ func DMXThread() bool {
 	if counter == 0 {
 		logger.Debug("fps", "fps", fpsController.GetFPS())
 	}
-	counter = (counter + 1) % 10
+	counter = (counter + 1) % 50
+	Render()
 	for _, r := range renderers {
 		r.Output(&rendered)
 	}

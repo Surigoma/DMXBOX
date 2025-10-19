@@ -6,9 +6,12 @@ import (
 	"backend/httpServer/controller"
 	"backend/message"
 	"backend/packageModule"
+	"context"
 	"fmt"
 	"log/slog"
+	"net/http"
 	"sync"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	sloggin "github.com/samber/slog-gin"
@@ -19,6 +22,7 @@ import (
 var wg *sync.WaitGroup
 var logger *slog.Logger
 var engine *gin.Engine
+var server *http.Server
 var listenAddr string
 
 var HttpServer packageModule.PackageModule = packageModule.PackageModule{
@@ -44,6 +48,10 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	logger = module.Logger
 	engine = registerEndPoints()
 	wg = module.Wg
+	server = &http.Server{
+		Addr:    listenAddr,
+		Handler: engine,
+	}
 	logger.Info("Hello http server", "addr", "http://"+listenAddr)
 	return true
 }
@@ -59,7 +67,7 @@ func registerEndPoints() *gin.Engine {
 		eg := v1.Group("/")
 		{
 			eg.GET("/hello", controller.HelloWorld)
-			eg.POST("/fade", controller.Fade)
+			eg.POST("/fade/:group", controller.Fade)
 		}
 	}
 	route.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
@@ -69,17 +77,21 @@ func registerEndPoints() *gin.Engine {
 func handleMessage(mes message.Message) int {
 	switch mes.Arg.Action {
 	case "stop":
+		defer wg.Done()
+		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+		defer cancel()
+		if err := server.Shutdown(ctx); err != nil {
+			logger.Error("Failed to stop http server.", "err", err)
+		}
 		logger.Error("Finalize")
-		wg.Done()
 		return -1
 	}
 	return 0
 }
 
 func StartHTTP() {
-	wg.Add(1)
-	err := engine.Run(listenAddr)
-	if err != nil {
+	err := server.ListenAndServe()
+	if err != nil && err != http.ErrServerClosed {
 		logger.Error("Failed to setup error", "error", err)
 		return
 	}

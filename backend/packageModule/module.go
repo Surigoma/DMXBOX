@@ -3,8 +3,10 @@ package packageModule
 import (
 	"backend/config"
 	"backend/message"
+	"fmt"
 	"log/slog"
 	"sync"
+	"time"
 )
 
 type PackageModule struct {
@@ -37,7 +39,18 @@ func (mgr *ModuleManagerType) Initialize(log *slog.Logger) bool {
 
 func (mgr *ModuleManagerType) Finalize() {
 	running = false
-	mgr.wg.Wait()
+	c := make(chan struct{})
+	go func() {
+		defer close(c)
+		mgr.wg.Wait()
+	}()
+	select {
+	case <-c:
+		break
+	case <-time.After(3 * time.Second):
+		mgr.logger.Error("Failed to wait.")
+		fmt.Printf("mgr.wg: %v\n", mgr.wg)
+	}
 }
 
 func (mgr *ModuleManagerType) RegisterModule(name string, module *PackageModule) bool {
@@ -70,15 +83,21 @@ func (mgr *ModuleManagerType) ModuleRun() {
 }
 
 func (mgr *ModuleManagerType) SendMessage(msg message.Message) bool {
+	fmt.Print(msg)
 	module, ok := mgr.modules[msg.To]
 	if !ok {
 		mgr.logger.Warn("Module not found.", "msg", msg)
 		return false
 	}
-	mgr.logger.Debug("Send message", "to", msg.To, "msg", msg)
-	go func() {
-		module.Channel <- msg
-	}()
+	mgr.logger.Debug("Start send", "to", msg.To, "msg", msg)
+	select {
+	case module.Channel <- msg:
+		mgr.logger.Debug("Send message", "to", msg.To, "msg", msg)
+		break
+	case <-time.After(time.Duration(1 * time.Second)):
+		mgr.logger.Error("message send error", "msg", msg)
+		return false
+	}
 	return true
 }
 
@@ -91,6 +110,7 @@ func (mgr *ModuleManagerType) GetModules() []string {
 }
 
 func (module *PackageModule) MessageProcess(name string, handler func(msg message.Message) int) {
+	fmt.Print(module)
 	module.Logger.Debug("Enter message process.")
 	for running {
 		msg := <-module.Channel
