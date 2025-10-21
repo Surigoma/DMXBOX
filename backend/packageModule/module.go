@@ -25,7 +25,6 @@ type ModuleManagerType struct {
 }
 
 var ModuleManager ModuleManagerType = ModuleManagerType{}
-var channel chan message.Message
 var running bool
 
 func (mgr *ModuleManagerType) Initialize(log *slog.Logger) bool {
@@ -47,7 +46,7 @@ func (mgr *ModuleManagerType) Finalize() {
 	case <-c:
 		break
 	case <-time.After(3 * time.Second):
-		mgr.logger.Error("Failed to wait.", "wg", mgr.wg)
+		mgr.logger.Error("Failed to wait.", "wg", &mgr.wg)
 	}
 }
 

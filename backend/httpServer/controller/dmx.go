@@ -12,7 +12,7 @@ import (
 
 type FadeResult struct {
 	Result string         `json:"result"`
-	Error  map[string]any `json:"err",omitempty`
+	Error  map[string]any `json:"err,omitempty"`
 }
 
 // Fade In/Out control
