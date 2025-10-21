@@ -5,6 +5,7 @@ import (
 	dmxserver "backend/dmxServer"
 	"backend/httpServer"
 	"backend/message"
+	oscserver "backend/oscServer"
 	"backend/packageModule"
 	tcpserver "backend/tcpServer"
 	"fmt"
@@ -38,6 +39,7 @@ func registerModule() {
 		}
 	}
 	packageModule.ModuleManager.RegisterModule("dmx", &dmxserver.DMXServer)
+	packageModule.ModuleManager.RegisterModule("osc", &oscserver.OscServer)
 }
 
 func handleMessage(mes message.Message) int {

@@ -49,7 +49,7 @@ func (dev *DMXDevice) Fade(isIn bool) {
 	//fmt.Println(dev.Model, dev.Channel, dev.effectStart, dev.effectEnd)
 
 	for i := range dev.Before {
-		dev.Before[i] = (*dev.Output)[i+int(dev.Channel)]
+		dev.Before[i] = (*dev.Output)[i+int(dev.Channel)-1]
 	}
 	for i := range dev.Target {
 		if isIn {
@@ -68,14 +68,14 @@ func (dev *DMXDevice) Update(wg *sync.WaitGroup) bool {
 	percentRaw := nowD.Seconds() / endD.Seconds()
 	percent := math.Max(0.0, math.Min(1.0, percentRaw))
 	if percent <= 0 {
-		return true
+		return false
 	}
-	if percentRaw > 1 {
-		return true
+	if percentRaw > 1.1 {
+		return false
 	}
 	for i := range dev.Target {
 		v := (float64(dev.Target[i])-float64(dev.Before[i]))*float64(percent) + float64(dev.Before[i])
-		(*dev.Output)[i+int(dev.Channel)] = byte(math.Max(0, math.Min(255, math.Round(v))))
+		(*dev.Output)[i+int(dev.Channel)-1] = byte(math.Max(0, math.Min(255, math.Round(v))))
 	}
 	return true
 }

@@ -68,6 +68,7 @@ func registerEndPoints() *gin.Engine {
 		{
 			eg.GET("/hello", controller.HelloWorld)
 			eg.POST("/fade/:group", controller.Fade)
+			eg.POST("/mute", controller.Osc)
 		}
 	}
 	route.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))

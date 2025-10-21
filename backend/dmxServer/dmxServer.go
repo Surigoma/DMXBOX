@@ -20,7 +20,7 @@ var deviceTypes map[string]func() *device.DMXDevice = make(map[string]func() *de
 var devices map[string][]*device.DMXDevice = make(map[string][]*device.DMXDevice)
 var renderTypes map[string]func() *controller.Controller = make(map[string]func() *controller.Controller)
 var renderers map[string]*controller.Controller = make(map[string]*controller.Controller)
-var rendered []byte = make([]byte, 513)
+var rendered []byte = make([]byte, 512)
 var fpsController *fps.FPSController
 var counter int = 0
 
@@ -54,8 +54,9 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	deviceTypes["wclight"] = deviceSpec.NewWCLight
 	renderTypes["console"] = ctrlModule.NewConsole
 	renderTypes["ftdi"] = ctrlModule.NewFTDI
+	renderTypes["artnet"] = ctrlModule.NewArtnet
 
-	for _, controller := range config.Output {
+	for _, controller := range config.Output.Target {
 		AddController(controller, config)
 	}
 	for name, groupDevices := range config.Dmx.Devices {
@@ -128,25 +129,28 @@ func AddController(model string, config *config.Config) bool {
 	return true
 }
 
-func Render() {
+func Render() bool {
+	result := false
 	for _, deviceGroup := range devices {
 		for _, device := range deviceGroup {
 			renderWg.Add(1)
-			device.Update(&renderWg)
+			result = device.Update(&renderWg) || result
 		}
 	}
 	renderWg.Wait()
+	return result
 }
 
 func DMXThread() bool {
 	if counter == 0 {
 		logger.Debug("fps", "fps", fpsController.GetFPS())
 	}
-	counter = (counter + 1) % 50
-	Render()
-	for _, r := range renderers {
-		r.Output(&rendered)
+	if Render() || counter == 0 {
+		for _, r := range renderers {
+			r.Output(&rendered)
+		}
 	}
+	counter = (counter + 1) % 10
 	return true
 }
 

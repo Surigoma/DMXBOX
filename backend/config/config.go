@@ -7,9 +7,14 @@ import (
 	"os"
 )
 
-type Hardware struct {
-	ShowDev bool   `json:"show_dev"`
-	Port    string `json:"port"`
+type DMXHardware struct {
+	Port string `json:"port"`
+}
+type Artnet struct {
+	Address     string `json:"addr"`
+	Universe    uint8  `json:"universe"`
+	SubUniverse uint8  `json:"subuni"`
+	Net         uint8  `json:"net"`
 }
 type HttpServer struct {
 	IP   string `json:"ip"`
@@ -30,13 +35,27 @@ type DMXServer struct {
 	Delay        float32                `json:"delay"`
 	Fps          float32                `json:"fps"`
 }
+
+type OutputTargets struct {
+	Target []string    `json:"target"`
+	DMX    DMXHardware `json:"dmx"`
+	Artnet Artnet      `json:"artnet"`
+}
+type OSCServer struct {
+	Ip       string  `json:"ip"`
+	Port     uint16  `json:"port"`
+	Format   string  `json:"format"`
+	Type     string  `json:"type"`
+	Inverse  bool    `json:"inverse"`
+	Channels []uint8 `json:"channels"`
+}
 type Config struct {
-	Modules  map[string]bool `json:"modules"`
-	Output   []string        `json:"output"`
-	Hardware Hardware        `json:"hw"`
-	Http     HttpServer      `json:"http"`
-	Tcp      TCPServer       `json:"tcp"`
-	Dmx      DMXServer       `json:"dmx"`
+	Modules map[string]bool `json:"modules"`
+	Output  OutputTargets   `json:"output"`
+	Http    HttpServer      `json:"http"`
+	Tcp     TCPServer       `json:"tcp"`
+	Dmx     DMXServer       `json:"dmx"`
+	Osc     OSCServer       `json:"osc"`
 }
 
 var ConfigData Config
@@ -46,12 +65,18 @@ func InitializeConfig() {
 		Modules: map[string]bool{
 			"http": false,
 			"tcp":  false,
-			"dmx":  false,
 		},
-		Output: []string{"console"},
-		Hardware: Hardware{
-			ShowDev: false,
-			Port:    "COM1",
+		Output: OutputTargets{
+			Target: []string{"console"},
+			DMX: DMXHardware{
+				Port: "COM1",
+			},
+			Artnet: Artnet{
+				Address:     "2.255.255.255/8",
+				Universe:    0,
+				SubUniverse: 0,
+				Net:         0,
+			},
 		},
 		Http: HttpServer{
 			IP:   "127.0.0.1",
@@ -66,6 +91,16 @@ func InitializeConfig() {
 			FadeInterval: 0.7,
 			Delay:        0.0,
 			Fps:          0.0,
+		},
+		Osc: OSCServer{
+			Ip:      "127.0.0.1",
+			Port:    8765,
+			Format:  "/yosc:req/set/MIXER:Current/InCh/Fader/On/{}/1",
+			Type:    "int",
+			Inverse: true,
+			Channels: []uint8{
+				1, 2, 3, 4,
+			},
 		},
 	}
 }

@@ -50,7 +50,6 @@ func handleRequest(conn *net.TCPConn) {
 			break
 		}
 		msgs := regexp.MustCompile("\r\n|\n|\r").Split(string(buf[:len]), -1)
-		fmt.Println(msgs)
 		for _, msg := range msgs {
 			switch msg {
 			case "test":

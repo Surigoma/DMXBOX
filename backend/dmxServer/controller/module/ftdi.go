@@ -10,7 +10,7 @@ import (
 	"go.bug.st/serial"
 )
 
-var logger *slog.Logger
+var loggerFTDI *slog.Logger
 var port serial.Port
 
 func NewFTDI() *controller.Controller {
@@ -23,16 +23,16 @@ func NewFTDI() *controller.Controller {
 }
 
 func InitializeFTDI(config *config.Config, log *slog.Logger) bool {
-	logger = log
-	target := config.Hardware.Port
+	loggerFTDI = log
+	target := config.Output.DMX.Port
 	ports, err := serial.GetPortsList()
-	logger.Debug("Found devices", "ports", ports)
+	loggerFTDI.Debug("Found devices", "ports", ports)
 	if err != nil {
-		logger.Error("Failed setup ports.", "err", err)
+		loggerFTDI.Error("Failed setup ports.", "err", err)
 		return false
 	}
 	if !slices.Contains(ports, target) {
-		logger.Error("Port is not found.", "ports", ports)
+		loggerFTDI.Error("Port is not found.", "ports", ports)
 		return false
 	}
 	mode := serial.Mode{
@@ -43,20 +43,23 @@ func InitializeFTDI(config *config.Config, log *slog.Logger) bool {
 	}
 	port, err = serial.Open(target, &mode)
 	if err != nil {
-		logger.Error("Failed to open port", "port", target, "err", err)
+		loggerFTDI.Error("Failed to open port", "port", target, "err", err)
 		return false
 	}
-	logger.Info("Open port.", "port", target)
+	loggerFTDI.Info("Open port.", "port", target)
 	return true
 }
 
+var zero = []byte{0}
+
 func OutputFTDI(data *[]byte) bool {
 	port.Break(time.Duration(1 * time.Millisecond))
+	port.Write(zero)
 	port.Write(*data)
 	return false
 }
 
 func FinalizeFTDI() {
-	logger.Info("Close port")
+	loggerFTDI.Info("Close port")
 	port.Close()
 }

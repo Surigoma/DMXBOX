@@ -1,35 +1,27 @@
 {
     "modules": {
         "http": true,
-        "tcp": false,
-        "art": false
+        "tcp": false
     },
-    "output": [
-        "console"
-    ],
-    "hw": {
-        "show_dev": false,
-        "port": "COM3"
+    "output": {
+        "target": [
+            "ftdi"
+        ],
+        "dmx": {
+            "port": "COM3"
+        },
+        "artnet": {
+            "addr": "127.0.0.1",
+            "universe": 1,
+            "subuni": 0,
+            "net": 0
+        }
     },
     "http": {
         "ip": "127.0.0.1",
         "port": 8080
     },
     "dmx": {
-        "target_ch": [
-            11,
-            12
-        ],
-        "target_additional_ch": [
-            9,
-            10
-        ],
-        "target_max": {
-            "11": 180,
-            "12": 180,
-            "9": 255,
-            "10": 255
-        },
         "devices": {
             "Stage": [
                 {
@@ -73,21 +65,17 @@
         "fps": 30,
         "preStatus": false
     },
-    "serial": {
-        "dev": "/dev/ttyUSB0",
-        "speed": 115200
-    },
     "tcp": {
         "ip": "127.0.0.1",
         "port": 50000
     },
     "osc": {
-        "ip": "192.168.101.110",
+        "ip": "127.0.0.1",
         "port": 49900,
         "format": "/yosc:req/set/MIXER:Current/InCh/Fader/On/{}/1",
-        "type": "int",
-        "inverse": true,
-        "mic": [
+        "type": "float",
+        "inverse": false,
+        "channels": [
             9,
             10,
             11,
