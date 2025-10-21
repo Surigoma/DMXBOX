@@ -35,7 +35,6 @@ var HttpServer packageModule.PackageModule = packageModule.PackageModule{
 //	@title			DMX BOX
 //	@version		0.1
 //	@description	For my frendz.
-//	@termsOfService	http://swagger.io/terms/
 
 //	@license.name	Apache 2.0
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
