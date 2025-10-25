@@ -96,14 +96,18 @@ func handleMessage(mes message.Message) int {
 	return 0
 }
 
-func MakeDevice(deviceType string, channel uint8, maxValue []uint8) *device.DMXDevice {
+func MakeDevice(deviceType string, channel uint8, maxValue []uint) *device.DMXDevice {
 	generator, ok := deviceTypes[deviceType]
 	if !ok {
 		logger.Warn("Unsupported type", "type", deviceType)
 		return nil
 	}
 	dev := generator()
-	if !dev.Initialize(channel, maxValue, &rendered, &param.Duration) {
+	castMaxValue := make([]uint8, len(maxValue))
+	for i, v := range maxValue {
+		castMaxValue[i] = uint8(v)
+	}
+	if !dev.Initialize(channel, castMaxValue, &rendered, &param.Duration) {
 		logger.Error("Failed to initialize device.", "dev", dev)
 		return nil
 	}
@@ -127,6 +131,22 @@ func AddController(model string, config *config.Config) bool {
 	}
 	renderers[model] = dev
 	return true
+}
+
+func GetConfig() map[string][]config.DMXDevice {
+	result := make(map[string][]config.DMXDevice, 0)
+	for k, v := range devices {
+		result[k] = make([]config.DMXDevice, len(v))
+		for i, d := range v {
+			result[k][i].Channel = d.Channel
+			result[k][i].MaxValue = make([]uint, len(d.MaxValue))
+			for ii, m := range d.MaxValue {
+				result[k][i].MaxValue[ii] = uint(m)
+			}
+			result[k][i].Model = d.Model
+		}
+	}
+	return result
 }
 
 func Render() bool {

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	dmxserver "backend/dmxServer"
 	"backend/message"
 	"backend/packageModule"
 	"net/http"
@@ -65,4 +66,20 @@ func Fade(g *gin.Context) {
 	g.JSON(http.StatusOK, FadeResult{
 		Result: "OK",
 	})
+}
+
+// Get fade config
+//
+//	@Summary	Control a DMX
+//	@Schemes
+//	@Description	Control a DXM using fade in/out
+//	@Tags			DMX
+//	@Accept			json
+//	@Produce		json
+//
+//	@Success		200		{object}	map[string][]config.DMXDevice
+//	@Router			/config/fade [get]
+func GetFadeConfig(g *gin.Context) {
+	config := dmxserver.GetConfig()
+	g.JSON(http.StatusOK, config)
 }

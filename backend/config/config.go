@@ -25,9 +25,9 @@ type TCPServer struct {
 	Port uint16 `json:"port"`
 }
 type DMXDevice struct {
-	Model    string  `json:"model"`
-	Channel  uint8   `json:"channel"`
-	MaxValue []uint8 `json:"max"`
+	Model    string `json:"model"`
+	Channel  uint8  `json:"channel"`
+	MaxValue []uint `json:"max"`
 }
 type DMXServer struct {
 	Devices      map[string][]DMXDevice `json:"devices"`

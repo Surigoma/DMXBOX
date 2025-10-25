@@ -68,6 +68,10 @@ func registerEndPoints() *gin.Engine {
 			eg.GET("/hello", controller.HelloWorld)
 			eg.POST("/fade/:group", controller.Fade)
 			eg.POST("/mute", controller.Osc)
+			cfg := eg.Group("/config/")
+			{
+				cfg.GET("/fade", controller.GetFadeConfig)
+			}
 		}
 	}
 	route.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
