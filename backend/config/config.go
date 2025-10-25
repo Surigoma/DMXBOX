@@ -17,8 +17,9 @@ type Artnet struct {
 	Net         uint8  `json:"net"`
 }
 type HttpServer struct {
-	IP   string `json:"ip"`
-	Port uint16 `json:"port"`
+	IP          string   `json:"ip"`
+	Port        uint16   `json:"port"`
+	AcceptHosts []string `json:"accepts"`
 }
 type TCPServer struct {
 	IP   string `json:"ip"`
@@ -81,6 +82,9 @@ func InitializeConfig() {
 		Http: HttpServer{
 			IP:   "127.0.0.1",
 			Port: 8000,
+			AcceptHosts: []string{
+				"http://127.0.0.1:5173",
+			},
 		},
 		Tcp: TCPServer{
 			IP:   "127.0.0.1",

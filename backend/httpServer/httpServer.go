@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	sloggin "github.com/samber/slog-gin"
 	swaggerfiles "github.com/swaggo/files"
@@ -57,6 +58,10 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 
 func registerEndPoints() *gin.Engine {
 	route := gin.Default()
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = config.ConfigData.Http.AcceptHosts
+	corsConfig.AllowCredentials = true
+	route.Use(cors.New(corsConfig))
 	route.Use(sloggin.New(logger))
 	route.Use(gin.Recovery())
 	route.GET("/", controller.HelloWorld)
