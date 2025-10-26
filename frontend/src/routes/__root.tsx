@@ -95,6 +95,7 @@ function RootLayout() {
                                 {Object.keys(PageInformation).map((k) => {
                                     return (
                                         <MenuItem
+                                            key={k}
                                             onClick={() =>
                                                 navigate(linkOptions({ to: k }))
                                             }
