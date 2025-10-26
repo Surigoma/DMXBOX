@@ -72,5 +72,7 @@ func OutputFTDI(data *[]byte) bool {
 
 func FinalizeFTDI() {
 	loggerFTDI.Info("Close port")
-	port.Close()
+	if port != nil {
+		port.Close()
+	}
 }
