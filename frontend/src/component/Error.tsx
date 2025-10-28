@@ -1,4 +1,4 @@
-import { Alert, Container, Grid } from "@mui/material";
+import { Alert, Container } from "@mui/material";
 import type { ReactNode } from "react";
 
 function ErrorComponent({ children }: { children: ReactNode }) {

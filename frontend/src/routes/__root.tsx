@@ -1,12 +1,10 @@
 import {
     createRootRoute,
-    Link,
     linkOptions,
     Outlet,
-    useLocation,
     useNavigate,
 } from "@tanstack/react-router";
-import { createContext, useContext, useState } from "react";
+import { createContext, useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
@@ -14,10 +12,11 @@ import { MdMenu } from "react-icons/md";
 import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
-import Configuration from "../contexts/config";
+import Configuration, { type ConfigBody } from "../contexts/config";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
+import Grid from "@mui/material/Grid";
 
 const Config = new Configuration();
 export const ConfigContext = createContext(Config.body);
@@ -28,11 +27,12 @@ export function fetcher(url: string) {
     );
 }
 
-export function genBackendPath(path: string): string {
-    const config = useContext(ConfigContext);
-    return (
-        "http://" + window.location.hostname + ":" + config.backendPort + path
-    );
+export function genBackendPath(config: ConfigBody, path: string, params: {[key: string]: any} = {}): string {
+    let result = new URL("http://" + window.location.hostname + ":" + config.backendPort + path);
+    for (let k in params) {
+        result.searchParams.append(k, params[k])
+    }
+    return result.toString();
 }
 
 interface PathInfo {
@@ -147,7 +147,9 @@ function RootLayout() {
                 </Container>
             </AppBar>
             <ConfigContext value={Config.body}>
+                <Grid padding={1}>
                 <Outlet />
+                </Grid>
             </ConfigContext>
         </div>
     );
