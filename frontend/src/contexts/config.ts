@@ -1,4 +1,4 @@
-type ConfigBody = {
+export type ConfigBody = {
     backendPort: number;
 };
 

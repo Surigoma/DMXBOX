@@ -1,9 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { fetcher, genBackendPath } from "./__root";
+import { ConfigContext, fetcher, genBackendPath } from "./__root";
 import useSWR from "swr";
 import FadeControl from "../component/FadeControl";
-import { Grid } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import ErrorComponent from "../component/Error";
+import { useContext } from "react";
 
 export const Route = createFileRoute("/")({
     component: ControlPage,
@@ -16,9 +17,9 @@ export interface DMXdeviceInfo {
 }
 
 function ControlPage() {
-    //const config = useContext(ConfigContext);
+    const config = useContext(ConfigContext);
     const { data, error, isLoading } = useSWR(
-        genBackendPath("/api/v1/config/fade"),
+        genBackendPath(config, "/api/v1/config/fade"),
         fetcher,
     );
     const dmxInfo = data as { [group: string]: DMXdeviceInfo[] };
@@ -44,12 +45,12 @@ function ControlPage() {
     }
     return (
         <>
-            <h3>Control</h3>
+            <Typography variant="h5" margin={2}>Control</Typography>
             <Grid container spacing={2} padding={2}>
                 {Object.keys(dmxInfo).map((k) => {
                     {
                         return (
-                            <Grid size={6}>
+                            <Grid size={{xs: 12, md: 6, lg: 3}} key={k}>
                                 <FadeControl group={k}></FadeControl>
                             </Grid>
                         );

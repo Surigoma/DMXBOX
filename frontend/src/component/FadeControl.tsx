@@ -1,13 +1,20 @@
 import {
     Button,
-    ButtonGroup,
     Card,
     CardContent,
     Grid,
+    Stack,
     Typography,
 } from "@mui/material";
+import { ConfigContext, genBackendPath } from "../routes/__root";
+import { useContext } from "react";
 
 function FadeControl({ group }: { group: string }) {
+    const config = useContext(ConfigContext);
+    async function fade(isIn: boolean) {
+        const path = genBackendPath(config, "/api/v1/fade/" + group, {"isIn": isIn});
+        console.log(await fetch(path, {method: "POST"}));
+    }
     return (
         <Card variant="outlined">
             <CardContent>
@@ -24,14 +31,14 @@ function FadeControl({ group }: { group: string }) {
                         </Typography>
                     </Grid>
                     <Grid>
-                        <ButtonGroup>
-                            <Button color="primary" size="large">
+                        <Stack direction="row" spacing={2}>
+                            <Button color="primary" size="large" variant="outlined" onClick={async ()=>{await fade(true)}}>
                                 Fade In
                             </Button>
-                            <Button color="secondary" size="large">
+                            <Button color="secondary" size="large" variant="outlined" onClick={async ()=>{await fade(false)}}>
                                 Fade Out
                             </Button>
-                        </ButtonGroup>
+                        </Stack>
                     </Grid>
                 </Grid>
             </CardContent>
