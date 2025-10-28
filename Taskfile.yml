@@ -1,0 +1,66 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  VERSION: 0.0.1
+  BUILD_TARGET:
+    - windows
+
+tasks:
+  ### Make directories
+  make_dist:
+    preconditions:
+    cmds:
+      - mkdir -p ./dist
+    silent: true
+  make_static:
+    deps:
+      - make_dist
+    cmds:
+      - mkdir -p ./dist/static
+    silent: true
+  make_folders:
+    deps:
+      - make_dist
+      - make_static
+  ### Build backend for any os
+  build_backend_win:
+    platforms: [windows]
+    deps:
+      - make_folders
+    dir: ./backend
+    cmds:
+      - GOOS=windows OGARCH=amd64 go build -o ../dist/dmxbox_win_{{.VERSION}}.exe main.go
+  ### Build frontend
+  build_frontend_any:
+    deps:
+      - make_folders
+    dir: ./frontend
+    cmds:
+      - yarn
+      - yarn run build --outDir ../dist/static
+  ### Build group
+  build_win:
+    desc: "Build package for windows"
+    deps:
+      - build_frontend_any
+      - build_backend_win
+  build_all:
+    desc: "Build all targets: {{.BUILD_TARGET}}"
+    deps:
+      - build_frontend_any
+      - build_backend_win
+  ### Copy configs
+  copy_config:
+    deps:
+      - make_folders
+    cmd: cp ./backend/config.json ./dist/config.json
+  ### Default tasks
+  default:
+    deps:
+      - build_all
+      - copy_config
+    cmds:
+      - echo "DONE"
+    silent: true
