@@ -31,7 +31,7 @@ tasks:
       - make_folders
     dir: ./backend
     cmds:
-      - GOOS=windows OGARCH=amd64 go build -o ../dist/dmxbox_win_{{.VERSION}}.exe main.go
+      - GIN_MODE=release GOOS=windows OGARCH=amd64 go build -o ../dist/dmxbox_win_{{.VERSION}}.exe main.go
   ### Build frontend
   build_frontend_any:
     deps:
