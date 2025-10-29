@@ -9,7 +9,7 @@ class Configuration {
     isLoading: boolean = true;
     isError: boolean = false;
     constructor() {
-        fetch("/config.json", {}).then((data) => {
+        fetch("./config.json", {}).then((data) => {
             if (!data.ok) {
                 this.isError = true;
                 return;

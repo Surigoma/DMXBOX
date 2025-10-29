@@ -21,7 +21,7 @@ createRoot(document.getElementById("root")!).render(
         <ThemeProvider theme={darkTheme}>
             <CssBaseline enableColorScheme />
             <StrictMode>
-                <RouterProvider router={router} />
+                <RouterProvider router={router} basepath="/gui" />
             </StrictMode>
         </ThemeProvider>
     </Fragment>,
