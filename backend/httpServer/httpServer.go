@@ -10,6 +10,10 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -64,7 +68,24 @@ func registerEndPoints() *gin.Engine {
 	route.Use(cors.New(corsConfig))
 	route.Use(sloggin.New(logger))
 	route.Use(gin.Recovery())
-	route.GET("/", controller.HelloWorld)
+	if info, _ := os.Stat("./static"); info != nil && info.IsDir() {
+		route.Any("/", func(g *gin.Context) {
+			g.Redirect(307, "/gui/")
+		})
+		route.NoRoute(func(g *gin.Context) {
+			dir, file := path.Split(g.Request.RequestURI)
+			ext := filepath.Ext(file)
+			if file == "" || ext == "" {
+				g.File("./static/index.html")
+			} else {
+				targetPath := strings.Join(strings.Split(dir, "/")[2:], "/") + file
+				g.File("./static/" + targetPath)
+			}
+		})
+	} else {
+		logger.Info("Disable file responser.")
+	}
+
 	docs.SwaggerInfo.BasePath = "/api/v1"
 	v1 := route.Group("/api/v1")
 	{
