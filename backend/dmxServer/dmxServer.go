@@ -165,12 +165,12 @@ func DMXThread() bool {
 	if counter == 0 {
 		logger.Debug("fps", "fps", fpsController.GetFPS())
 	}
-	if Render() || counter == 0 {
+	if Render() || counter%10 == 0 {
 		for _, r := range renderers {
 			r.Output(&rendered)
 		}
 	}
-	counter = (counter + 1) % 10
+	counter = (counter + 1) % 50
 	return true
 }
 
