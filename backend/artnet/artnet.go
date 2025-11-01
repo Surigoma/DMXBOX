@@ -57,7 +57,6 @@ func (a *Artnet) Initialize(log *slog.Logger, config *config.Config) bool {
 	}
 	for _, addr := range addrs {
 		_, cidr, _ := net.ParseCIDR(addr.String())
-		fmt.Println(addr, cidr)
 		if cidr.Contains(a.targetUDP.IP) {
 			a.sourceUDP, err = net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", addr.(*net.IPNet).IP.String(), static.Port))
 			if err != nil {
