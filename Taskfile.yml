@@ -7,6 +7,20 @@ vars:
   BUILD_TARGET:
     - windows
 
+includes:
+  backend:
+    flatten: true
+    dir: ./backend
+    taskfile: ./backend
+    vars:
+      BUILD_TARGET: $BUILD_TARGET
+  frontend:
+    flatten: true
+    dir: ./frontend
+    taskfile: ./frontend
+    vars:
+      BUILD_TARGET: $BUILD_TARGET
+
 tasks:
   ### Make directories
   make_dist:
@@ -24,22 +38,6 @@ tasks:
     deps:
       - make_dist
       - make_static
-  ### Build backend for any os
-  build_backend_win:
-    platforms: [windows]
-    deps:
-      - make_folders
-    dir: ./backend
-    cmds:
-      - GIN_MODE=release GOOS=windows OGARCH=amd64 go build -o ../dist/dmxbox_win_{{.VERSION}}.exe main.go
-  ### Build frontend
-  build_frontend_any:
-    deps:
-      - make_folders
-    dir: ./frontend
-    cmds:
-      - yarn
-      - yarn run build --outDir ../dist/static
   ### Build group
   build_win:
     desc: "Build package for windows"
@@ -58,9 +56,9 @@ tasks:
     cmd: cp ./backend/config.json ./dist/config.json
   ### Default tasks
   default:
-    deps:
-      - build_all
-      - copy_config
     cmds:
+      - task: make_folders
+      - task: build_all
+      - task: copy_config
       - echo "DONE"
     silent: true

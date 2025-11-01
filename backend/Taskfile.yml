@@ -1,0 +1,25 @@
+version: '3'
+
+vars:
+  VERSION: 0.0.1
+  BUILD_TARGET:
+    - windows
+
+tasks:
+  make_testdir:
+    cmd: mkdir static
+  ### Build test env for backend
+  build_frontend_for_test:
+    deps:
+      - make_testdir
+    dir: ../frontend
+    cmds:
+      - yarn
+      - yarn run build --outDir ../backend/static
+  ### Build backend for any os
+  build_backend_win:
+    platforms: [windows]
+    deps:
+      - make_folders
+    cmds:
+      - GIN_MODE=release GOOS=windows OGARCH=amd64 go build -o ../dist/dmxbox_win_{{.VERSION}}.exe main.go

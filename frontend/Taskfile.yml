@@ -1,0 +1,16 @@
+version: '3'
+
+vars:
+  VERSION: 0.0.1
+  BUILD_TARGET:
+    - windows
+
+tasks:
+  ### Build frontend
+  build_frontend_any:
+    deps:
+      - make_folders
+    dir: ./frontend
+    cmds:
+      - yarn
+      - yarn run build --outDir ../dist/static
