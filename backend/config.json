@@ -25,43 +25,49 @@
         ]
     },
     "dmx": {
-        "devices": {
-            "Stage": [
-                {
-                    "model": "wclight",
-                    "channel": 50,
-                    "max": [
-                        255,
-                        255,
-                        0
-                    ]
-                },
-                {
-                    "model": "wclight",
-                    "channel": 53,
-                    "max": [
-                        255,
-                        255,
-                        0
-                    ]
-                }
-            ],
-            "Audience": [
-                {
-                    "model": "dimmer",
-                    "channel": 7,
-                    "max": [
-                        255
-                    ]
-                },
-                {
-                    "model": "dimmer",
-                    "channel": 8,
-                    "max": [
-                        255
-                    ]
-                }
-            ]
+        "groups": {
+            "stg": {
+                "name": "Stage",
+                "devices": [
+                    {
+                        "model": "wclight",
+                        "channel": 50,
+                        "max": [
+                            255,
+                            255,
+                            0
+                        ]
+                    },
+                    {
+                        "model": "wclight",
+                        "channel": 53,
+                        "max": [
+                            255,
+                            255,
+                            0
+                        ]
+                    }
+                ]
+            },
+            "aud": {
+                "name": "Audience",
+                "devices": [
+                    {
+                        "model": "dimmer",
+                        "channel": 7,
+                        "max": [
+                            255
+                        ]
+                    },
+                    {
+                        "model": "dimmer",
+                        "channel": 8,
+                        "max": [
+                            255
+                        ]
+                    }
+                ]
+            }
         },
         "fadeInterval": 0.7,
         "delay": 0.0,

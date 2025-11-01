@@ -30,11 +30,15 @@ type DMXDevice struct {
 	Channel  uint8  `json:"channel"`
 	MaxValue []uint `json:"max"`
 }
+type DMXGroup struct {
+	Name    string      `json:"name"`
+	Devices []DMXDevice `json:"devices"`
+}
 type DMXServer struct {
-	Devices      map[string][]DMXDevice `json:"devices"`
-	FadeInterval float32                `json:"fadeInterval"`
-	Delay        float32                `json:"delay"`
-	Fps          float32                `json:"fps"`
+	Groups       map[string]DMXGroup `json:"groups"`
+	FadeInterval float32             `json:"fadeInterval"`
+	Delay        float32             `json:"delay"`
+	Fps          float32             `json:"fps"`
 }
 
 type OutputTargets struct {
@@ -91,7 +95,7 @@ func InitializeConfig() {
 			Port: 50000,
 		},
 		Dmx: DMXServer{
-			Devices:      make(map[string][]DMXDevice),
+			Groups:       make(map[string]DMXGroup),
 			FadeInterval: 0.7,
 			Delay:        0.0,
 			Fps:          0.0,

@@ -59,9 +59,9 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	for _, controller := range config.Output.Target {
 		AddController(controller, config)
 	}
-	for name, groupDevices := range config.Dmx.Devices {
-		devices[name] = make([]*device.DMXDevice, len(groupDevices))
-		for i, device := range groupDevices {
+	for name, groupDevices := range config.Dmx.Groups {
+		devices[name] = make([]*device.DMXDevice, len(groupDevices.Devices))
+		for i, device := range groupDevices.Devices {
 			devices[name][i] = MakeDevice(device.Model, device.Channel, device.MaxValue)
 			if devices[name][i] == nil {
 				return false
@@ -133,17 +133,20 @@ func AddController(model string, config *config.Config) bool {
 	return true
 }
 
-func GetConfig() map[string][]config.DMXDevice {
-	result := make(map[string][]config.DMXDevice, 0)
+func GetConfig() map[string]config.DMXGroup {
+	result := make(map[string]config.DMXGroup, 0)
 	for k, v := range devices {
-		result[k] = make([]config.DMXDevice, len(v))
+		result[k] = config.DMXGroup{
+			Name:    config.ConfigData.Dmx.Groups[k].Name,
+			Devices: make([]config.DMXDevice, len(v)),
+		}
 		for i, d := range v {
-			result[k][i].Channel = d.Channel
-			result[k][i].MaxValue = make([]uint, len(d.MaxValue))
+			result[k].Devices[i].Channel = d.Channel
+			result[k].Devices[i].MaxValue = make([]uint, len(d.MaxValue))
 			for ii, m := range d.MaxValue {
-				result[k][i].MaxValue[ii] = uint(m)
+				result[k].Devices[i].MaxValue[ii] = uint(m)
 			}
-			result[k][i].Model = d.Model
+			result[k].Devices[i].Model = d.Model
 		}
 	}
 	return result

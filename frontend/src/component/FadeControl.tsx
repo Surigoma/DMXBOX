@@ -8,11 +8,12 @@ import {
 } from "@mui/material";
 import { ConfigContext, genBackendPath } from "../routes/__root";
 import { useContext } from "react";
+import type { DMXGroupInfo } from "../routes";
 
-function FadeControl({ group }: { group: string }) {
+function FadeControl({ name, data }: { name: string, data: DMXGroupInfo }) {
     const config = useContext(ConfigContext);
     async function fade(isIn: boolean) {
-        const path = genBackendPath(config, "/api/v1/fade/" + group, {"isIn": isIn});
+        const path = genBackendPath(config, "/api/v1/fade/" + name, {"isIn": isIn});
         console.log(await fetch(path, {method: "POST"}));
     }
     return (
@@ -27,7 +28,7 @@ function FadeControl({ group }: { group: string }) {
                 >
                     <Grid>
                         <Typography variant="h5" component="div">
-                            {group}
+                            {data.name}
                         </Typography>
                     </Grid>
                     <Grid>

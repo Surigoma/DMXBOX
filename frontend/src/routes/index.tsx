@@ -10,10 +10,15 @@ export const Route = createFileRoute("/")({
     component: ControlPage,
 });
 
-export interface DMXdeviceInfo {
-    model: string;
-    channel: number;
-    max: number[];
+export interface DMXGroupInfo {
+    name: string;
+    devices: [
+        {
+            model: string;
+            channel: number;
+            max: number[];
+        },
+    ];
 }
 
 function ControlPage() {
@@ -22,7 +27,7 @@ function ControlPage() {
         genBackendPath(config, "/api/v1/config/fade"),
         fetcher,
     );
-    const dmxInfo = data as { [group: string]: DMXdeviceInfo[] };
+    const dmxInfo = data as { [group: string]: DMXGroupInfo };
     if (error) {
         return (
             <ErrorComponent>
@@ -45,13 +50,18 @@ function ControlPage() {
     }
     return (
         <>
-            <Typography variant="h5" margin={2}>Control</Typography>
+            <Typography variant="h5" margin={2}>
+                Control
+            </Typography>
             <Grid container spacing={2} padding={2}>
                 {Object.keys(dmxInfo).map((k) => {
                     {
                         return (
-                            <Grid size={{xs: 12, md: 6, lg: 3}} key={k}>
-                                <FadeControl group={k}></FadeControl>
+                            <Grid size={{ xs: 12, md: 6, lg: 3 }} key={k}>
+                                <FadeControl
+                                    name={k}
+                                    data={dmxInfo[k]}
+                                ></FadeControl>
                             </Grid>
                         );
                     }
