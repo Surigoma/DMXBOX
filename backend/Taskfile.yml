@@ -6,6 +6,11 @@ vars:
     - windows
 
 tasks:
+  test:
+    cmds:
+      - mkdir -p ./test
+      - go test -cover ./... -coverprofile=test/cover.out
+      - go tool cover -html=test/cover.out -o test/cover.html
   make_testdir:
     cmd: mkdir static
   ### Build test env for backend
