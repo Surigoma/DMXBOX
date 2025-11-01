@@ -2,6 +2,7 @@ package artnet
 
 import (
 	"backend/config"
+	"encoding/json"
 	"log/slog"
 	"net"
 	"testing"
@@ -36,7 +37,7 @@ func TestArtnet_Initialize(t *testing.T) {
 			config *config.Config
 			want   bool
 		}{
-			name: "test",
+			name: "localhost",
 			log:  slog.New(slog.NewJSONHandler(t.Output(), nil)),
 			config: &config.Config{
 				Output: config.OutputTargets{
@@ -57,7 +58,7 @@ func TestArtnet_Initialize(t *testing.T) {
 			config *config.Config
 			want   bool
 		}{
-			name: "test",
+			name: "empty address",
 			log:  slog.New(slog.NewJSONHandler(t.Output(), nil)),
 			config: &config.Config{
 				Output: config.OutputTargets{
@@ -78,7 +79,7 @@ func TestArtnet_Initialize(t *testing.T) {
 			config *config.Config
 			want   bool
 		}{
-			name: "test",
+			name: "outrange test",
 			log:  slog.New(slog.NewJSONHandler(t.Output(), nil)),
 			config: &config.Config{
 				Output: config.OutputTargets{
@@ -102,7 +103,7 @@ func TestArtnet_Initialize(t *testing.T) {
 				config *config.Config
 				want   bool
 			}{
-				name: "test",
+				name: "Can only use IPv4",
 				log:  slog.New(slog.NewJSONHandler(t.Output(), nil)),
 				config: &config.Config{
 					Output: config.OutputTargets{
@@ -128,7 +129,7 @@ func TestArtnet_Initialize(t *testing.T) {
 				config *config.Config
 				want   bool
 			}{
-				name: "test",
+				name: "Outrange",
 				log:  slog.New(slog.NewJSONHandler(t.Output(), nil)),
 				config: &config.Config{
 					Output: config.OutputTargets{
@@ -147,11 +148,13 @@ func TestArtnet_Initialize(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// TODO: construct the receiver type.
+			encodedJson, _ := json.Marshal(tt.config)
+			t.Log("data: " + string(encodedJson))
 			var a Artnet = Artnet{
 				TargetAddr: tt.config.Output.Artnet.Address,
 			}
 			got := a.Initialize(tt.log, tt.config)
-			// TODO: update the condition below to compare got with tt.want.
+			t.Logf("result: %v, want %v", got, tt.want)
 			if tt.want != got {
 				t.Errorf("Initialize() = %v, want %v", got, tt.want)
 			}
