@@ -9,13 +9,15 @@ import (
 )
 
 type StaticBase struct {
-	Port    uint
+	srcPort uint
+	rmtPort uint
 	Version []uint8
 	Ops     map[string][]byte
 }
 
 var static StaticBase = StaticBase{
-	Port: 6454,
+	srcPort: 6454,
+	rmtPort: 6454,
 	Version: []uint8{
 		0,  // High
 		14, // Low
@@ -45,7 +47,7 @@ type Artnet struct {
 func (a *Artnet) Initialize(log *slog.Logger, config *config.Config) bool {
 	var err error
 	a.logger = log
-	a.targetUDP, err = net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", a.TargetAddr, static.Port))
+	a.targetUDP, err = net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", a.TargetAddr, static.rmtPort))
 	if err != nil {
 		a.logger.Error("Failed initialize Artnet System.", "err", err)
 		return false
@@ -58,7 +60,7 @@ func (a *Artnet) Initialize(log *slog.Logger, config *config.Config) bool {
 	for _, addr := range addrs {
 		_, cidr, _ := net.ParseCIDR(addr.String())
 		if cidr.Contains(a.targetUDP.IP) {
-			a.sourceUDP, err = net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", addr.(*net.IPNet).IP.String(), static.Port))
+			a.sourceUDP, err = net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", addr.(*net.IPNet).IP.String(), static.srcPort))
 			if err != nil {
 				a.logger.Error("failed to create", "addr", addr)
 			}
@@ -94,14 +96,14 @@ func (a *Artnet) listen() {
 		for k, v := range static.Ops {
 			if bytes.Equal(op, v) {
 				if k != "OpDMX" {
-					a.logger.Debug("CMD: "+k, "n", n, "data", buffer[:n])
+					a.logger.With("dir", "recv").Debug("CMD: "+k, "n", n, "data", buffer[:n])
 				}
 				cmd = k
 				break
 			}
 		}
 		if cmd == "" {
-			a.logger.Debug("OpUNKNOWN", "n", n, "data", buffer[:n])
+			a.logger.With("dir", "recv").Debug("OpUNKNOWN", "n", n, "data", buffer[:n])
 		}
 	}
 }
@@ -110,7 +112,7 @@ func (a *Artnet) Start() bool {
 	var err error
 	a.socket, err = net.ListenUDP("udp", a.sourceUDP)
 	if err != nil {
-		a.logger.Error("Failed to create socket", "src", a.sourceUDP, "dst", a.targetUDP)
+		a.logger.Error("Failed to create socket", "err", err, "src", a.sourceUDP, "dst", a.targetUDP)
 		return false
 	}
 	a.running = true
