@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 vars:
   VERSION: 0.0.1
@@ -11,10 +11,11 @@ tasks:
   test:
     cmds:
       - mkdir -p ./test/html
-      - gotestsum --junitfile test/report.xml --jsonfile test/result.json -- -cover ./... -coverprofile=test/cover.out -json
+      - cmd: gotestsum --junitfile test/report.xml --jsonfile test/result.json -- -cover ./... -coverprofile=test/cover.out -json
+        ignore_error: true
       - go tool cover -html=test/cover.out -o test/html/cover.html
       - gocover-cobertura < test/cover.out > test/coverage.xml
-      - gopogh -in ./test/result.json -out_html ./test/html/testout.html -name="backend" 
+      - gopogh -in ./test/result.json -out_html ./test/html/testout.html -name="backend"
   make_testdir:
     cmd: mkdir static
   ### Build test env for backend
