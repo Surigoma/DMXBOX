@@ -114,8 +114,12 @@ func InitializeConfig() {
 }
 
 func Load(logger *slog.Logger) bool {
+	return LoadWithPath(logger, "./config.json")
+}
+
+func LoadWithPath(logger *slog.Logger, path string) bool {
 	InitializeConfig()
-	jsonFile, err := os.Open("./config.json")
+	jsonFile, err := os.Open(path)
 	if err != nil {
 		logger.Error("Failed to load a config file", "error", err)
 		return false
@@ -126,7 +130,11 @@ func Load(logger *slog.Logger) bool {
 		logger.Error("Failed to read a jcon file", "error", err)
 		return false
 	}
-	json.Unmarshal(jsonData, &ConfigData)
+	err = json.Unmarshal(jsonData, &ConfigData)
+	if err != nil {
+		logger.Error("JSON format error", "err", err)
+		return false
+	}
 	logger.Info("Decoded", "config", ConfigData)
 	return true
 }

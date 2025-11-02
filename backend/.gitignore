@@ -1,3 +1,4 @@
 static/
 docs/
-test/
+test/*
+!test/data
