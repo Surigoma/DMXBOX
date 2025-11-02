@@ -74,7 +74,7 @@ func (mgr *ModuleManagerType) ModuleInitialize(logHander *slog.Handler) {
 func (mgr *ModuleManagerType) ModuleRun() {
 	for _, module := range mgr.modules {
 		module.Wg.Add(1)
-		go module.MessageProcess("tcp", module.MessageHandler)
+		go module.MessageProcess(module.ModuleName, module.MessageHandler)
 		go module.Run()
 	}
 }
@@ -106,18 +106,18 @@ func (mgr *ModuleManagerType) GetModules() []string {
 }
 
 func (module *PackageModule) MessageProcess(name string, handler func(msg message.Message) int) {
-	module.Logger.Debug("Enter message process.")
+	module.Logger.Debug("Enter message process.", "module", name)
 	for running {
 		msg := <-module.Channel
-		module.Logger.Debug("Catch message", "mes", msg)
+		module.Logger.Debug("Catch message", "module", name, "mes", msg)
 		if msg.To == module.ModuleName {
-			module.Logger.Debug("Message coming", "msg", msg)
+			module.Logger.Debug("Message coming", "module", name, "msg", msg)
 			if module.MessageHandler(msg) < 0 {
 				break
 			}
 		} else {
-			module.Logger.Error("To is mismatch!", "msg", msg)
+			module.Logger.Error("To is mismatch!", "module", name, "msg", msg)
 		}
 	}
-	module.Logger.Debug("Exit message process.")
+	module.Logger.Debug("Exit message process.", "module", name)
 }
