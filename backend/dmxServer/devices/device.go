@@ -46,7 +46,6 @@ func (dev *DMXDevice) Initialize(channel uint8, maxValue []byte, target *[]byte,
 func (dev *DMXDevice) Fade(isIn bool) {
 	dev.effectStart = time.Now()
 	dev.effectEnd = dev.effectStart.Add(time.Duration(*dev.Duration * float32(time.Second)))
-	//fmt.Println(dev.Model, dev.Channel, dev.effectStart, dev.effectEnd)
 
 	for i := range dev.Before {
 		dev.Before[i] = (*dev.Output)[i+int(dev.Channel)-1]
