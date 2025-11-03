@@ -125,7 +125,7 @@ func AddController(model string, config *config.Config) bool {
 		return true
 	}
 	dev := generator()
-	if !dev.Initialize(param.Fps, config, logger) {
+	if !dev.Initialize(config, logger) {
 		logger.Error("Failed to initialize render model.", "model", dev.Model)
 		return false
 	}

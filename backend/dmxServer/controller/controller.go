@@ -13,7 +13,7 @@ type Controller struct {
 	logger        *slog.Logger
 }
 
-func (c *Controller) Initialize(FPS float32, config *config.Config, log *slog.Logger) bool {
+func (c *Controller) Initialize(config *config.Config, log *slog.Logger) bool {
 	if c.ModInitialize == nil {
 		return false
 	}
