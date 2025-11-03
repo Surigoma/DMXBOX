@@ -29,18 +29,12 @@ func TestArtnet_Initialize(t *testing.T) {
 		}
 	}
 	tests := []struct {
-		name string // description of this test case
-		// Named input parameters for target function.
+		name   string
 		log    *slog.Logger
 		config *config.Config
 		want   bool
 	}{
-		struct {
-			name   string
-			log    *slog.Logger
-			config *config.Config
-			want   bool
-		}{
+		{
 			name: "localhost",
 			log:  slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug})),
 			config: &config.Config{
@@ -56,12 +50,7 @@ func TestArtnet_Initialize(t *testing.T) {
 			},
 			want: true,
 		},
-		struct {
-			name   string
-			log    *slog.Logger
-			config *config.Config
-			want   bool
-		}{
+		{
 			name: "empty address",
 			log:  slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug})),
 			config: &config.Config{
@@ -77,12 +66,7 @@ func TestArtnet_Initialize(t *testing.T) {
 			},
 			want: false,
 		},
-		struct {
-			name   string
-			log    *slog.Logger
-			config *config.Config
-			want   bool
-		}{
+		{
 			name: "outrange test",
 			log:  slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug})),
 			config: &config.Config{
@@ -151,13 +135,13 @@ func TestArtnet_Initialize(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// TODO: construct the receiver type.
 			encodedJson, _ := json.Marshal(tt.config)
 			t.Log("data: " + string(encodedJson))
 			var a Artnet = Artnet{
 				TargetAddr: tt.config.Output.Artnet.Address,
 			}
 			got := a.Initialize(tt.log, tt.config)
+			defer a.Stop()
 			t.Logf("result: %v, want %v", got, tt.want)
 			if tt.want != got {
 				t.Errorf("Initialize() = %v, want %v", got, tt.want)
@@ -168,27 +152,20 @@ func TestArtnet_Initialize(t *testing.T) {
 
 func TestArtnet_Start_Stop(t *testing.T) {
 	tests := []struct {
-		name string // description of this test case
+		name string
 		want bool
 	}{
-		struct {
-			name string
-			want bool
-		}{
+		{
 			name: "isSuccess",
 			want: true,
 		},
-		struct {
-			name string
-			want bool
-		}{
+		{
 			name: "isFailed",
 			want: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// TODO: construct the receiver type.
 			var a Artnet = Artnet{
 				TargetAddr: "127.0.0.1",
 			}
@@ -214,7 +191,6 @@ func TestArtnet_Start_Stop(t *testing.T) {
 				defer a.Stop()
 				a.socket.Close()
 			}
-			// TODO: update the condition below to compare got with tt.want.
 			if got != tt.want {
 				t.Errorf("Start() = %v, want %v", got, tt.want)
 			}
@@ -224,24 +200,16 @@ func TestArtnet_Start_Stop(t *testing.T) {
 
 func TestArtnet_listen(t *testing.T) {
 	tests := []struct {
-		name      string // description of this test case
-		data      []byte //Test data for art-net
+		name      string
+		data      []byte
 		outputLog bool
 	}{
-		struct {
-			name      string
-			data      []byte
-			outputLog bool
-		}{
+		{
 			name:      "ArtPoll",
 			data:      []byte{0x41, 0x72, 0x74, 0x2d, 0x4e, 0x65, 0x74, 0x0, 0x0, 0x20, 0x0, 0xe, 0x2, 0x0},
 			outputLog: true,
 		},
-		struct {
-			name      string
-			data      []byte
-			outputLog bool
-		}{
+		{
 			name: "ArtDMX",
 			data: []byte{
 				0x41, 0x72, 0x74, 0x2d, 0x4e, 0x65, 0x74, 0x00, 0x00, 0x50, 0x00, 0x0e, 0x0b, 0x00, 0x00, 0x00,
@@ -280,11 +248,7 @@ func TestArtnet_listen(t *testing.T) {
 				0x00, 0x00},
 			outputLog: false,
 		},
-		struct {
-			name      string
-			data      []byte
-			outputLog bool
-		}{
+		{
 			name: "ArtPollRep",
 			data: []byte{
 				0x41, 0x72, 0x74, 0x2d, 0x4e, 0x65, 0x74, 0x00, 0x00, 0x21, 0x7f, 0x00, 0x00, 0x01, 0x36, 0x19,
@@ -304,20 +268,12 @@ func TestArtnet_listen(t *testing.T) {
 				0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00},
 			outputLog: true,
 		},
-		struct {
-			name      string
-			data      []byte
-			outputLog bool
-		}{
+		{
 			name:      "ArtSync",
 			data:      []byte{0x41, 0x72, 0x74, 0x2D, 0x4E, 0x65, 0x74, 0x00, 0x00, 0x52, 0x00, 0x14, 0x00, 0x00},
 			outputLog: true,
 		},
-		struct {
-			name      string
-			data      []byte
-			outputLog bool
-		}{
+		{
 			name:      "No Artnet command",
 			data:      []byte{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08},
 			outputLog: false,
@@ -342,7 +298,7 @@ func TestArtnet_listen(t *testing.T) {
 				Level: slog.LevelDebug,
 			}))
 			lock.Lock()
-			// TODO: construct the receiver type.
+			defer lock.Unlock()
 			var a Artnet = Artnet{
 				TargetAddr: config.Output.Artnet.Address,
 			}
@@ -350,7 +306,6 @@ func TestArtnet_listen(t *testing.T) {
 				t.Error("Failed to initialize")
 			}
 			a.Start()
-			defer a.socket.Close()
 			defer a.Stop()
 			conn, err := net.Dial("udp", "127.0.0.1:6454")
 			if err != nil {
@@ -388,25 +343,18 @@ func TestArtnet_listen(t *testing.T) {
 				}
 			}
 			t.Log("target log: " + string(targetLog))
-			lock.Unlock()
 		})
 	}
 }
 
 func TestArtnet_RenderData(t *testing.T) {
 	tests := []struct {
-		name string // description of this test case
-		// Named input parameters for target function.
+		name string
 		op   string
 		data []byte
 		want []byte
 	}{
-		struct {
-			name string
-			op   string
-			data []byte
-			want []byte
-		}{
+		{
 			name: "Generate OpDMX",
 			op:   "OpDMX",
 			data: []byte{
@@ -417,12 +365,7 @@ func TestArtnet_RenderData(t *testing.T) {
 				0x00,
 			},
 		},
-		struct {
-			name string
-			op   string
-			data []byte
-			want []byte
-		}{
+		{
 			name: "Generate OpPoll",
 			op:   "OpPoll",
 			data: []byte{
@@ -433,12 +376,7 @@ func TestArtnet_RenderData(t *testing.T) {
 				0x00,
 			},
 		},
-		struct {
-			name string
-			op   string
-			data []byte
-			want []byte
-		}{
+		{
 			name: "Generate OpPollRep",
 			op:   "OpPollRep",
 			data: []byte{
@@ -453,7 +391,6 @@ func TestArtnet_RenderData(t *testing.T) {
 	logger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// TODO: construct the receiver type.
 			var a Artnet = Artnet{
 				TargetAddr: "127.0.0.1",
 			}
@@ -470,7 +407,6 @@ func TestArtnet_RenderData(t *testing.T) {
 			}
 			a.Initialize(logger, &config)
 			got := a.RenderData(tt.op, &tt.data)
-			// TODO: update the condition below to compare got with tt.want.
 			if !bytes.Equal(*got, tt.want) {
 				t.Errorf("RenderData() = %v, want %v", got, tt.want)
 			}
@@ -487,7 +423,7 @@ func TestArtnet_SendDMXData(t *testing.T) {
 		increment[i] = byte(i)
 	}
 	tests := []struct {
-		name        string // description of this test case
+		name        string
 		data        []byte
 		universe    uint8
 		subUniverse uint8
@@ -495,15 +431,7 @@ func TestArtnet_SendDMXData(t *testing.T) {
 		sequence    uint8
 		want        []byte
 	}{
-		struct {
-			name        string
-			data        []byte
-			universe    uint8
-			subUniverse uint8
-			net         uint8
-			sequence    uint8
-			want        []byte
-		}{
+		{
 			name:        "All Zero",
 			data:        allZero,
 			universe:    0,
@@ -512,15 +440,7 @@ func TestArtnet_SendDMXData(t *testing.T) {
 			sequence:    0,
 			want:        append(header, append([]byte{0, 0, 0, 0, 0x2, 0}, allZero...)...),
 		},
-		struct {
-			name        string
-			data        []byte
-			universe    uint8
-			subUniverse uint8
-			net         uint8
-			sequence    uint8
-			want        []byte
-		}{
+		{
 			name:        "Increment",
 			data:        increment,
 			universe:    3,
@@ -536,7 +456,6 @@ func TestArtnet_SendDMXData(t *testing.T) {
 			logger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
 			lock.Lock()
 			defer lock.Unlock()
-			// TODO: construct the receiver type.
 			var a Artnet = Artnet{
 				TargetAddr: "127.0.0.1",
 			}

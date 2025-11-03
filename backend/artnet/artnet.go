@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"time"
 )
 
 type StaticBase struct {
@@ -40,7 +41,8 @@ type Artnet struct {
 	sourceUDP  *net.UDPAddr
 	socket     *net.UDPConn
 	logger     *slog.Logger
-	running    bool
+	isRunning  bool
+	Running    bool
 	address    ArtnetAddress
 }
 
@@ -82,10 +84,11 @@ func (a *Artnet) Initialize(log *slog.Logger, config *config.Config) bool {
 
 func (a *Artnet) listen() {
 	var buffer []byte = make([]byte, 1024)
-	for a.running {
+	a.Running = true
+	for a.isRunning {
 		n, err := a.socket.Read(buffer)
 		if err != nil {
-			a.running = false
+			a.isRunning = false
 			break
 		}
 		if !bytes.Equal(buffer[0:7], []byte("Art-Net")) {
@@ -106,6 +109,7 @@ func (a *Artnet) listen() {
 			a.logger.With("dir", "recv").Debug("OpUNKNOWN", "n", n, "data", buffer[:n])
 		}
 	}
+	a.Running = false
 }
 
 func (a *Artnet) Start() bool {
@@ -115,13 +119,24 @@ func (a *Artnet) Start() bool {
 		a.logger.Error("Failed to create socket", "err", err, "src", a.sourceUDP, "dst", a.targetUDP)
 		return false
 	}
-	a.running = true
+	a.logger.Debug("Start")
+	a.isRunning = true
 	go a.listen()
 	return true
 }
 
 func (a *Artnet) Stop() bool {
-	a.running = false
+	a.isRunning = false
+	if a.socket != nil {
+		a.socket.Close()
+	}
+	for range 100 {
+		if !a.Running {
+			break
+		}
+		time.After(10 * time.Millisecond)
+	}
+	a.logger.Debug("Stop")
 	return true
 }
 
