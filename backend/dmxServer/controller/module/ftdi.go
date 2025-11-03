@@ -67,7 +67,7 @@ func OutputFTDI(data *[]byte) bool {
 	}
 	port.Write(zero)
 	port.Write(*data)
-	return false
+	return true
 }
 
 func FinalizeFTDI() {
