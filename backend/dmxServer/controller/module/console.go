@@ -22,5 +22,6 @@ func NewConsole() *controller.Controller {
 			counter = (counter + 1) % 100
 			return true
 		},
+		ModFinalize: func() {},
 	}
 }
