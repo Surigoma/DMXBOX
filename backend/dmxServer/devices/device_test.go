@@ -1,0 +1,166 @@
+package device_test
+
+import (
+	device "backend/dmxServer/devices"
+	"bytes"
+	"sync"
+	"testing"
+	"time"
+)
+
+func TestDMXDevice_Initialize(t *testing.T) {
+	var duration float32 = 0.1
+	tests := []struct {
+		name     string
+		channel  uint8
+		maxValue []byte
+		duration *float32
+		want     bool
+	}{
+		{
+			name:     "Can create",
+			channel:  1,
+			maxValue: []byte{255, 255, 255},
+			duration: &duration,
+			want:     true,
+		},
+		{
+			name:     "Can not create",
+			channel:  1,
+			maxValue: []byte{},
+			duration: &duration,
+			want:     false,
+		},
+		{
+			name:     "maxValue is nil",
+			channel:  1,
+			maxValue: nil,
+			duration: &duration,
+			want:     false,
+		},
+	}
+	target := make([]byte, 512)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var dev = device.DMXDevice{
+				Model:      "test",
+				UseChannel: 3,
+			}
+			got := dev.Initialize(tt.channel, tt.maxValue, &target, tt.duration)
+			if got != tt.want {
+				t.Errorf("Initialize() = %v, want %v", got, tt.want)
+				return
+			}
+			t.Logf("Success %v wants %v", got, tt.want)
+		})
+	}
+}
+
+func TestDMXDevice_Fade(t *testing.T) {
+	tests := []struct {
+		name     string
+		maxValue []byte
+		duration float32
+		addTime  float32
+		isIn     bool
+	}{
+		{
+			name:     "Fade In",
+			maxValue: []byte{255, 255, 255},
+			duration: 0.8,
+			addTime:  0,
+			isIn:     true,
+		},
+		{
+			name:     "Fade Out",
+			maxValue: []byte{255, 255, 255},
+			duration: 0.8,
+			addTime:  0,
+			isIn:     false,
+		},
+		{
+			name:     "Fade In (to target)",
+			maxValue: []byte{100, 200, 255},
+			duration: 0.8,
+			addTime:  0,
+			isIn:     true,
+		},
+		{
+			name:     "Fade In (Long time 2s)",
+			maxValue: []byte{100, 200, 255},
+			duration: 2,
+			addTime:  0,
+			isIn:     true,
+		},
+		{
+			name:     "Fade In (Shot time 0.01s)",
+			maxValue: []byte{100, 200, 255},
+			duration: 0.01,
+			addTime:  0,
+			isIn:     true,
+		},
+		{
+			name:     "Fade In (Overtime)",
+			maxValue: []byte{100, 200, 255},
+			duration: 0.1,
+			addTime:  0.5,
+			isIn:     true,
+		},
+	}
+	t.Parallel()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var wg sync.WaitGroup
+			t.Parallel()
+			target := make([]byte, 512)
+			var dev device.DMXDevice = device.DMXDevice{
+				Model:      "test",
+				UseChannel: 3,
+			}
+			if !dev.Initialize(1, tt.maxValue, &target, &tt.duration) {
+				t.Error("Failed to initialize")
+			}
+			dev.Fade(tt.isIn)
+			time.Sleep(time.Duration(tt.duration * float32(time.Second)))
+			wg.Add(1)
+			dev.Update(&wg)
+			if tt.addTime > 0 {
+				t.Log("Wait after")
+				time.Sleep(time.Duration(tt.addTime * float32(time.Second)))
+				wg.Add(1)
+				dev.Update(&wg)
+			}
+			targetValue := tt.maxValue
+			if !tt.isIn {
+				targetValue = make([]byte, len(tt.maxValue))
+			}
+			if !bytes.Equal(target[:dev.UseChannel], targetValue) {
+				t.Errorf("Failed to fade. %v want %v", target[:dev.UseChannel], targetValue)
+				return
+			}
+			t.Logf("result: %v want %v", target[:dev.UseChannel], targetValue)
+		})
+	}
+}
+
+func TestDMXDevice_Update(t *testing.T) {
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for target function.
+		wg   *sync.WaitGroup
+		want bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// TODO: construct the receiver type.
+			var dev device.DMXDevice
+			got := dev.Update(tt.wg)
+			// TODO: update the condition below to compare got with tt.want.
+			if true {
+				t.Errorf("Update() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
