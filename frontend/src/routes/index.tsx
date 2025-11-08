@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { ConfigContext, fetcher, genBackendPath } from "./__root";
 import useSWR from "swr";
 import FadeControl from "../component/FadeControl";
@@ -32,7 +32,7 @@ function ControlPage() {
         return (
             <ErrorComponent>
                 Connection Error. Plase check backend config or frontend{" "}
-                <a href="/config.json">config.json</a>
+                <Link to="config.json" target="_blank" rel="noopener noreferrer">config.json</Link>
             </ErrorComponent>
         );
     }
