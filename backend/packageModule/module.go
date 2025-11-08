@@ -60,9 +60,9 @@ func (mgr *ModuleManagerType) RegisterModule(name string, module *PackageModule)
 	return true
 }
 
-func (mgr *ModuleManagerType) ModuleInitialize(logHander *slog.Handler) {
+func (mgr *ModuleManagerType) ModuleInitialize(logHandler *slog.Handler) {
 	for name, module := range mgr.modules {
-		module.Logger = slog.New(*logHander).With("module", name)
+		module.Logger = slog.New(*logHandler).With("module", name)
 		module.Wg = &mgr.wg
 		module.Channel = make(chan message.Message, 10)
 		if !module.Initialize(module, &config.ConfigData) {

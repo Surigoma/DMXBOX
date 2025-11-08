@@ -27,7 +27,7 @@ type OSCFormatter struct {
 }
 
 func (f *OSCFormatter) Render(mute bool) ([]string, any) {
-	datamap := map[string][]any{
+	dataMap := map[string][]any{
 		"int":   {int32(0), int32(1)},
 		"float": {float32(0), float32(1)},
 	}
@@ -39,7 +39,7 @@ func (f *OSCFormatter) Render(mute bool) ([]string, any) {
 	if mute != f.Inverse {
 		index = 1
 	}
-	return result, datamap[f.Type][index]
+	return result, dataMap[f.Type][index]
 }
 
 var formatter OSCFormatter
