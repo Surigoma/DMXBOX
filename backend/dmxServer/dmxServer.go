@@ -10,6 +10,7 @@ import (
 	"backend/message"
 	"backend/packageModule"
 	"log/slog"
+	"strconv"
 	"sync"
 )
 
@@ -83,6 +84,20 @@ func handleMessage(mes message.Message) int {
 		if ok {
 			isIn = isInStr == "true"
 		}
+		duration := float32(-1)
+		interval := float32(-1)
+		if argStr, ok := mes.Arg.Arg["duration"]; ok {
+			conv, err := strconv.ParseFloat(argStr, 32)
+			if err == nil {
+				duration = float32(conv)
+			}
+		}
+		if argStr, ok := mes.Arg.Arg["interval"]; ok {
+			conv, err := strconv.ParseFloat(argStr, 32)
+			if err == nil {
+				interval = float32(conv)
+			}
+		}
 		targetGroup, ok := devices[id]
 		if !ok {
 			logger.Error("group is not found", "id", id)
@@ -90,7 +105,7 @@ func handleMessage(mes message.Message) int {
 		}
 		logger.Debug("action fade", "fade", isIn)
 		for _, d := range targetGroup {
-			d.Fade(isIn)
+			d.Fade(isIn, duration, interval)
 		}
 	}
 	return 0

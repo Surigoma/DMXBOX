@@ -17,6 +17,7 @@ type DMXDevice struct {
 	effectStart time.Time
 	effectEnd   time.Time
 	Duration    *float32
+	once        bool
 }
 
 func (dev *DMXDevice) Initialize(channel uint8, maxValue []byte, target *[]byte, duration *float32) bool {
@@ -43,9 +44,20 @@ func (dev *DMXDevice) Initialize(channel uint8, maxValue []byte, target *[]byte,
 	return true
 }
 
-func (dev *DMXDevice) Fade(isIn bool) {
-	dev.effectStart = time.Now()
-	dev.effectEnd = dev.effectStart.Add(time.Duration(*dev.Duration * float32(time.Second)))
+func (dev *DMXDevice) Fade(isIn bool, duration float32, interval float32) {
+	dur := *dev.Duration
+	inter := float32(0)
+	if duration >= 0 {
+		dur = duration
+	}
+	if interval > 0 {
+		inter = interval
+	}
+	dev.effectStart = time.Now().Add(time.Duration(inter * float32(time.Second)))
+	dev.effectEnd = dev.effectStart.Add(time.Duration(dur * float32(time.Second)))
+	if dur == 0 {
+		dev.once = true
+	}
 
 	for i := range dev.Before {
 		dev.Before[i] = (*dev.Output)[i+int(dev.Channel)-1]
@@ -66,8 +78,15 @@ func (dev *DMXDevice) Update(wg *sync.WaitGroup) bool {
 	endD := dev.effectEnd.Sub(dev.effectStart)
 	percentRaw := nowD.Seconds() / endD.Seconds()
 	percent := math.Max(0.0, math.Min(1.0, percentRaw))
-	if percent <= 0 {
+	if nowD < 0 {
 		return false
+	}
+	if dev.once {
+		dev.once = false
+		for i := range dev.Target {
+			(*dev.Output)[i+int(dev.Channel)-1] = dev.Target[i]
+		}
+		return true
 	}
 	if percentRaw > 1.1 {
 		return false

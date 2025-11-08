@@ -25,8 +25,10 @@ type FadeResult struct {
 //	@Accept			json
 //	@Produce		json
 //
-//	@Param			group	path		string	true	"Name of DMX group"
-//	@Param			isIn	query		bool	false	"is Fade In"
+//	@Param			group		path		string	true	"Name of DMX group"
+//	@Param			isIn		query		bool	false	"is Fade In"
+//	@Param			interval	query		int		false	"Onetime Interval"
+//	@Param			duration	query		int		false	"Onetime duration"
 //
 //	@Success		200		{object}	FadeResult
 //	@Success		400		{object}	FadeResult
@@ -55,6 +57,12 @@ func Fade(g *gin.Context) {
 				"isIn": isInStr,
 			},
 		},
+	}
+	if intStr := g.Query("interval"); intStr != "" {
+		msg.Arg.Arg["interval"] = intStr
+	}
+	if intStr := g.Query("duration"); intStr != "" {
+		msg.Arg.Arg["duration"] = intStr
 	}
 	ok := packageModule.ModuleManager.SendMessage(msg)
 	if !ok {

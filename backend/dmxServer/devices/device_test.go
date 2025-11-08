@@ -58,53 +58,94 @@ func TestDMXDevice_Initialize(t *testing.T) {
 
 func TestDMXDevice_Fade(t *testing.T) {
 	tests := []struct {
-		name     string
-		maxValue []byte
-		duration float32
-		addTime  float32
-		isIn     bool
+		name        string
+		maxValue    []byte
+		duration    float32
+		addTime     float32
+		optDuration float32
+		optInterval float32
+		isIn        bool
 	}{
 		{
-			name:     "Fade In",
-			maxValue: []byte{255, 255, 255},
-			duration: 0.8,
-			addTime:  0,
-			isIn:     true,
+			name:        "Fade In",
+			maxValue:    []byte{255, 255, 255},
+			duration:    0.8,
+			addTime:     0,
+			optDuration: -1,
+			optInterval: -1,
+			isIn:        true,
 		},
 		{
-			name:     "Fade Out",
-			maxValue: []byte{255, 255, 255},
-			duration: 0.8,
-			addTime:  0,
-			isIn:     false,
+			name:        "Fade Out",
+			maxValue:    []byte{255, 255, 255},
+			duration:    0.8,
+			addTime:     0,
+			optDuration: -1,
+			optInterval: -1,
+			isIn:        false,
 		},
 		{
-			name:     "Fade In (to target)",
-			maxValue: []byte{100, 200, 255},
-			duration: 0.8,
-			addTime:  0,
-			isIn:     true,
+			name:        "Fade In (to target)",
+			maxValue:    []byte{100, 200, 255},
+			duration:    0.8,
+			addTime:     0,
+			optDuration: -1,
+			optInterval: -1,
+			isIn:        true,
 		},
 		{
-			name:     "Fade In (Long time 2s)",
-			maxValue: []byte{100, 200, 255},
-			duration: 2,
-			addTime:  0,
-			isIn:     true,
+			name:        "Fade In (Long time 2s)",
+			maxValue:    []byte{100, 200, 255},
+			duration:    2,
+			addTime:     0,
+			optDuration: -1,
+			optInterval: -1,
+			isIn:        true,
 		},
 		{
-			name:     "Fade In (Shot time 0.01s)",
-			maxValue: []byte{100, 200, 255},
-			duration: 0.01,
-			addTime:  0,
-			isIn:     true,
+			name:        "Fade In (Shot time 0.01s)",
+			maxValue:    []byte{100, 200, 255},
+			duration:    0.01,
+			addTime:     0,
+			optDuration: -1,
+			optInterval: -1,
+			isIn:        true,
 		},
 		{
-			name:     "Fade In (Overtime)",
-			maxValue: []byte{100, 200, 255},
-			duration: 0.1,
-			addTime:  0.5,
-			isIn:     true,
+			name:        "Fade In (Overtime)",
+			maxValue:    []byte{100, 200, 255},
+			duration:    0.1,
+			addTime:     0.5,
+			optDuration: -1,
+			optInterval: -1,
+			isIn:        true,
+		},
+		{
+			name:        "Fade In (Optional Duration 0.1s)",
+			maxValue:    []byte{100, 200, 255},
+			duration:    0.5,
+			addTime:     0.5,
+			optDuration: 0.1,
+			optInterval: -1,
+			isIn:        true,
+		},
+		{
+			name:        "Fade In (Optional Duration 0s)",
+			maxValue:    []byte{100, 200, 255},
+			duration:    0.5,
+			addTime:     0.5,
+			optDuration: 0,
+			optInterval: -1,
+			isIn:        true,
+		},
+		{
+			name:        "Fade In (Optional Interval 0.5s)",
+			maxValue:    []byte{100, 200, 255},
+			duration:    0.1,
+			addTime:     0,
+			optDuration: -1,
+			optInterval: 0.5,
+			isIn:        true,
 		},
 	}
 	t.Parallel()
@@ -120,8 +161,21 @@ func TestDMXDevice_Fade(t *testing.T) {
 			if !dev.Initialize(1, tt.maxValue, &target, &tt.duration) {
 				t.Error("Failed to initialize")
 			}
-			dev.Fade(tt.isIn)
-			time.Sleep(time.Duration(tt.duration * float32(time.Second)))
+			dev.Fade(tt.isIn, tt.optDuration, tt.optInterval)
+			if tt.optInterval > 0 {
+				wg.Add(1)
+				dev.Update(&wg)
+				if !bytes.Equal(target[:dev.UseChannel], make([]byte, dev.UseChannel)) {
+					t.Error("Failed to match 0 when before interval")
+					return
+				}
+				time.Sleep(time.Duration(tt.optInterval * float32(time.Second)))
+			}
+			if tt.optDuration < 0 {
+				time.Sleep(time.Duration(tt.duration * float32(time.Second)))
+			} else {
+				time.Sleep(time.Duration(tt.optDuration * float32(time.Second)))
+			}
 			wg.Add(1)
 			dev.Update(&wg)
 			if tt.addTime > 0 {
