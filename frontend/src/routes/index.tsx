@@ -32,7 +32,7 @@ function ControlPage() {
     if (error) {
         return (
             <ErrorComponent>
-                Connection Error. Plase check backend config or frontend{" "}
+                Connection Error. Please check backend config or frontend{" "}
                 <Link
                     to="config.json"
                     target="_blank"
