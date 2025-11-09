@@ -59,6 +59,7 @@ function FadeControl({ name, data, showCutin }: { name: string; data: DMXGroupIn
                     direction="column"
                     alignItems="stretch"
                     justifyContent="center"
+                    wrap="nowrap"
                     width="100%"
                     height="100%"
                     zIndex={10}
@@ -89,7 +90,7 @@ function FadeControl({ name, data, showCutin }: { name: string; data: DMXGroupIn
                             </Button>
                         </Stack>
                     </Grid>
-                    <Grid size="grow" height={CutHeight + "%"}>
+                    <Grid size="grow" height={CutHeight + "%"} sx={{minHeight: 0}}>
                         <Stack direction="row" spacing={0} height="100%">
                             <Button
                                 style={{ width: "100%", height: "100%" }}
