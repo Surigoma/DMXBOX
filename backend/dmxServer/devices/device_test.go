@@ -252,21 +252,51 @@ func TestDMXDevice_Fade(t *testing.T) {
 }
 
 func TestDMXDevice_Update(t *testing.T) {
+	wg := sync.WaitGroup{}
 	tests := []struct {
-		name string // description of this test case
-		// Named input parameters for target function.
-		wg   *sync.WaitGroup
-		want bool
+		name     string
+		dev      device.DMXDevice
+		duration float32
+		want     bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "Default",
+			dev: device.DMXDevice{
+				Model:      "dummy",
+				UseChannel: 1,
+			},
+			duration: 0.5,
+			want:     true,
+		},
+		{
+			name: "ModUpdate - return true",
+			dev: device.DMXDevice{
+				Model:      "modupdate",
+				UseChannel: 1,
+				ModUpdate:  func() bool { return true },
+			},
+			want: true,
+		},
+		{
+			name: "ModUpdate - return false",
+			dev: device.DMXDevice{
+				Model:      "modupdate",
+				UseChannel: 1,
+				ModUpdate:  func() bool { return false },
+			},
+			want: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// TODO: construct the receiver type.
-			var dev device.DMXDevice
-			got := dev.Update(tt.wg)
-			// TODO: update the condition below to compare got with tt.want.
-			if true {
+			target := make([]byte, 512)
+			var dev device.DMXDevice = tt.dev
+			dev.Initialize(1, []byte{255}, &target, &tt.duration)
+			dev.Fade(true, -1, -1)
+			time.Sleep(time.Duration(tt.duration * float32(time.Second) * 0.5))
+			wg.Add(1)
+			got := dev.Update(&wg)
+			if got != tt.want {
 				t.Errorf("Update() = %v, want %v", got, tt.want)
 			}
 		})
