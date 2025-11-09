@@ -59,15 +59,18 @@ func TestDMXDevice_Initialize(t *testing.T) {
 func TestDMXDevice_Fade(t *testing.T) {
 	tests := []struct {
 		name        string
+		channel     uint8
 		maxValue    []byte
 		duration    float32
 		addTime     float32
 		optDuration float32
 		optInterval float32
 		isIn        bool
+		modFade     bool
 	}{
 		{
 			name:        "Fade In",
+			channel:     1,
 			maxValue:    []byte{255, 255, 255},
 			duration:    0.8,
 			addTime:     0,
@@ -77,6 +80,7 @@ func TestDMXDevice_Fade(t *testing.T) {
 		},
 		{
 			name:        "Fade Out",
+			channel:     1,
 			maxValue:    []byte{255, 255, 255},
 			duration:    0.8,
 			addTime:     0,
@@ -86,6 +90,7 @@ func TestDMXDevice_Fade(t *testing.T) {
 		},
 		{
 			name:        "Fade In (to target)",
+			channel:     1,
 			maxValue:    []byte{100, 200, 255},
 			duration:    0.8,
 			addTime:     0,
@@ -95,6 +100,7 @@ func TestDMXDevice_Fade(t *testing.T) {
 		},
 		{
 			name:        "Fade In (Long time 2s)",
+			channel:     1,
 			maxValue:    []byte{100, 200, 255},
 			duration:    2,
 			addTime:     0,
@@ -104,6 +110,7 @@ func TestDMXDevice_Fade(t *testing.T) {
 		},
 		{
 			name:        "Fade In (Shot time 0.01s)",
+			channel:     1,
 			maxValue:    []byte{100, 200, 255},
 			duration:    0.01,
 			addTime:     0,
@@ -113,6 +120,7 @@ func TestDMXDevice_Fade(t *testing.T) {
 		},
 		{
 			name:        "Fade In (Overtime)",
+			channel:     1,
 			maxValue:    []byte{100, 200, 255},
 			duration:    0.1,
 			addTime:     0.5,
@@ -122,6 +130,7 @@ func TestDMXDevice_Fade(t *testing.T) {
 		},
 		{
 			name:        "Fade In (Optional Duration 0.1s)",
+			channel:     1,
 			maxValue:    []byte{100, 200, 255},
 			duration:    0.5,
 			addTime:     0.5,
@@ -131,6 +140,7 @@ func TestDMXDevice_Fade(t *testing.T) {
 		},
 		{
 			name:        "Fade In (Optional Duration 0s)",
+			channel:     1,
 			maxValue:    []byte{100, 200, 255},
 			duration:    0.5,
 			addTime:     0.5,
@@ -140,6 +150,7 @@ func TestDMXDevice_Fade(t *testing.T) {
 		},
 		{
 			name:        "Fade In (Optional Interval 0.5s)",
+			channel:     1,
 			maxValue:    []byte{100, 200, 255},
 			duration:    0.1,
 			addTime:     0,
@@ -148,7 +159,18 @@ func TestDMXDevice_Fade(t *testing.T) {
 			isIn:        true,
 		},
 		{
+			name:        "Change channel",
+			channel:     10,
+			maxValue:    []byte{100, 200, 255},
+			duration:    0,
+			addTime:     0,
+			optDuration: -1,
+			optInterval: -1,
+			isIn:        true,
+		},
+		{
 			name:        "ModFade - Fill max",
+			channel:     1,
 			maxValue:    []byte{100, 200, 255},
 			duration:    0,
 			addTime:     0,
@@ -159,6 +181,7 @@ func TestDMXDevice_Fade(t *testing.T) {
 		},
 		{
 			name:        "ModFade - Fill 0",
+			channel:     1,
 			maxValue:    []byte{100, 200, 255},
 			duration:    0,
 			addTime:     0,
@@ -178,7 +201,7 @@ func TestDMXDevice_Fade(t *testing.T) {
 				Model:      "test",
 				UseChannel: 3,
 			}
-			if !dev.Initialize(1, tt.maxValue, &target, &tt.duration) {
+			if !dev.Initialize(tt.channel, tt.maxValue, &target, &tt.duration) {
 				t.Error("Failed to initialize")
 			}
 			if tt.modFade {
@@ -196,7 +219,7 @@ func TestDMXDevice_Fade(t *testing.T) {
 			if tt.optInterval > 0 {
 				wg.Add(1)
 				dev.Update(&wg)
-				if !bytes.Equal(target[:dev.UseChannel], make([]byte, dev.UseChannel)) {
+				if !bytes.Equal(target[dev.Channel-1:dev.Channel+dev.UseChannel-1], make([]byte, dev.UseChannel)) {
 					t.Error("Failed to match 0 when before interval")
 					return
 				}
@@ -219,11 +242,11 @@ func TestDMXDevice_Fade(t *testing.T) {
 			if !tt.isIn {
 				targetValue = make([]byte, len(tt.maxValue))
 			}
-			if !bytes.Equal(target[:dev.UseChannel], targetValue) {
-				t.Errorf("Failed to fade. %v want %v", target[:dev.UseChannel], targetValue)
+			if !bytes.Equal(target[tt.channel-1:tt.channel+dev.UseChannel-1], targetValue) {
+				t.Errorf("Failed to fade. %v want %v", target[tt.channel-1:tt.channel+dev.UseChannel-1], targetValue)
 				return
 			}
-			t.Logf("result: %v want %v", target[:dev.UseChannel], targetValue)
+			t.Logf("result: %v want %v", target[tt.channel-1:tt.channel+dev.UseChannel-1], targetValue)
 		})
 	}
 }
