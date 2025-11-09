@@ -18,6 +18,8 @@ type DMXDevice struct {
 	effectEnd   time.Time
 	Duration    *float32
 	once        bool
+	ModFade     func(isIn bool, duration float32, interval float32)
+	ModUpdate   func() bool
 }
 
 func (dev *DMXDevice) Initialize(channel uint8, maxValue []byte, target *[]byte, duration *float32) bool {
@@ -45,6 +47,10 @@ func (dev *DMXDevice) Initialize(channel uint8, maxValue []byte, target *[]byte,
 }
 
 func (dev *DMXDevice) Fade(isIn bool, duration float32, interval float32) {
+	if dev.ModFade != nil {
+		dev.ModFade(isIn, duration, interval)
+		return
+	}
 	dur := *dev.Duration
 	inter := float32(0)
 	if duration >= 0 {
@@ -73,6 +79,9 @@ func (dev *DMXDevice) Fade(isIn bool, duration float32, interval float32) {
 
 func (dev *DMXDevice) Update(wg *sync.WaitGroup) bool {
 	defer wg.Done()
+	if dev.ModUpdate != nil {
+		return dev.ModUpdate()
+	}
 	now := time.Now()
 	nowD := now.Sub(dev.effectStart)
 	endD := dev.effectEnd.Sub(dev.effectStart)

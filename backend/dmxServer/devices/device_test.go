@@ -147,6 +147,26 @@ func TestDMXDevice_Fade(t *testing.T) {
 			optInterval: 0.5,
 			isIn:        true,
 		},
+		{
+			name:        "ModFade - Fill max",
+			maxValue:    []byte{100, 200, 255},
+			duration:    0,
+			addTime:     0,
+			optDuration: -1,
+			optInterval: -1,
+			isIn:        true,
+			modFade:     true,
+		},
+		{
+			name:        "ModFade - Fill 0",
+			maxValue:    []byte{100, 200, 255},
+			duration:    0,
+			addTime:     0,
+			optDuration: -1,
+			optInterval: -1,
+			isIn:        false,
+			modFade:     false,
+		},
 	}
 	t.Parallel()
 	for _, tt := range tests {
@@ -160,6 +180,17 @@ func TestDMXDevice_Fade(t *testing.T) {
 			}
 			if !dev.Initialize(1, tt.maxValue, &target, &tt.duration) {
 				t.Error("Failed to initialize")
+			}
+			if tt.modFade {
+				dev.ModFade = func(isIn bool, duration float32, interval float32) {
+					for i := range dev.Target {
+						if isIn {
+							(*dev.Output)[i+int(dev.Channel)-1] = dev.MaxValue[i]
+						} else {
+							(*dev.Output)[i+int(dev.Channel)-1] = 0
+						}
+					}
+				}
 			}
 			dev.Fade(tt.isIn, tt.optDuration, tt.optInterval)
 			if tt.optInterval > 0 {
