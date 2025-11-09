@@ -91,7 +91,7 @@ func registerEndPoints() *gin.Engine {
 	{
 		eg := v1.Group("/")
 		{
-			eg.GET("/hello", controller.HelloWorld)
+			eg.GET("/health", controller.Health)
 			eg.POST("/fade/:group", controller.Fade)
 			eg.POST("/mute", controller.Osc)
 			cfg := eg.Group("/config/")
