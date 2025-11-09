@@ -6,6 +6,12 @@ vars:
     - windows
 
 tasks:
+  dev:
+    deps:
+      - update_swag
+    cmds:
+      - cmd: go run main.go
+        ignore_error: true
   update_swag:
     cmd: swag init -g httpServer/httpServer.go
   test:
