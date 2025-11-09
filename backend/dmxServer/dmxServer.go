@@ -17,14 +17,25 @@ import (
 var logger *slog.Logger
 var wg *sync.WaitGroup
 var renderWg sync.WaitGroup
-var deviceTypes map[string]func() *device.DMXDevice = make(map[string]func() *device.DMXDevice)
-var devices map[string][]*device.DMXDevice = make(map[string][]*device.DMXDevice)
-var renderTypes map[string]func() *controller.Controller = make(map[string]func() *controller.Controller)
+var DeviceTypes map[string]func() *device.DMXDevice = map[string]func() *device.DMXDevice{
+	"dimmer":  deviceSpec.NewDimmer,
+	"wclight": deviceSpec.NewWCLight,
+}
+var RenderTypes map[string]func() *controller.Controller = map[string]func() *controller.Controller{
+	"console": ctrlModule.NewConsole,
+	"ftdi":    ctrlModule.NewFTDI,
+	"artnet":  ctrlModule.NewArtnet,
+}
+var groups map[string]Group = make(map[string]Group)
 var renderers map[string]*controller.Controller = make(map[string]*controller.Controller)
 var rendered []byte = make([]byte, 512)
 var fpsController *fps.FPSController
 var counter int = 0
 
+type Group struct {
+	Name    string
+	Devices []*device.DMXDevice
+}
 type EffectParam struct {
 	Duration float32
 	Delay    float32
@@ -44,6 +55,7 @@ var DMXServer packageModule.PackageModule = packageModule.PackageModule{
 }
 
 func Initialize(module *packageModule.PackageModule, config *config.Config) bool {
+	CleanupDMXServer()
 	logger = module.Logger
 	renderWg = sync.WaitGroup{}
 	wg = module.Wg
@@ -51,25 +63,42 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	param.Delay = config.Dmx.Delay
 	param.Fps = config.Dmx.Fps
 
-	deviceTypes["dimmer"] = deviceSpec.NewDimmer
-	deviceTypes["wclight"] = deviceSpec.NewWCLight
-	renderTypes["console"] = ctrlModule.NewConsole
-	renderTypes["ftdi"] = ctrlModule.NewFTDI
-	renderTypes["artnet"] = ctrlModule.NewArtnet
-
 	for _, controller := range config.Output.Target {
-		AddController(controller, config)
+		if !AddController(controller, config) {
+			logger.Error("Failed to setup dmx server: unknown controller", "controller", controller)
+			return false
+		}
+	}
+	o := []string{}
+	for _, r := range renderers {
+		o = append(o, r.Model)
+	}
+	if len(renderers) <= 0 {
+		logger.Error("Failed to setup dmx server: controller is none")
+		return false
 	}
 	for name, groupDevices := range config.Dmx.Groups {
-		devices[name] = make([]*device.DMXDevice, len(groupDevices.Devices))
+		groups[name] = Group{
+			Name:    groupDevices.Name,
+			Devices: make([]*device.DMXDevice, len(groupDevices.Devices)),
+		}
 		for i, device := range groupDevices.Devices {
-			devices[name][i] = MakeDevice(device.Model, device.Channel, device.MaxValue)
-			if devices[name][i] == nil {
+			groups[name].Devices[i] = MakeDevice(device.Model, device.Channel, device.MaxValue)
+			if groups[name].Devices[i] == nil {
+				logger.Error("Failed to setup dmx server: failed to create device", "group", name, "device", device.Model, "index", i)
 				return false
 			}
 		}
 	}
 	return true
+}
+func CleanupDMXServer() {
+	for k := range groups {
+		delete(groups, k)
+	}
+	for k := range renderers {
+		delete(renderers, k)
+	}
 }
 
 func handleMessage(mes message.Message) int {
@@ -98,13 +127,13 @@ func handleMessage(mes message.Message) int {
 				interval = float32(conv)
 			}
 		}
-		targetGroup, ok := devices[id]
+		targetGroup, ok := groups[id]
 		if !ok {
 			logger.Error("group is not found", "id", id)
 			return 0
 		}
 		logger.Debug("action fade", "fade", isIn)
-		for _, d := range targetGroup {
+		for _, d := range targetGroup.Devices {
 			d.Fade(isIn, duration, interval)
 		}
 	}
@@ -112,7 +141,7 @@ func handleMessage(mes message.Message) int {
 }
 
 func MakeDevice(deviceType string, channel uint8, maxValue []uint) *device.DMXDevice {
-	generator, ok := deviceTypes[deviceType]
+	generator, ok := DeviceTypes[deviceType]
 	if !ok {
 		logger.Warn("Unsupported type", "type", deviceType)
 		return nil
@@ -131,7 +160,7 @@ func MakeDevice(deviceType string, channel uint8, maxValue []uint) *device.DMXDe
 }
 
 func AddController(model string, config *config.Config) bool {
-	generator, ok := renderTypes[model]
+	generator, ok := RenderTypes[model]
 	if !ok {
 		logger.Warn("Unsupported render model", "model", model)
 		return false
@@ -150,12 +179,12 @@ func AddController(model string, config *config.Config) bool {
 
 func GetConfig() map[string]config.DMXGroup {
 	result := make(map[string]config.DMXGroup, 0)
-	for k, v := range devices {
+	for k, v := range groups {
 		result[k] = config.DMXGroup{
-			Name:    config.ConfigData.Dmx.Groups[k].Name,
-			Devices: make([]config.DMXDevice, len(v)),
+			Name:    v.Name,
+			Devices: make([]config.DMXDevice, len(v.Devices)),
 		}
-		for i, d := range v {
+		for i, d := range v.Devices {
 			result[k].Devices[i].Channel = d.Channel
 			result[k].Devices[i].MaxValue = make([]uint, len(d.MaxValue))
 			for ii, m := range d.MaxValue {
@@ -169,8 +198,8 @@ func GetConfig() map[string]config.DMXGroup {
 
 func Render() bool {
 	result := false
-	for _, deviceGroup := range devices {
-		for _, device := range deviceGroup {
+	for _, deviceGroup := range groups {
+		for _, device := range deviceGroup.Devices {
 			renderWg.Add(1)
 			result = device.Update(&renderWg) || result
 		}
@@ -198,6 +227,7 @@ func Finalize() {
 		logger.Debug("Finalize", "k", k)
 		r.Finalize()
 	}
+	CleanupDMXServer()
 	wg.Done()
 }
 
