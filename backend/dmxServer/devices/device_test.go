@@ -188,7 +188,7 @@ func TestDMXDevice_Fade(t *testing.T) {
 			optDuration: -1,
 			optInterval: -1,
 			isIn:        false,
-			modFade:     false,
+			modFade:     true,
 		},
 	}
 	t.Parallel()
@@ -206,11 +206,11 @@ func TestDMXDevice_Fade(t *testing.T) {
 			}
 			if tt.modFade {
 				dev.ModFade = func(isIn bool, duration float32, interval float32) {
-					for i := range dev.Target {
+					for i := range dev.UseChannel {
 						if isIn {
-							(*dev.Output)[i+int(dev.Channel)-1] = dev.MaxValue[i]
+							dev.Target[i] = dev.MaxValue[i]
 						} else {
-							(*dev.Output)[i+int(dev.Channel)-1] = 0
+							dev.Target[i] = 0
 						}
 					}
 				}
@@ -242,11 +242,12 @@ func TestDMXDevice_Fade(t *testing.T) {
 			if !tt.isIn {
 				targetValue = make([]byte, len(tt.maxValue))
 			}
-			if !bytes.Equal(target[tt.channel-1:tt.channel+dev.UseChannel-1], targetValue) {
-				t.Errorf("Failed to fade. %v want %v", target[tt.channel-1:tt.channel+dev.UseChannel-1], targetValue)
+			result := target[int(tt.channel-1):int(tt.channel+dev.UseChannel-1)]
+			if !bytes.Equal(result, targetValue) {
+				t.Errorf("Failed to fade. %v want %v", result, targetValue)
 				return
 			}
-			t.Logf("result: %v want %v", target[tt.channel-1:tt.channel+dev.UseChannel-1], targetValue)
+			t.Logf("result: %v want %v", result, targetValue)
 		})
 	}
 }

@@ -47,10 +47,6 @@ func (dev *DMXDevice) Initialize(channel uint8, maxValue []byte, target *[]byte,
 }
 
 func (dev *DMXDevice) Fade(isIn bool, duration float32, interval float32) {
-	if dev.ModFade != nil {
-		dev.ModFade(isIn, duration, interval)
-		return
-	}
 	dur := *dev.Duration
 	inter := float32(0)
 	if duration >= 0 {
@@ -64,7 +60,10 @@ func (dev *DMXDevice) Fade(isIn bool, duration float32, interval float32) {
 	if dur == 0 {
 		dev.once = true
 	}
-
+	if dev.ModFade != nil {
+		dev.ModFade(isIn, duration, interval)
+		return
+	}
 	for i := range dev.Before {
 		dev.Before[i] = (*dev.Output)[i+int(dev.Channel)-1]
 	}
