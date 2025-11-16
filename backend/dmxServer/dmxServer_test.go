@@ -5,12 +5,14 @@ import (
 	dmxserver "backend/dmxServer"
 	"backend/dmxServer/controller"
 	device "backend/dmxServer/devices"
+	"backend/message"
 	"backend/packageModule"
 	"encoding/json"
 	"fmt"
 	"log/slog"
 	"maps"
 	"slices"
+	"sync"
 	"testing"
 	"time"
 )
@@ -407,4 +409,73 @@ func TestRender(t *testing.T) {
 			}
 		})
 	}
+}
+func TestMessage(t *testing.T) {
+	t.Run("Message Stop", func(t *testing.T) {
+		fps := float32(30.0)
+		Wg := sync.WaitGroup{}
+		module := packageModule.PackageModule{
+			Logger: slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug})),
+			Wg:     &Wg,
+		}
+		dmxserver.RenderTypes["dummy"] = func() *controller.Controller {
+			return &controller.Controller{
+				Model:         "dummy",
+				ModInitialize: func(c *config.Config, l *slog.Logger) bool { return true },
+				ModOutput:     func(b *[]byte) bool { return true },
+				ModFinalize:   func() {},
+			}
+		}
+		Wg.Add(1)
+		ok := dmxserver.DMXServer.Initialize(&module, &config.Config{
+			Dmx: config.DMXServer{
+				Fps: fps,
+			},
+			Output: config.OutputTargets{
+				Target: []string{"dummy"},
+			},
+		})
+		if !ok {
+			t.Error("Failed to initialize")
+			return
+		}
+		dmxserver.DMXServer.Run()
+		waitCh := make(chan bool)
+		go func() {
+			for range 15 {
+				if dmxserver.FpsController.Running {
+					waitCh <- true
+					return
+				}
+				time.Sleep(time.Duration(100 * time.Millisecond))
+			}
+			waitCh <- false
+		}()
+		select {
+		case <-time.After(time.Duration(time.Second)):
+			t.Error("Failed to start run FPSController")
+			return
+		case result := <-waitCh:
+			if !result {
+				t.Error("Failed to start run FPSController")
+				return
+			}
+			break
+		}
+		ret := dmxserver.DMXServer.MessageHandler(message.Message{
+			To: "dmx",
+			Arg: message.MessageBody{
+				Action: "stop",
+			},
+		})
+		if ret != -1 {
+			t.Errorf("Return code is not match: %v want -1", ret)
+			return
+		}
+		time.Sleep(time.Duration(float32(time.Second) * 2 / fps))
+		if dmxserver.FpsController.Running {
+			t.Error("Failed to Stop FPSController")
+			return
+		}
+	})
 }

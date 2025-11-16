@@ -29,7 +29,7 @@ var RenderTypes map[string]func() *controller.Controller = map[string]func() *co
 var groups map[string]Group = make(map[string]Group)
 var renderers map[string]*controller.Controller = make(map[string]*controller.Controller)
 var rendered []byte = make([]byte, 512)
-var fpsController *fps.FPSController
+var FpsController *fps.FPSController
 var counter int = 0
 
 type Group struct {
@@ -104,7 +104,7 @@ func CleanupDMXServer() {
 func handleMessage(mes message.Message) int {
 	switch mes.Arg.Action {
 	case "stop":
-		fpsController.Stop()
+		FpsController.Stop()
 		return -1
 	case "fade":
 		id := mes.Arg.Arg["id"]
@@ -210,7 +210,7 @@ func Render() bool {
 
 func DMXThread() bool {
 	if counter == 0 {
-		logger.Debug("fps", "fps", fpsController.GetFPS())
+		logger.Debug("fps", "fps", FpsController.GetFPS())
 	}
 	if Render() || counter%10 == 0 {
 		for _, r := range renderers {
@@ -232,10 +232,10 @@ func Finalize() {
 }
 
 func StartDMX() {
-	fpsController = fps.NewFPS(param.Fps, DMXThread, Finalize)
-	if fpsController == nil {
+	FpsController = fps.NewFPS(param.Fps, DMXThread, Finalize)
+	if FpsController == nil {
 		logger.Error("Failed to setup FPS controller.")
 		return
 	}
-	go fpsController.Run()
+	go FpsController.Run()
 }
