@@ -69,10 +69,6 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 			return false
 		}
 	}
-	o := []string{}
-	for _, r := range renderers {
-		o = append(o, r.Model)
-	}
 	if len(renderers) <= 0 {
 		logger.Error("Failed to setup dmx server: controller is none")
 		return false
