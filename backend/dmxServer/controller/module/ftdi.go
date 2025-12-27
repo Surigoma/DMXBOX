@@ -35,7 +35,7 @@ func InitializeFTDI(config *config.Config, log *slog.Logger) bool {
 	target = config.Output.DMX.Port
 	ports, err := serial.GetPortsList()
 	loggerFTDI.Debug("Found devices", "ports", ports)
-	if err != nil {
+	if err != nil { //coverage:ignore
 		loggerFTDI.Error("Failed setup ports.", "err", err)
 		return false
 	}
@@ -44,7 +44,7 @@ func InitializeFTDI(config *config.Config, log *slog.Logger) bool {
 		return false
 	}
 	port, err = serial.Open(target, &mode)
-	if err != nil {
+	if err != nil { //coverage:ignore
 		loggerFTDI.Error("Failed to open port", "port", target, "err", err)
 		return false
 	}

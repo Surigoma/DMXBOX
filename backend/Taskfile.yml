@@ -19,6 +19,7 @@ tasks:
       - mkdir -p ./test/html
       - cmd: gotestsum --junitfile test/report.xml --jsonfile test/result.json -- -cover ./... -coverprofile=test/cover.out -json
         ignore_error: true
+      - go-ignore-cov --file test/cover.out
       - go tool cover -html=test/cover.out -o test/html/cover.html
       - gocover-cobertura < test/cover.out > test/coverage.xml
       - gopogh -in ./test/result.json -out_html ./test/html/testout.html -name="backend" > ./test/result.txt

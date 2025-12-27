@@ -229,7 +229,7 @@ func Finalize() {
 
 func StartDMX() {
 	FpsController = fps.NewFPS(param.Fps, DMXThread, Finalize)
-	if FpsController == nil {
+	if FpsController == nil { //coverage:ignore
 		logger.Error("Failed to setup FPS controller.")
 		return
 	}
