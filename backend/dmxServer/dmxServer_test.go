@@ -478,4 +478,136 @@ func TestMessage(t *testing.T) {
 			return
 		}
 	})
+	testMessage := []struct {
+		name string
+		msg  message.Message
+		want int
+	}{
+		{
+			name: "All",
+			msg: message.Message{
+				To: "dmx",
+				Arg: message.MessageBody{
+					Action: "stop",
+				},
+			},
+			want: -1,
+		},
+		{
+			name: "All",
+			msg: message.Message{
+				To: "dmx",
+				Arg: message.MessageBody{
+					Action: "fade",
+					Arg: map[string]string{
+						"id":       "group",
+						"isIn":     "true",
+						"duration": "1",
+						"interval": "1",
+					},
+				},
+			},
+			want: 0,
+		},
+		{
+			name: "All",
+			msg: message.Message{
+				To: "dmx",
+				Arg: message.MessageBody{
+					Action: "fade",
+					Arg: map[string]string{
+						"id":       "notFound",
+						"isIn":     "true",
+						"duration": "1",
+						"interval": "1",
+					},
+				},
+			},
+			want: 0,
+		},
+	}
+	for _, tt := range testMessage {
+		t.Run("Message message", func(t *testing.T) {
+			fps := float32(30.0)
+			Wg := sync.WaitGroup{}
+			module := packageModule.PackageModule{
+				Logger: slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug})),
+				Wg:     &Wg,
+			}
+			dmxserver.RenderTypes["dummy"] = func() *controller.Controller {
+				return &controller.Controller{
+					Model:         "dummy",
+					ModInitialize: func(c *config.Config, l *slog.Logger) bool { return true },
+					ModOutput:     func(b *[]byte) bool { return true },
+					ModFinalize:   func() {},
+				}
+			}
+			Wg.Add(1)
+			ok := dmxserver.DMXServer.Initialize(&module, &config.Config{
+				Dmx: config.DMXServer{
+					Fps: fps,
+					Groups: map[string]config.DMXGroup{
+						"group": {
+							Name: "TEST",
+							Devices: []config.DMXDevice{
+								{
+									Model:    "dimmer",
+									Channel:  1,
+									MaxValue: []uint{255},
+								},
+							},
+						},
+					},
+				},
+				Output: config.OutputTargets{
+					Target: []string{"dummy"},
+				},
+			})
+			if !ok {
+				t.Error("Failed to initialize")
+				return
+			}
+			dmxserver.DMXServer.Run()
+			waitCh := make(chan bool)
+			go func() {
+				for range 15 {
+					if dmxserver.FpsController.Running {
+						waitCh <- true
+						return
+					}
+					time.Sleep(time.Duration(100 * time.Millisecond))
+				}
+				waitCh <- false
+			}()
+			select {
+			case <-time.After(time.Duration(time.Second)):
+				t.Error("Failed to start run FPSController")
+				return
+			case result := <-waitCh:
+				if !result {
+					t.Error("Failed to start run FPSController")
+					return
+				}
+				break
+			}
+			ret := dmxserver.DMXServer.MessageHandler(tt.msg)
+			if ret != tt.want {
+				t.Errorf("Return code is not match: %v want %v", ret, tt.want)
+				return
+			}
+			time.Sleep(time.Duration(float32(time.Second) * 2 / fps))
+			if tt.want == -1 && dmxserver.FpsController.Running {
+				t.Error("Failed to Stop FPSController")
+				return
+			} else {
+				dmxserver.DMXServer.MessageHandler(message.Message{
+					To: "dmx",
+					Arg: message.MessageBody{
+						Action: "stop",
+					},
+				})
+				time.Sleep(time.Duration(float32(time.Second) * 2 / fps))
+			}
+		})
+	}
 }
