@@ -1,28 +1,24 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ConfigContext, fetcher, genBackendPath } from "./__root";
+import { FrontConfigContext, fetcher, genBackendPath } from "./__root";
 import useSWR from "swr";
 import FadeControl from "../component/FadeControl";
-import { FormControlLabel, FormGroup, Grid, Switch, Typography } from "@mui/material";
+import {
+    FormControlLabel,
+    FormGroup,
+    Grid,
+    Switch,
+    Typography,
+} from "@mui/material";
 import ErrorComponent from "../component/Error";
 import { useContext, useState } from "react";
+import type { DMXGroupInfo } from "../types";
 
 export const Route = createFileRoute("/")({
     component: ControlPage,
 });
 
-export interface DMXGroupInfo {
-    name: string;
-    devices: [
-        {
-            model: string;
-            channel: number;
-            max: number[];
-        },
-    ];
-}
-
 function ControlPage() {
-    const config = useContext(ConfigContext);
+    const config = useContext(FrontConfigContext);
     const { data, error, isLoading } = useSWR(
         genBackendPath(config, "/api/v1/config/fade"),
         fetcher,
@@ -57,7 +53,12 @@ function ControlPage() {
     }
     return (
         <>
-            <Grid container direction="row" justifyContent="center" alignItems="center">
+            <Grid
+                container
+                direction="row"
+                justifyContent="center"
+                alignItems="center"
+            >
                 <Grid size="grow">
                     <Typography variant="h5" margin={2}>
                         Control
@@ -65,7 +66,17 @@ function ControlPage() {
                 </Grid>
                 <Grid size="auto" justifyContent="center" alignContent="center">
                     <FormGroup>
-                        <FormControlLabel label="CUT" control={<Switch onChange={(e)=>{setCutin(e.target.checked)}} checked={showCutin} />}></FormControlLabel>
+                        <FormControlLabel
+                            label="CUT"
+                            control={
+                                <Switch
+                                    onChange={(e) => {
+                                        setCutin(e.target.checked);
+                                    }}
+                                    checked={showCutin}
+                                />
+                            }
+                        ></FormControlLabel>
                     </FormGroup>
                 </Grid>
             </Grid>

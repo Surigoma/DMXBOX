@@ -6,21 +6,33 @@ import {
     Stack,
     Typography,
 } from "@mui/material";
-import { ConfigContext, genBackendPath } from "../routes/__root";
+import { FrontConfigContext, genBackendPath } from "../routes/__root";
 import { useContext, useMemo } from "react";
-import type { DMXGroupInfo } from "../routes";
+import type { DMXGroupInfo } from "../types";
 
-function FadeControl({ name, data, showCutin }: { name: string; data: DMXGroupInfo, showCutin: boolean }) {
-    const config = useContext(ConfigContext);
-    const FadeHeight = useMemo<number>(()=>{return showCutin ? 70 : 100}, [showCutin])
-    const CutHeight = useMemo<number>(()=>{return 100 - FadeHeight}, [FadeHeight])
+function FadeControl({
+    name,
+    data,
+    showCutin,
+}: {
+    name: string;
+    data: DMXGroupInfo;
+    showCutin: boolean;
+}) {
+    const config = useContext(FrontConfigContext);
+    const FadeHeight = useMemo<number>(() => {
+        return showCutin ? 70 : 100;
+    }, [showCutin]);
+    const CutHeight = useMemo<number>(() => {
+        return 100 - FadeHeight;
+    }, [FadeHeight]);
     async function fade(isIn: boolean, cutIn: boolean = false) {
-        let opts: {[k: string]:string} = {
-            "isIn": String(isIn),
+        let opts: { [k: string]: string } = {
+            isIn: String(isIn),
         };
         if (cutIn) {
-            opts["interval"] = "0"
-            opts["duration"] = "0"
+            opts["interval"] = "0";
+            opts["duration"] = "0";
         }
         const path = genBackendPath(config, "/api/v1/fade/" + name, opts);
         console.log(await fetch(path, { method: "POST" }));
@@ -28,7 +40,12 @@ function FadeControl({ name, data, showCutin }: { name: string; data: DMXGroupIn
     return (
         <Card variant="outlined">
             <CardContent
-                style={{ margin: 0, padding: 0, position: "relative", height: "150px"}}
+                style={{
+                    margin: 0,
+                    padding: 0,
+                    position: "relative",
+                    height: "150px",
+                }}
             >
                 <div
                     style={{
@@ -90,7 +107,11 @@ function FadeControl({ name, data, showCutin }: { name: string; data: DMXGroupIn
                             </Button>
                         </Stack>
                     </Grid>
-                    <Grid size="grow" height={CutHeight + "%"} sx={{minHeight: 0}}>
+                    <Grid
+                        size="grow"
+                        height={CutHeight + "%"}
+                        sx={{ minHeight: 0 }}
+                    >
                         <Stack direction="row" spacing={0} height="100%">
                             <Button
                                 style={{ width: "100%", height: "100%" }}

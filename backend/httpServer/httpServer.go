@@ -97,6 +97,7 @@ func registerEndPoints() *gin.Engine {
 			cfg := eg.Group("/config/")
 			{
 				cfg.GET("/fade", controller.GetFadeConfig)
+				cfg.GET("/all", controller.GetConfig)
 			}
 		}
 	}

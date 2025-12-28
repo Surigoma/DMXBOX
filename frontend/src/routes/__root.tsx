@@ -19,7 +19,7 @@ import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 
 const Config = new Configuration();
-export const ConfigContext = createContext(Config.body);
+export const FrontConfigContext = createContext(Config.body);
 
 export function fetcher(url: string) {
     return fetch(url, { credentials: "include", mode: "cors" }).then((r) =>
@@ -27,10 +27,16 @@ export function fetcher(url: string) {
     );
 }
 
-export function genBackendPath(config: ConfigBody, path: string, params: {[key: string]: any} = {}): string {
-    let result = new URL("http://" + window.location.hostname + ":" + config.backendPort + path);
+export function genBackendPath(
+    config: ConfigBody,
+    path: string,
+    params: { [key: string]: any } = {},
+): string {
+    let result = new URL(
+        "http://" + window.location.hostname + ":" + config.backendPort + path,
+    );
     for (let k in params) {
-        result.searchParams.append(k, params[k])
+        result.searchParams.append(k, params[k]);
     }
     return result.toString();
 }
@@ -146,11 +152,11 @@ function RootLayout() {
                     </Toolbar>
                 </Container>
             </AppBar>
-            <ConfigContext value={Config.body}>
+            <FrontConfigContext value={Config.body}>
                 <Grid padding={1}>
-                <Outlet />
+                    <Outlet />
                 </Grid>
-            </ConfigContext>
+            </FrontConfigContext>
         </div>
     );
 }
