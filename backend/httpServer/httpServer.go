@@ -48,6 +48,7 @@ var HttpServer packageModule.PackageModule = packageModule.PackageModule{
 //	@BasePath	/api/v1
 
 func Initialize(module *packageModule.PackageModule, config *config.Config) bool {
+	gin.SetMode(gin.ReleaseMode)
 	listenAddr = fmt.Sprintf("%s:%d", config.Http.IP, config.Http.Port)
 	logger = module.Logger
 	engine = registerEndPoints()
