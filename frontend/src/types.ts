@@ -54,8 +54,12 @@ export interface OSCServer {
     inverse: boolean;
     channels: number[];
 }
+export interface InputModules {
+    http: boolean;
+    tcp: boolean;
+}
 export interface Config {
-    modules: string;
+    modules: InputModules;
     output: OutputTargets;
     http: HttpServer;
     tcp: TCPServer;
