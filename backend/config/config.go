@@ -47,12 +47,12 @@ type OutputTargets struct {
 	Artnet Artnet      `json:"artnet"`
 }
 type OSCServer struct {
-	Ip       string  `json:"ip"`
-	Port     uint16  `json:"port"`
-	Format   string  `json:"format"`
-	Type     string  `json:"type"`
-	Inverse  bool    `json:"inverse"`
-	Channels []uint8 `json:"channels"`
+	Ip       string `json:"ip"`
+	Port     uint16 `json:"port"`
+	Format   string `json:"format"`
+	Type     string `json:"type"`
+	Inverse  bool   `json:"inverse"`
+	Channels []uint `json:"channels"`
 }
 type Config struct {
 	Modules map[string]bool `json:"modules"`
@@ -106,7 +106,7 @@ func InitializeConfig() {
 			Format:  "/yosc:req/set/MIXER:Current/InCh/Fader/On/{}/1",
 			Type:    "int",
 			Inverse: true,
-			Channels: []uint8{
+			Channels: []uint{
 				1, 2, 3, 4,
 			},
 		},

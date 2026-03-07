@@ -23,7 +23,7 @@ type OSCFormatter struct {
 	Base     string
 	Type     string
 	Inverse  bool
-	Channels []uint8
+	Channels []uint
 }
 
 func (f *OSCFormatter) Render(mute bool) ([]string, any) {
