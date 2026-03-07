@@ -27,7 +27,7 @@ type OSCResult struct {
 //	@Param			isMute	query		bool	false	"Mute"
 //
 //	@Success		200		{object}	OSCResult
-//	@Success		400		{object}	OSCResult
+//	@Failure			400		{object}	OSCResult
 //	@Router			/mute [post]
 func Osc(g *gin.Context) {
 	arg := map[string]string{}
