@@ -1,48 +1,53 @@
-import { Card, Grid, InputLabel, Switch, Typography } from "@mui/material";
+import { Checkbox, FormControlLabel } from "@mui/material";
+import { Controller, useFormContext } from "react-hook-form";
 
 interface CheckedParam {
     title: string;
-    check: boolean;
-    onCheck: (isChecked: boolean) => void;
+    target: string;
+    value?: string;
 }
 
 function Checked(param: CheckedParam) {
+    const { control } = useFormContext();
+
+    function isChecked(value: any) {
+        if (typeof value == "boolean") {
+            return value;
+        } else if (value instanceof Array) {
+            return value.includes(param.value);
+        }
+        return false;
+    }
+    function onChange(value: any, checked: boolean) {
+        if (typeof value == "boolean") {
+            return checked;
+        } else if (value instanceof Array) {
+            return checked
+                ? [...(value || []), param.value]
+                : value.filter((v) => v !== param.value);
+        }
+    }
     return (
-        <Card
-            variant="outlined"
-            onClick={() => {
-                param.onCheck(!param.check);
-            }}
-        >
-            <Grid
-                container
-                spacing={2}
-                justifyContent="space-around"
-                alignItems="center"
-            >
-                <Grid size="grow">
-                    <InputLabel>
-                        <Typography
-                            margin={2}
-                            style={{
-                                userSelect: "none",
-                                wordBreak: "break-all",
+        <Controller
+            name={param.target}
+            control={control}
+            render={({ field }) => (
+                <FormControlLabel
+                    key={param.value}
+                    control={
+                        <Checkbox
+                            checked={isChecked(field.value)}
+                            onChange={(_, c) => {
+                                const NEW = onChange(field.value, c);
+                                field.onChange(NEW);
                             }}
-                        >
-                            {param.title}
-                        </Typography>
-                    </InputLabel>
-                </Grid>
-                <Grid size="auto" justifyContent="flex-end">
-                    <Switch
-                        checked={param.check}
-                        onChange={(e) => {
-                            param.onCheck(e.target.checked);
-                        }}
-                    ></Switch>
-                </Grid>
-            </Grid>
-        </Card>
+                        />
+                    }
+                    label={param.title}
+                    style={{ userSelect: "none" }}
+                />
+            )}
+        />
     );
 }
 
