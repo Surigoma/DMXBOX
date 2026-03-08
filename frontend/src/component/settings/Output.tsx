@@ -4,12 +4,12 @@ import { useFormContext, Watch } from "react-hook-form";
 import type { ReactElement } from "react";
 import OutputDMX from "./output/dmx";
 import OutputArtnet from "./output/artnet";
+import OutputOSC from "./output/osc";
 
 function Outputs() {
     const { control } = useFormContext();
     return (
         <Grid>
-            <Typography variant="h4">Output</Typography>
             <Grid container alignItems="center" spacing={2} margin={2}>
                 <InputLabel id="demo-multiple-chip-label">
                     <Typography variant="h5">Target: </Typography>
@@ -56,8 +56,11 @@ function Outputs() {
                                         </Grid>
                                     ))
                                 ) : (
-                                    <>Not selected</>
+                                    <></>
                                 )}
+                                <Grid size="grow">
+                                    <OutputOSC />
+                                </Grid>
                             </Grid>
                         </Card>
                     );

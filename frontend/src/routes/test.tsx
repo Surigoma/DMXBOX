@@ -12,7 +12,15 @@ import Stack from "@mui/material/Stack";
 import Inputs from "../component/settings/Input";
 import Outputs from "../component/settings/Output";
 import { FormProvider, useForm } from "react-hook-form";
-import { Box, Button } from "@mui/material";
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Box,
+    Button,
+    Typography,
+} from "@mui/material";
+import { MdExpandMore } from "react-icons/md";
 
 // export const BackendConfigContext = createContext<Config>(DefaultConfig());
 
@@ -46,8 +54,26 @@ function ResponsiveAppBar() {
         <FormProvider {...configForm}>
             <Box component="form" onSubmit={configForm.handleSubmit(onSubmit)}>
                 <Stack margin={2} spacing={2}>
-                    <Inputs></Inputs>
-                    <Outputs></Outputs>
+                    <Accordion expanded>
+                        <AccordionSummary expandIcon={<MdExpandMore />}>
+                            <Typography component="span" variant="h4">
+                                Input
+                            </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <Inputs />
+                        </AccordionDetails>
+                    </Accordion>
+                    <Accordion expanded>
+                        <AccordionSummary expandIcon={<MdExpandMore />}>
+                            <Typography component="span" variant="h4">
+                                Output
+                            </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <Outputs />
+                        </AccordionDetails>
+                    </Accordion>
                     <Button type="submit">Update</Button>
                     <pre>{JSON.stringify(result, undefined, 4)}</pre>
                 </Stack>

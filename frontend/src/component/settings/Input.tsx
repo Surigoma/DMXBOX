@@ -8,7 +8,6 @@ function Inputs() {
     const { control } = useFormContext();
     return (
         <Grid container spacing={2} direction="column">
-            <Typography variant="h4">Input</Typography>
             <Grid container margin={2} spacing={2} alignItems="center">
                 <InputLabel>
                     <Typography variant="h5">Modules: </Typography>
