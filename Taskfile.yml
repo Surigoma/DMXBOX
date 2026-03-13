@@ -4,24 +4,27 @@ version: '3'
 
 vars:
   VERSION: 0.0.1
-  BUILD_TARGET:
-    - windows
 
 includes:
   backend:
-    flatten: true
+    flatten: false
     dir: ./backend
     taskfile: ./backend
-    vars:
-      BUILD_TARGET: $BUILD_TARGET
   frontend:
-    flatten: true
+    flatten: false
     dir: ./frontend
     taskfile: ./frontend
-    vars:
-      BUILD_TARGET: $BUILD_TARGET
 
 tasks:
+  setup:
+    cmd: .devcontainer/postCreateCommand.sh
+  dev:
+    deps:
+      - frontend:dev
+      - backend:dev
+  build:
+    cmds:
+      - task: build_{{OS}}
   ### Make directories
   make_dist:
     preconditions:
@@ -39,16 +42,16 @@ tasks:
       - make_dist
       - make_static
   ### Build group
-  build_win:
+  build:
     desc: "Build package for windows"
     deps:
-      - build_frontend_any
-      - build_backend_win
+      - frontend:build
+      - backend:build
   build_all:
     desc: "Build all targets: {{.BUILD_TARGET}}"
     deps:
-      - build_frontend_any
-      - build_backend_win
+      - frontend:build
+      - backend:build_any
   ### Copy configs
   copy_config:
     deps:

@@ -2,15 +2,20 @@ version: "3"
 
 vars:
   VERSION: 0.0.1
-  BUILD_TARGET:
-    - windows
 
 tasks:
+  install_dep:
+    cmd: go mod tidy
   dev:
     deps:
+      - install_dep
       - update_swag
     cmds:
-      - cmd: go run main.go
+      - cmd: air --tmp_dir ".tmp" --build.cmd "go build -o ./.tmp/main.exe main.go" --build.entrypoint "./.tmp/main.exe" --build.exclude_dir "docs"
+        platforms: [windows]
+        ignore_error: true
+      - cmd: air --tmp_dir ".tmp" --build.cmd "go build -o ./.tmp/main main.go" --build.entrypoint "./.tmp/main" --build.exclude_dir "docs"
+        platforms: [linux, darwin]
         ignore_error: true
   update_swag:
     cmd: swag init -g httpServer/httpServer.go
@@ -34,9 +39,26 @@ tasks:
       - yarn
       - yarn run build --outDir ../backend/static
   ### Build backend for any os
-  build_backend_win:
-    platforms: [windows]
-    deps:
-      - make_folders
+  build:
     cmds:
-      - GIN_MODE=release GOOS=windows OGARCH=amd64 go build -o ../dist/dmxbox_win_{{.VERSION}}.exe main.go
+      - task: build_{{OS}}
+  build_any:
+    deps:
+      - build_windows
+      - build_linux_any
+  build_windows:
+    cmds:
+      - GIN_MODE=release GOOS=windows GOARCH=amd64 go build -o ../dist/dmxbox_win_{{.VERSION}}.exe main.go
+  build_linux:
+    cmds:
+      - task: build_linux_{{ARCH}}
+  build_linux_any:
+    deps:
+      - build_linux_arm64
+      - build_linux_amd64
+  build_linux_arm64:
+    cmds:
+      - GIN_MODE=release GOOS=linux GOARCH=arm64 go build -o ../dist/dmxbox_linux_arm64_{{.VERSION}} main.go
+  build_linux_amd64:
+    cmds:
+      - GIN_MODE=release GOOS=linux GOARCH=amd64 go build -o ../dist/dmxbox_linux_amd64_{{.VERSION}} main.go

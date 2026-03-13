@@ -2,3 +2,4 @@ static/
 docs/
 test/*
 !test/data
+.tmp
