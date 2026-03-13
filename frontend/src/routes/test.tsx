@@ -38,7 +38,7 @@ function ResponsiveAppBar() {
         configForm.reset(data as Config, {
             keepDefaultValues: false,
         });
-    }, [data, configForm.reset]);
+    }, [data, configForm]);
 
     function onSubmit(data: Config) {
         setResult(data);
