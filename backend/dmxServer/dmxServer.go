@@ -151,7 +151,7 @@ func MakeDevice(deviceType string, channel uint8, maxValue []uint) *device.DMXDe
 		logger.Error("Failed to initialize device.", "dev", dev)
 		return nil
 	}
-	logger.Debug("Add device", "dev", dev)
+	logger.Debug("Add device", "dev", dev.Model, "target_ch", dev.Channel)
 	return dev
 }
 
