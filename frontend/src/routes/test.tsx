@@ -54,7 +54,7 @@ function ResponsiveAppBar() {
         <FormProvider {...configForm}>
             <Box component="form" onSubmit={configForm.handleSubmit(onSubmit)}>
                 <Stack margin={2} spacing={2}>
-                    <Accordion expanded>
+                    <Accordion defaultExpanded={true} key="input">
                         <AccordionSummary expandIcon={<MdExpandMore />}>
                             <Typography component="span" variant="h4">
                                 Input
@@ -64,7 +64,7 @@ function ResponsiveAppBar() {
                             <Inputs />
                         </AccordionDetails>
                     </Accordion>
-                    <Accordion expanded>
+                    <Accordion defaultExpanded={true} key="output">
                         <AccordionSummary expandIcon={<MdExpandMore />}>
                             <Typography component="span" variant="h4">
                                 Output
