@@ -38,7 +38,7 @@ export interface DMXDevice {
 }
 export interface DMXGroup {
     name: string;
-    devices: DMXDevice;
+    devices: DMXDevice[];
 }
 export interface DMXServer {
     groups: { [name: string]: DMXGroup };

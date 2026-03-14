@@ -21,6 +21,7 @@ import {
     Typography,
 } from "@mui/material";
 import { MdExpandMore } from "react-icons/md";
+import Devices from "../component/settings/Device";
 
 // export const BackendConfigContext = createContext<Config>(DefaultConfig());
 
@@ -62,6 +63,16 @@ function ResponsiveAppBar() {
                         </AccordionSummary>
                         <AccordionDetails>
                             <Inputs />
+                        </AccordionDetails>
+                    </Accordion>
+                    <Accordion defaultExpanded={true} key="devices">
+                        <AccordionSummary expandIcon={<MdExpandMore />}>
+                            <Typography component="span" variant="h4">
+                                Devices
+                            </Typography>
+                        </AccordionSummary>
+                        <AccordionDetails>
+                            <Devices />
                         </AccordionDetails>
                     </Accordion>
                     <Accordion defaultExpanded={true} key="output">
