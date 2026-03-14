@@ -1,24 +1,71 @@
-import { Card, MenuItem, Select, Stack } from "@mui/material";
-import { useMemo } from "react";
+import {
+    Button,
+    Card,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogTitle,
+    Grid,
+    IconButton,
+    List,
+    ListItem,
+    MenuItem,
+    Select,
+    Stack,
+    Typography,
+} from "@mui/material";
+import { useMemo, useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import Dimmer from "./model/dimmer";
 import NumberField from "../../common/numberField";
 import WCLight from "./model/wclight";
+import { MdDelete } from "react-icons/md";
+import type { DMXGroup } from "../../../types";
 
 interface DeviceProp {
     index: number;
     base: string;
 }
 
+function ModelSelector(model: string, name: string) {
+    switch (model) {
+        case "dimmer":
+            return <Dimmer name={name} />;
+        case "wclight":
+            return <WCLight name={name} />;
+        default:
+            return <div>Undefined</div>;
+    }
+}
+
 function Device(prop: DeviceProp) {
-    const { control } = useFormContext();
+    const { control, getValues, setValue, watch } = useFormContext();
+    const [openDelete, setOpenDelete] = useState(false);
     const name = useMemo(
         () => prop.base + ".devices[" + prop.index + "]",
         [prop],
     );
+    const model = watch(name + ".model");
+
     return (
         <Card style={{ padding: "5px" }}>
             <Stack gap={2}>
+                <Grid container>
+                    <Grid
+                        size="grow"
+                        justifyContent="center"
+                        alignItems="center"
+                    >
+                        <Typography margin={1} variant="subtitle1">
+                            Index: {prop.index + 1}
+                        </Typography>
+                    </Grid>
+                    <Grid>
+                        <IconButton onClick={() => setOpenDelete(true)}>
+                            <MdDelete />
+                        </IconButton>
+                    </Grid>
+                </Grid>
                 <Controller
                     key="model"
                     control={control}
@@ -52,22 +99,34 @@ function Device(prop: DeviceProp) {
                         ></NumberField>
                     )}
                 ></Controller>
-                <Controller
-                    key="type_defined"
-                    control={control}
-                    name={name + ".model"}
-                    render={({ field }) => {
-                        switch (field.value) {
-                            case "dimmer":
-                                return <Dimmer name={name} />;
-                            case "wclight":
-                                return <WCLight name={name} />;
-                            default:
-                                return <div>Undefined</div>;
-                        }
-                    }}
-                />
+                {ModelSelector(model, name)}
             </Stack>
+            <Dialog open={openDelete} aria-hidden={!openDelete}>
+                <DialogTitle>
+                    Are you sure you want to delete this item?
+                </DialogTitle>
+                <DialogContent>
+                    <List>
+                        <ListItem>Index: {prop.index + 1}</ListItem>
+                        <ListItem>Model: {getValues(name + ".model")}</ListItem>
+                    </List>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setOpenDelete(false)}>Cancel</Button>
+                    <Button
+                        color="error"
+                        onClick={() => {
+                            const body = getValues(prop.base) as DMXGroup;
+                            body.devices.splice(prop.index, 1);
+                            setValue(prop.base, body);
+                            console.log(body)
+                            setOpenDelete(false);
+                        }}
+                    >
+                        Confirm
+                    </Button>
+                </DialogActions>
+            </Dialog>
         </Card>
     );
 }

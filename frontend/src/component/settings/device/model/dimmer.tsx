@@ -1,4 +1,5 @@
 import { Slider, Stack } from "@mui/material";
+import { useEffect } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import { MdLightbulb, MdLightbulbOutline } from "react-icons/md";
 
@@ -6,7 +7,13 @@ interface DimmerProp {
     name: string;
 }
 function Dimmer(prop: DimmerProp) {
-    const { control } = useFormContext();
+    const { control, getValues, setValue } = useFormContext();
+    useEffect(() => {
+        const value = getValues(prop.name + ".max") as number[];
+        if (value.length > 1) {
+            setValue(prop.name + ".max", [value[0]]);
+        }
+    });
     return (
         <Stack spacing={2} direction="row" sx={{ alignItems: "center", mb: 1 }}>
             <MdLightbulb />

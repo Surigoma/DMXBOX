@@ -22,11 +22,13 @@ export default function NumberField({
     label,
     error,
     size = "medium",
+    help,
     ...other
 }: BaseNumberField.Root.Props & {
     label?: React.ReactNode;
     size?: "small" | "medium";
     error?: boolean;
+    help?: string;
     onChange?: React.ChangeEventHandler;
 }) {
     let id = React.useId();
@@ -118,9 +120,17 @@ export default function NumberField({
                     />
                 )}
             />
-            <FormHelperText sx={{ ml: 0, "&:empty": { mt: 0 } }}>
-                Enter value between {other.min} and {other.max}
-            </FormHelperText>
+            {help !== undefined ? 
+                <FormHelperText sx={{ ml: 0, "&:empty": { mt: 0 } }}>
+                    {help}
+                </FormHelperText>
+            : other.min !== undefined && other.max !== undefined ? (
+                <FormHelperText sx={{ ml: 0, "&:empty": { mt: 0 } }}>
+                    Enter value between {other.min} and {other.max}
+                </FormHelperText>
+            ) : (
+                <></>
+            )}
         </BaseNumberField.Root>
     );
 }

@@ -15,8 +15,8 @@ import {
     TextField,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import { Controller, useFormContext } from "react-hook-form";
-import type { DMXGroup } from "../../../types";
+import { useFormContext } from "react-hook-form";
+import type { DMXDevice, DMXGroup } from "../../../types";
 import { MdDelete, MdEdit } from "react-icons/md";
 import Device from "./device";
 
@@ -43,7 +43,7 @@ export function AddEditGroup(prop: AddGroupProp) {
         }
         setId(prop.name.split(".").pop() ?? "");
         setTitle(getValues(prop.name + ".name"));
-    }, [prop]);
+    }, [prop, getValues]);
     return (
         <Dialog open={prop.open} aria-hidden={!prop.open}>
             <DialogTitle>
@@ -82,77 +82,69 @@ export function AddEditGroup(prop: AddGroupProp) {
 }
 
 function Group(prop: GroupProp) {
-    const { control, getValues, setValue } = useFormContext();
+    const { getValues, setValue, watch } = useFormContext();
     const parent = "dmx.groups";
     const name = useMemo(() => parent + "." + prop.name, [prop]);
     const [openEdit, setOpenEdit] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
+    const group = watch(name) as DMXGroup;
     return (
         <Card variant="outlined">
             <Grid container direction="column">
-                <Controller
-                    control={control}
-                    name={name}
-                    render={({ field }) => {
-                        const value = field.value as DMXGroup;
-                        if (value === undefined) {
-                            return <></>;
-                        }
-                        return (
-                            <Grid
-                                container
-                                direction="row"
-                                justifyContent="center"
-                                alignItems="center"
-                            >
-                                <Grid size="grow">
-                                    <CardHeader
-                                        title={
-                                            value.name + " (" + prop.name + ")"
-                                        }
-                                    ></CardHeader>
-                                </Grid>
-                                <Grid size="auto">
-                                    <IconButton
-                                        sx={{ marginRight: "8px" }}
-                                        onClick={() => setOpenDelete(true)}
-                                    >
-                                        <MdDelete />
-                                    </IconButton>
-                                </Grid>
-                                <Grid size="auto">
-                                    <IconButton
-                                        sx={{ marginRight: "8px" }}
-                                        onClick={() => setOpenEdit(true)}
-                                    >
-                                        <MdEdit />
-                                    </IconButton>
-                                </Grid>
-                            </Grid>
-                        );
-                    }}
-                />
+                <Grid
+                    container
+                    direction="row"
+                    justifyContent="center"
+                    alignItems="center"
+                >
+                    <Grid size="grow">
+                        <CardHeader
+                            title={group.name + " (" + prop.name + ")"}
+                        ></CardHeader>
+                    </Grid>
+                    <Grid size="auto">
+                        <IconButton
+                            sx={{ marginRight: "8px" }}
+                            onClick={() => setOpenDelete(true)}
+                        >
+                            <MdDelete />
+                        </IconButton>
+                    </Grid>
+                    <Grid size="auto">
+                        <IconButton
+                            sx={{ marginRight: "8px" }}
+                            onClick={() => setOpenEdit(true)}
+                        >
+                            <MdEdit />
+                        </IconButton>
+                    </Grid>
+                </Grid>
                 <Grid
                     container
                     gap={1}
                     margin={2}
                     direction={{ xs: "column", md: "row" }}
                 >
-                    <Controller
-                        control={control}
-                        name={name + ".devices"}
-                        render={({ field }) => (
-                            <>
-                                {(field.value as object[]).map((_, i) => (
-                                    <Grid key={i} size="grow">
-                                        <Device base={name} index={i} />
-                                    </Grid>
-                                ))}
-                            </>
-                        )}
-                    />
+                    {group.devices.map((v, i) => (
+                        <Grid key={v.model + "_" + i} size="auto" minWidth="400px">
+                            <Device base={name} index={i} />
+                        </Grid>
+                    ))}
                 </Grid>
-                <Button>Add Device</Button>
+                <Button
+                    onClick={() => {
+                        const path = name + ".devices";
+                        const body = getValues(path) as DMXDevice[];
+                        body.push({
+                            model: "dimmer",
+                            channel: 1,
+                            max: [255],
+                        });
+                        setValue(path, body);
+                    }}
+                >
+                    Add Device
+                </Button>
             </Grid>
             <AddEditGroup
                 name={name}

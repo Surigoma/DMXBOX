@@ -99,6 +99,7 @@ func registerEndPoints() *gin.Engine {
 			{
 				cfg.GET("/fade", controller.GetFadeConfig)
 				cfg.GET("/all", controller.GetConfig)
+				cfg.POST("/save", controller.SetConfig)
 				cfg.GET("/console", controller.GetConsoles)
 			}
 		}

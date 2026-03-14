@@ -22,3 +22,18 @@ func GetConfig(g *gin.Context) {
 	config := config.ConfigData
 	g.JSON(http.StatusOK, config)
 }
+
+// Set all config
+//
+//	@Summary	Set all config
+//	@Schemes
+//	@Description	Set all config
+//	@Tags			Config
+//	@Accept			json
+//	@Produce		json
+//
+//	@Success		200		{object}	config.Config
+//	@Router			/config/save [post]
+func SetConfig(g *gin.Context) {
+	g.String(http.StatusOK, "OK")
+}

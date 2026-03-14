@@ -18,7 +18,9 @@ interface WCInfo {
     temp: number;
 }
 function WCLight(prop: WCLightProp) {
-    const colorPallete = { cool: "#add8e6", warm: "#ffffe0" };
+    const colorPalette = useMemo(() => {
+        return { cool: "#add8e6", warm: "#ffffe0" };
+    }, []);
     const style: SxProps<Theme> = {
         width: "1em",
         height: "1em",
@@ -32,14 +34,21 @@ function WCLight(prop: WCLightProp) {
             "color-mix(" +
             [
                 "in srgb",
-                [colorPallete.cool, (1 - colorTemp) * 100 + "%"].join(" "),
-                [colorPallete.warm, colorTemp * 100 + "%"].join(" "),
+                [colorPalette.cool, (1 - colorTemp) * 100 + "%"].join(" "),
+                [colorPalette.warm, colorTemp * 100 + "%"].join(" "),
             ].join(",") +
             ")",
-        [colorTemp],
+        [colorTemp, colorPalette],
     );
+    let setTimer: number | undefined = undefined;
 
     function convertDMXtoWCInfo(values: number[]): WCInfo {
+        if (values === undefined || values.length < 3) {
+            return {
+                dimmer: values[0] !== undefined ? values[0] / 255 : 1,
+                temp: 0.5,
+            };
+        }
         const target = values.slice(0, 2);
         const cool = target[0];
         const warm = target[1];
@@ -65,7 +74,11 @@ function WCLight(prop: WCLightProp) {
             temp: colorTemp,
         };
         const newValue = convertWCInfotoDMX(value);
-        setValue(prop.name + ".max", newValue);
+        clearTimeout(setTimer);
+        setTimer = setTimeout(()=>{
+            setValue(prop.name + ".max", newValue);
+            setTimer = undefined;
+        }, 100);
     }
     return (
         <Stack spacing={2}>
@@ -103,7 +116,7 @@ function WCLight(prop: WCLightProp) {
             >
                 <Box
                     sx={{
-                        backgroundColor: colorPallete.cool,
+                        backgroundColor: colorPalette.cool,
                         ...style,
                     }}
                 />
@@ -120,7 +133,7 @@ function WCLight(prop: WCLightProp) {
                 />
                 <Box
                     sx={{
-                        backgroundColor: colorPallete.warm,
+                        backgroundColor: colorPalette.warm,
                         ...style,
                     }}
                 />
