@@ -41,16 +41,11 @@ export function AddEditGroup(prop: AddGroupProp) {
         if (!prop.open || prop.name === undefined) {
             return;
         }
-        console.log(
-            prop.name,
-            prop.name.split(".").pop() ?? "",
-            getValues(prop.name + ".name"),
-        );
         setId(prop.name.split(".").pop() ?? "");
         setTitle(getValues(prop.name + ".name"));
     }, [prop]);
     return (
-        <Dialog open={prop.open}>
+        <Dialog open={prop.open} aria-hidden={!prop.open}>
             <DialogTitle>
                 Group: {title !== "" ? title : "New Group"}
             </DialogTitle>
@@ -170,18 +165,16 @@ function Group(prop: GroupProp) {
                     const oldId = prop.name;
                     const newId = r.id;
                     const body = getValues(parent);
-                    console.log(body);
                     body[oldId].title = r.title;
                     if (oldId !== r.id) {
                         body[newId] = body[oldId];
                         delete body[oldId];
                     }
                     setValue(parent, body);
-                    console.log(parent, body);
                     setOpenEdit(false);
                 }}
             />
-            <Dialog open={openDelete}>
+            <Dialog open={openDelete} aria-hidden={!openDelete}>
                 <DialogTitle>
                     Are you sure you want to delete this item?
                 </DialogTitle>
