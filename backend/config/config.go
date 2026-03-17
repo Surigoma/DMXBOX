@@ -154,7 +154,7 @@ func LoadWithPath(logger *slog.Logger, path string) bool {
 	}
 	defer jsonFile.Close()
 	jsonData, err := io.ReadAll(jsonFile)
-	if err != nil { //coverage:ignore
+	if err != nil {
 		logger.Error("Failed to read a json file", "error", err)
 		return false
 	}

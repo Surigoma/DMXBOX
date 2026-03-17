@@ -55,7 +55,7 @@ func (a *Artnet) Initialize(log *slog.Logger, config *config.Config) bool {
 		return false
 	}
 	addrs, err := net.InterfaceAddrs()
-	if err != nil { //coverage:ignore
+	if err != nil {
 		a.logger.Error("Failed to get Interface ips.", "err", err)
 		return false
 	}
@@ -63,7 +63,7 @@ func (a *Artnet) Initialize(log *slog.Logger, config *config.Config) bool {
 		_, cidr, _ := net.ParseCIDR(addr.String())
 		if cidr.Contains(a.targetUDP.IP) {
 			a.sourceUDP, err = net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", addr.(*net.IPNet).IP.String(), static.srcPort))
-			if err != nil { //coverage:ignore
+			if err != nil {
 				a.logger.Error("failed to create", "addr", addr)
 			}
 			break
@@ -134,9 +134,7 @@ func (a *Artnet) Stop() bool {
 		if !a.Running {
 			break
 		}
-		{ //coverage:ignore
-			time.After(10 * time.Millisecond)
-		}
+		time.After(10 * time.Millisecond)
 	}
 	a.logger.Debug("Stop")
 	return true
@@ -166,7 +164,7 @@ func (a *Artnet) SendDMXData(data *[]byte) {
 	}
 	go func() {
 		_, err := a.socket.WriteToUDP(*rendered, a.targetUDP)
-		if err != nil { //coverage:ignore
+		if err != nil {
 			a.logger.Error("Drop", "data", rendered)
 			return
 		}
