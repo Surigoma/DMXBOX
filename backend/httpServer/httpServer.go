@@ -34,6 +34,7 @@ var HttpServer packageModule.PackageModule = packageModule.PackageModule{
 	ModuleName:     "http",
 	Initialize:     Initialize,
 	Run:            StartHTTP,
+	Stop:           StopHTTP,
 	MessageHandler: handleMessage,
 }
 
@@ -110,14 +111,9 @@ func registerEndPoints() *gin.Engine {
 
 func handleMessage(mes message.Message) int {
 	switch mes.Arg.Action {
+	case "reload":
+		return 1
 	case "stop":
-		defer wg.Done()
-		ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
-		defer cancel()
-		if err := server.Shutdown(ctx); err != nil {
-			logger.Error("Failed to stop http server.", "err", err)
-		}
-		logger.Error("Finalize")
 		return -1
 	}
 	return 0
@@ -129,4 +125,14 @@ func StartHTTP() {
 		logger.Error("Failed to setup error", "error", err)
 		return
 	}
+}
+
+func StopHTTP() {
+	defer wg.Done()
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+	defer cancel()
+	if err := server.Shutdown(ctx); err != nil {
+		logger.Error("Failed to stop http server.", "err", err)
+	}
+	logger.Error("Finalize")
 }

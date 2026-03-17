@@ -5,6 +5,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"sync"
 )
 
 type DMXHardware struct {
@@ -64,8 +65,10 @@ type Config struct {
 }
 
 var ConfigData Config
+var ConfigMutex sync.Mutex
 
 func InitializeConfig() {
+	ConfigMutex.Lock()
 	ConfigData = Config{
 		Modules: map[string]bool{
 			"http": false,
@@ -111,6 +114,31 @@ func InitializeConfig() {
 			},
 		},
 	}
+	ConfigMutex.Unlock()
+}
+
+func Get() Config {
+	ConfigMutex.Lock()
+	result := ConfigData
+	ConfigMutex.Unlock()
+	return result
+}
+func Set(data Config) {
+	ConfigMutex.Lock()
+	ConfigData = data
+	ConfigMutex.Unlock()
+}
+
+func Save() (bool, error) {
+	jsonData, err := json.MarshalIndent(&ConfigData, "", "    ")
+	if err != nil {
+		return false, err
+	}
+	err = os.WriteFile("./config.json", jsonData, 0644)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func Load(logger *slog.Logger) bool {

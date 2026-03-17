@@ -48,6 +48,7 @@ var OscServer packageModule.PackageModule = packageModule.PackageModule{
 	ModuleName:     "osc",
 	Initialize:     Initialize,
 	Run:            StartOSC,
+	Stop:           func() {},
 	MessageHandler: handleMessage,
 }
 
@@ -68,8 +69,9 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 
 func handleMessage(mes message.Message) int {
 	switch mes.Arg.Action {
+	case "reload":
+		return 1
 	case "stop":
-		defer wg.Done()
 		return -1
 	case "mute":
 		isMute := true
@@ -90,6 +92,7 @@ func handleMessage(mes message.Message) int {
 	}
 	return 0
 }
+
 func StartOSC() {
 	client = osc.NewClient(ip, port)
 }

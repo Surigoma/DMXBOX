@@ -11,6 +11,7 @@ import (
 type PackageModule struct {
 	Initialize     func(module *PackageModule, config *config.Config) bool
 	Run            func()
+	Stop           func()
 	Wg             *sync.WaitGroup
 	Channel        chan message.Message
 	Logger         *slog.Logger
@@ -61,11 +62,12 @@ func (mgr *ModuleManagerType) RegisterModule(name string, module *PackageModule)
 }
 
 func (mgr *ModuleManagerType) ModuleInitialize(logHandler *slog.Handler) {
+	configData := config.Get()
 	for name, module := range mgr.modules {
 		module.Logger = slog.New(*logHandler).With("module", name)
 		module.Wg = &mgr.wg
 		module.Channel = make(chan message.Message, 10)
-		if !module.Initialize(module, &config.ConfigData) {
+		if !module.Initialize(module, &configData) {
 			mgr.logger.Error("Failed to initialize", "module", name)
 		}
 	}
@@ -77,6 +79,17 @@ func (mgr *ModuleManagerType) ModuleRun() {
 		go module.MessageProcess(module.ModuleName, module.MessageHandler)
 		go module.Run()
 	}
+}
+
+func (mgr *ModuleManagerType) SendMessageAll(base message.Message) bool {
+	for m := range mgr.modules {
+		msg := base
+		msg.To = m
+		if !mgr.SendMessage(msg) {
+			return false
+		}
+	}
+	return true
 }
 
 func (mgr *ModuleManagerType) SendMessage(msg message.Message) bool {
@@ -106,18 +119,28 @@ func (mgr *ModuleManagerType) GetModules() []string {
 }
 
 func (module *PackageModule) MessageProcess(name string, handler func(msg message.Message) int) {
-	module.Logger.Debug("Enter message process.", "module", name)
+	module.Logger.Debug("Enter message process.")
 	for running {
 		msg := <-module.Channel
-		module.Logger.Debug("Catch message", "module", name, "mes", msg)
+		module.Logger.Debug("Catch message", "mes", msg)
 		if msg.To == module.ModuleName {
-			module.Logger.Debug("Message coming", "module", name, "msg", msg)
-			if module.MessageHandler(msg) < 0 {
+			module.Logger.Debug("Message coming", "msg", msg)
+			if res := module.MessageHandler(msg); res < 0 {
 				break
+			} else if res == 1 {
+				module.Logger.Debug("Module reloading", "msg", msg)
+				module.Stop()
+				configData := config.Get()
+				if !module.Initialize(module, &configData) {
+					module.Logger.Error("Failed to initialize")
+				}
+				module.Wg.Add(1)
+				go module.Run()
 			}
 		} else {
-			module.Logger.Error("To is mismatch!", "module", name, "msg", msg)
+			module.Logger.Error("To is mismatch!", "msg", msg)
 		}
 	}
-	module.Logger.Debug("Exit message process.", "module", name)
+	module.Stop()
+	module.Logger.Debug("Exit message process.")
 }

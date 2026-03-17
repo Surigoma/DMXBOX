@@ -373,6 +373,7 @@ func TestRender(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			defer dmxserver.CleanupDMXServer()
 			logger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
 			module := packageModule.PackageModule{
 				Logger: logger,
@@ -472,11 +473,7 @@ func TestMessage(t *testing.T) {
 			t.Errorf("Return code is not match: %v want -1", ret)
 			return
 		}
-		time.Sleep(time.Duration(float32(time.Second) * 2 / fps))
-		if dmxserver.FpsController.Running {
-			t.Error("Failed to Stop FPSController")
-			return
-		}
+		dmxserver.DMXServer.Stop()
 	})
 	testMessage := []struct {
 		name string
@@ -492,6 +489,16 @@ func TestMessage(t *testing.T) {
 				},
 			},
 			want: -1,
+		},
+		{
+			name: "All",
+			msg: message.Message{
+				To: "dmx",
+				Arg: message.MessageBody{
+					Action: "reload",
+				},
+			},
+			want: 1,
 		},
 		{
 			name: "All",
@@ -596,18 +603,7 @@ func TestMessage(t *testing.T) {
 				return
 			}
 			time.Sleep(time.Duration(float32(time.Second) * 2 / fps))
-			if tt.want == -1 && dmxserver.FpsController.Running {
-				t.Error("Failed to Stop FPSController")
-				return
-			} else {
-				dmxserver.DMXServer.MessageHandler(message.Message{
-					To: "dmx",
-					Arg: message.MessageBody{
-						Action: "stop",
-					},
-				})
-				time.Sleep(time.Duration(float32(time.Second) * 2 / fps))
-			}
+			dmxserver.DMXServer.Stop()
 		})
 	}
 }
