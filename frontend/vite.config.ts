@@ -1,6 +1,8 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import { playwright } from "@vitest/browser-playwright";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -12,4 +14,22 @@ export default defineConfig({
     }),
     react(),
   ],
+  test: {
+    browser: {
+      enabled: true,
+      provider: playwright(),
+      headless: true,
+      instances: [
+        {browser: "chromium"}
+      ]
+    },
+    coverage: {
+      reportsDirectory: "./test/coverage/",
+      provider: "v8"
+    },
+    reporters: ['default', "html"],
+    outputFile:{
+      html: "./test/unit/index.html"
+    }
+  }
 });

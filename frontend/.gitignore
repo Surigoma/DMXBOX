@@ -27,3 +27,10 @@ src/routeTree.gen.ts
 
 # Remove .yarn
 .yarn
+# Remove .tanstack
+.tanstack
+
+# Test result
+test/**
+!test/unit
+!test/unit/.gitkeep

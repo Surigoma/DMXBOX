@@ -22,6 +22,10 @@ tasks:
     deps:
       - frontend:dev
       - backend:dev
+  test:
+    deps:
+      - frontend:test
+      - backend:test
   build:
     cmds:
       - task: build_{{OS}}
