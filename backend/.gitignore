@@ -2,4 +2,5 @@ static/
 docs/
 test/*
 !test/data
+!test/data/static
 .tmp
