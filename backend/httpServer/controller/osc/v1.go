@@ -1,4 +1,4 @@
-package controller
+package osc
 
 import (
 	"backend/message"
@@ -8,19 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//	@BasePath	/api/v1
-
 type OSCResult struct {
 	Result string         `json:"result"`
 	Error  map[string]any `json:"err,omitempty"`
 }
 
-// Fade In/Out control
+// Mute control
 //
 //	@Summary	Control a DMX
 //	@Schemes
 //	@Description	Control a mute status using OSC
-//	@Tags			OSC
+//	@Tags			OSC,v1
 //	@Accept			json
 //	@Produce		json
 //
@@ -28,8 +26,8 @@ type OSCResult struct {
 //
 //	@Success		200		{object}	OSCResult
 //	@Failure			400		{object}	OSCResult
-//	@Router			/mute [post]
-func Osc(g *gin.Context) {
+//	@Router			/v1/mute [post]
+func SendOSCV1(g *gin.Context) {
 	arg := map[string]string{}
 	isMuteStr := g.Query("isMute")
 	if isMuteStr == "" {
@@ -52,7 +50,7 @@ func Osc(g *gin.Context) {
 			"arg":    msg,
 		})
 	}
-	g.JSON(http.StatusOK, FadeResult{
+	g.JSON(http.StatusOK, OSCResult{
 		Result: "OK",
 	})
 }

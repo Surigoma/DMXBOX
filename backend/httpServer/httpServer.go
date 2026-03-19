@@ -4,6 +4,10 @@ import (
 	"backend/config"
 	"backend/docs"
 	"backend/httpServer/controller"
+	configAPI "backend/httpServer/controller/config"
+	"backend/httpServer/controller/console"
+	"backend/httpServer/controller/dmx"
+	"backend/httpServer/controller/osc"
 	"backend/message"
 	"backend/packageModule"
 	"context"
@@ -88,20 +92,35 @@ func RegisterEndPoints(config *config.HttpServer) *gin.Engine {
 		logger.Info("Disable file responser.")
 	}
 
-	docs.SwaggerInfo.BasePath = "/api/v1"
-	v1 := route.Group("/api/v1")
+	docs.SwaggerInfo.BasePath = "/api"
+	api := route.Group("/api")
 	{
-		eg := v1.Group("/")
+		v1 := api.Group("/v1")
 		{
-			eg.GET("/health", controller.Health)
-			eg.POST("/fade/:group", controller.Fade)
-			eg.POST("/mute", controller.Osc)
-			cfg := eg.Group("/config/")
+			eg := v1.Group("/")
 			{
-				cfg.GET("/fade", controller.GetFadeConfig)
-				cfg.GET("/all", controller.GetConfig)
-				cfg.POST("/save", controller.SetConfig)
-				cfg.GET("/console", controller.GetConsoles)
+				eg.GET("/health", controller.HealthV1)
+				eg.POST("/fade/:group", dmx.FadeV1)
+				eg.POST("/mute", osc.SendOSCV1)
+				cfg := eg.Group("/config/")
+				{
+					cfg.GET("/fade", dmx.GetFadeConfigV1)
+					cfg.GET("/all", configAPI.GetConfigV1)
+					cfg.POST("/save", configAPI.SetConfigV1)
+					cfg.GET("/console", console.GetConsolesV1)
+				}
+			}
+		}
+		old := api.Group("/")
+		{
+			old.GET("/fadeIn", dmx.FadeInLegacy)
+			old.GET("/fadeOut", dmx.FadeOutLegacy)
+			old.GET("/fadeAddIn", dmx.AddFadeInLegacy)
+			old.GET("/fadeAddOut", dmx.AddFadeOutLegacy)
+			old.GET("/mute", osc.LegacyMute)
+			cfg := old.Group("/config")
+			{
+				cfg.POST("/save", configAPI.LegacySave)
 			}
 		}
 	}

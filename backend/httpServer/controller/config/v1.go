@@ -1,4 +1,4 @@
-package controller
+package config
 
 import (
 	"backend/config"
@@ -14,13 +14,13 @@ import (
 //	@Summary	Get all config
 //	@Schemes
 //	@Description	Get all config
-//	@Tags			Config
+//	@Tags			Config,v1
 //	@Accept			json
 //	@Produce		json
 //
 //	@Success		200		{object}	config.Config
-//	@Router			/config/all [get]
-func GetConfig(g *gin.Context) {
+//	@Router			/v1/config/all [get]
+func GetConfigV1(g *gin.Context) {
 	config := config.Get()
 	g.JSON(http.StatusOK, config)
 }
@@ -34,7 +34,7 @@ type ConfigResult struct {
 //
 //	@Summary	Set all config
 //	@Description	Set all config
-//	@Tags			Config
+//	@Tags			Config,v1
 //	@Accept			json
 //	@Produce		json
 //
@@ -43,8 +43,8 @@ type ConfigResult struct {
 //	@Success		200		{object}	ConfigResult
 //	@Failure		400		{object}	ConfigResult
 //	@Failure		500		{object}	ConfigResult
-//	@Router			/config/save [post]
-func SetConfig(g *gin.Context) {
+//	@Router			/v1/config/save [post]
+func SetConfigV1(g *gin.Context) {
 	var newConfig config.Config
 	err := g.BindJSON(&newConfig)
 	if err != nil {

@@ -1,4 +1,4 @@
-package controller
+package console
 
 import (
 	"net/http"
@@ -12,14 +12,14 @@ import (
 //	@Summary	Get all ports for console
 //	@Schemes
 //	@Description	Get all ports for console
-//	@Tags			Config
+//	@Tags			Config,v1
 //	@Accept			json
 //	@Produce		json
 //
 //	@Success		200		{object}	[]string
 //	@Failure		500		{object}	map[string]string
-//	@Router			/config/console [get]
-func GetConsoles(g *gin.Context) {
+//	@Router			/v1/config/console [get]
+func GetConsolesV1(g *gin.Context) {
 	ports, err := serial.GetPortsList()
 	if err != nil {
 		g.JSON(http.StatusInternalServerError, map[string]any{

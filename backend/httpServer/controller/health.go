@@ -7,8 +7,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-//	@BasePath	/api/v1
-
 type HealthResp struct {
 	Status string    `json:"status" example:"ok"`
 	Time   time.Time `json:"time"`
@@ -19,12 +17,12 @@ type HealthResp struct {
 //	@Summary	liveness probe
 //	@Schemes
 //	@Description	do ping
-//	@Tags			Health
+//	@Tags			Health,v1
 //	@Accept			json
 //	@Produce		json
 //	@Success		200	{object}	HealthResp
-//	@Router			/health [get]
-func Health(g *gin.Context) {
+//	@Router			/v1/health [get]
+func HealthV1(g *gin.Context) {
 	g.JSON(http.StatusOK, HealthResp{
 		Status: "ok",
 		Time:   time.Now(),
