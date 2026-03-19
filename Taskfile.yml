@@ -32,7 +32,6 @@ tasks:
       - backend:test_watch
   ### Make directories
   make_dist:
-    preconditions:
     cmds:
       - mkdir -p ./dist
     silent: true
