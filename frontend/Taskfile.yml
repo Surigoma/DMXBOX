@@ -10,6 +10,8 @@ tasks:
     cmd: yarn run test:coverage
   test_watch:
     cmd: yarn run test:watch
+  test_view:
+    cmd: yarn vite preview --outDir test/unit --base /
   ### Build frontend
   build:
     dir: ./frontend
