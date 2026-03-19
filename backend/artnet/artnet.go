@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -42,14 +43,21 @@ type Artnet struct {
 	socket     *net.UDPConn
 	logger     *slog.Logger
 	isRunning  bool
-	Running    bool
+	Running    sync.WaitGroup
 	address    ArtnetAddress
 }
 
 func (a *Artnet) Initialize(log *slog.Logger, config *config.Config) bool {
 	var err error
+	a.Running = sync.WaitGroup{}
 	a.logger = log
-	a.targetUDP, err = net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", a.TargetAddr, static.rmtPort))
+	srcPort := static.srcPort
+	rmtPort := static.rmtPort
+	if config.Output.Artnet.Port != nil {
+		srcPort = *config.Output.Artnet.Port
+		rmtPort = *config.Output.Artnet.Port
+	}
+	a.targetUDP, err = net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", a.TargetAddr, rmtPort))
 	if err != nil {
 		a.logger.Error("Failed initialize Artnet System.", "err", err)
 		return false
@@ -62,7 +70,7 @@ func (a *Artnet) Initialize(log *slog.Logger, config *config.Config) bool {
 	for _, addr := range addrs {
 		_, cidr, _ := net.ParseCIDR(addr.String())
 		if cidr.Contains(a.targetUDP.IP) {
-			a.sourceUDP, err = net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", addr.(*net.IPNet).IP.String(), static.srcPort))
+			a.sourceUDP, err = net.ResolveUDPAddr("udp", fmt.Sprintf("%s:%d", addr.(*net.IPNet).IP.String(), srcPort))
 			if err != nil {
 				a.logger.Error("failed to create", "addr", addr)
 			}
@@ -84,8 +92,9 @@ func (a *Artnet) Initialize(log *slog.Logger, config *config.Config) bool {
 
 func (a *Artnet) listen() {
 	var buffer []byte = make([]byte, 1024)
-	a.Running = true
+	a.Running.Add(1)
 	for a.isRunning {
+		a.socket.SetDeadline(time.Now().Add(500 * time.Millisecond))
 		n, err := a.socket.Read(buffer)
 		if err != nil {
 			a.isRunning = false
@@ -109,7 +118,7 @@ func (a *Artnet) listen() {
 			a.logger.With("dir", "recv").Debug("OpUNKNOWN", "n", n, "data", buffer[:n])
 		}
 	}
-	a.Running = false
+	a.Running.Done()
 }
 
 func (a *Artnet) Start() bool {
@@ -127,14 +136,13 @@ func (a *Artnet) Start() bool {
 
 func (a *Artnet) Stop() bool {
 	a.isRunning = false
+	a.Running.Wait()
 	if a.socket != nil {
-		a.socket.Close()
-	}
-	for range 100 {
-		if !a.Running {
-			break
+		err := a.socket.Close()
+		if err != nil {
+			a.logger.Error("Failed to close socket", "err", err)
 		}
-		time.After(10 * time.Millisecond)
+		a.socket = nil
 	}
 	a.logger.Debug("Stop")
 	return true
@@ -163,6 +171,9 @@ func (a *Artnet) SendDMXData(data *[]byte) {
 		sequence = 1
 	}
 	go func() {
+		if !a.isRunning {
+			return
+		}
 		_, err := a.socket.WriteToUDP(*rendered, a.targetUDP)
 		if err != nil {
 			a.logger.Error("Drop", "data", rendered)

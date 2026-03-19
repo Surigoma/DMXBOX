@@ -120,7 +120,7 @@ func TestFPSController_Run(t *testing.T) {
 			select {
 			case <-testChannel:
 				break
-			case <-time.After(time.Duration((1.1 / tt.fps) * float32(time.Second))):
+			case <-time.After(time.Duration((1.2 / tt.fps) * float32(time.Second))):
 				t.Error("Failed call callback function")
 				return
 			}

@@ -191,11 +191,10 @@ func TestDMXDevice_Fade(t *testing.T) {
 			modFade:     true,
 		},
 	}
-	t.Parallel()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var wg sync.WaitGroup
 			t.Parallel()
+			var wg sync.WaitGroup
 			target := make([]byte, 512)
 			var dev device.DMXDevice = device.DMXDevice{
 				Model:      "test",

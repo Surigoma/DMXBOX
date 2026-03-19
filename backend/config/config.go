@@ -16,6 +16,7 @@ type Artnet struct {
 	Universe    uint8  `json:"universe"`
 	SubUniverse uint8  `json:"subuni"`
 	Net         uint8  `json:"net"`
+	Port        *uint  `json:"port,omitempty"`
 }
 type HttpServer struct {
 	IP          string   `json:"ip"`

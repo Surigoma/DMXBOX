@@ -81,6 +81,7 @@ func TestModule_Initialize(t *testing.T) {
 		t.Error("Failed to get ports.")
 		return
 	}
+	var artnetPort uint = 0
 	tests := []struct {
 		name   string
 		target string
@@ -134,6 +135,7 @@ func TestModule_Initialize(t *testing.T) {
 						Universe:    0,
 						SubUniverse: 0,
 						Net:         0,
+						Port:        &artnetPort,
 					},
 				},
 			},
@@ -150,6 +152,7 @@ func TestModule_Initialize(t *testing.T) {
 						Universe:    0,
 						SubUniverse: 0,
 						Net:         0,
+						Port:        &artnetPort,
 					},
 				},
 			},
@@ -163,7 +166,7 @@ func TestModule_Initialize(t *testing.T) {
 			got := cont.Initialize(&tt.config, logger)
 			defer cont.Finalize()
 			if got != tt.want {
-				t.Errorf("Failed to initialize: %v", cont)
+				t.Errorf("Failed to initialize: %v", &cont)
 			}
 		})
 	}
@@ -255,6 +258,7 @@ func TestModule_Console_Output(t *testing.T) {
 }
 
 func TestModule_Artnet_Output(t *testing.T) {
+	var port uint = 0
 	t.Run("Artnet", func(tt *testing.T) {
 		logger := slog.New(slog.NewJSONHandler(tt.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
 		artnet := testData["artnet"]()
@@ -266,6 +270,7 @@ func TestModule_Artnet_Output(t *testing.T) {
 					Universe:    0,
 					SubUniverse: 0,
 					Net:         0,
+					Port:        &port,
 				},
 			},
 		}

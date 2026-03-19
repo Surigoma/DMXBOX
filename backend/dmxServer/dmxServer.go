@@ -16,7 +16,7 @@ import (
 
 var logger *slog.Logger
 var wg *sync.WaitGroup
-var runningWg sync.WaitGroup
+var runningWg *sync.WaitGroup
 var renderWg sync.WaitGroup
 var DeviceTypes map[string]func() *device.DMXDevice = map[string]func() *device.DMXDevice{
 	"dimmer":  deviceSpec.NewDimmer,
@@ -59,7 +59,6 @@ var DMXServer packageModule.PackageModule = packageModule.PackageModule{
 func Initialize(module *packageModule.PackageModule, config *config.Config) bool {
 	CleanupDMXServer()
 	logger = module.Logger
-	runningWg = sync.WaitGroup{}
 	renderWg = sync.WaitGroup{}
 	wg = module.Wg
 	param.Duration = config.Dmx.FadeInterval
@@ -229,7 +228,9 @@ func Finalize() {
 	}
 	CleanupDMXServer()
 	wg.Done()
-	runningWg.Done()
+	if runningWg != nil {
+		runningWg.Done()
+	}
 }
 
 func StartDMX() {
@@ -238,11 +239,14 @@ func StartDMX() {
 		logger.Error("Failed to setup FPS controller.")
 		return
 	}
+	runningWg = &sync.WaitGroup{}
 	runningWg.Add(1)
 	go FpsController.Run()
 }
 
 func StopDMX() {
 	FpsController.Stop()
-	runningWg.Wait()
+	if runningWg != nil {
+		runningWg.Wait()
+	}
 }

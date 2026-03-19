@@ -350,6 +350,7 @@ func TestRender(t *testing.T) {
 			},
 		},
 	}
+	dmxserver.DMXServer.Wg = &sync.WaitGroup{}
 	dmxserver.RenderTypes["test"] = func() *controller.Controller {
 		return &controller.Controller{
 			Model:         "test",
@@ -375,8 +376,10 @@ func TestRender(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			defer dmxserver.CleanupDMXServer()
 			logger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
+			wg := sync.WaitGroup{}
 			module := packageModule.PackageModule{
 				Logger: logger,
+				Wg:     &wg,
 			}
 			testChan := make(chan bool)
 			dmxserver.DeviceTypes["test"] = func() *device.DMXDevice {
@@ -389,10 +392,12 @@ func TestRender(t *testing.T) {
 					},
 				}
 			}
+			wg.Add(1)
 			if !dmxserver.Initialize(&module, &testConfig) {
 				t.Error("failed to initialize dmx server")
 				return
 			}
+			defer dmxserver.Finalize()
 			got := false
 			go func() {
 				got = dmxserver.Render()
