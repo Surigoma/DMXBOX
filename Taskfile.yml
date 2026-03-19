@@ -1,6 +1,6 @@
 # https://taskfile.dev
 
-version: '3'
+version: "3"
 
 vars:
   VERSION: 0.0.1
@@ -26,9 +26,10 @@ tasks:
     deps:
       - frontend:test
       - backend:test
-  build:
-    cmds:
-      - task: build_{{OS}}
+  test_watch:
+    deps:
+      - frontend:test_watch
+      - backend:test_watch
   ### Make directories
   make_dist:
     preconditions:
