@@ -35,7 +35,7 @@ var HttpServer packageModule.PackageModule = packageModule.PackageModule{
 	Initialize:     Initialize,
 	Run:            StartHTTP,
 	Stop:           StopHTTP,
-	MessageHandler: handleMessage,
+	MessageHandler: HandleMessage,
 }
 
 //	@title			DMX BOX
@@ -52,7 +52,7 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	gin.SetMode(gin.ReleaseMode)
 	listenAddr = fmt.Sprintf("%s:%d", config.Http.IP, config.Http.Port)
 	logger = module.Logger
-	engine = registerEndPoints()
+	engine = RegisterEndPoints(&config.Http)
 	wg = module.Wg
 	server = &http.Server{
 		Addr:    listenAddr,
@@ -62,10 +62,10 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	return true
 }
 
-func registerEndPoints() *gin.Engine {
+func RegisterEndPoints(config *config.HttpServer) *gin.Engine {
 	route := gin.Default()
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = config.ConfigData.Http.AcceptHosts
+	corsConfig.AllowOrigins = config.AcceptHosts
 	corsConfig.AllowCredentials = true
 	route.Use(cors.New(corsConfig))
 	route.Use(sloggin.New(logger))
@@ -109,7 +109,7 @@ func registerEndPoints() *gin.Engine {
 	return route
 }
 
-func handleMessage(mes message.Message) int {
+func HandleMessage(mes message.Message) int {
 	switch mes.Arg.Action {
 	case "reload":
 		return 1

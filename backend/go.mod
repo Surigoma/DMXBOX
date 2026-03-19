@@ -5,6 +5,7 @@ go 1.25.2
 require (
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.11.0
+	github.com/go-playground/assert/v2 v2.2.0
 	github.com/hypebeast/go-osc v0.0.0-20220308234300-cec5a8a1e5f5
 	github.com/samber/slog-gin v1.17.2
 	github.com/swaggo/files v1.0.1
