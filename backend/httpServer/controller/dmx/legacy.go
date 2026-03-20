@@ -93,7 +93,7 @@ func FadeOutLegacy(g *gin.Context) {
 //
 //	@Summary	Control a DMX
 //	@Schemes
-//	@Description	Control a "aug" group to fade in
+//	@Description	Control a "aud" group to fade in
 //	@Tags			DMX,Legacy
 //	@Accept			json
 //	@Produce		json
@@ -114,7 +114,7 @@ func AddFadeInLegacy(g *gin.Context) {
 //
 //	@Summary	Control a DMX
 //	@Schemes
-//	@Description	Control a "aug" group to fade out
+//	@Description	Control a "aud" group to fade out
 //	@Tags			DMX,Legacy
 //	@Accept			json
 //	@Produce		json
