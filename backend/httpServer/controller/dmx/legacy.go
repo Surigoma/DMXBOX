@@ -51,7 +51,7 @@ func sendMessage(g *gin.Context, msg message.Message) {
 //
 //	@Summary	Control a DMX
 //	@Schemes
-//	@Description	Control a DXM using fade in for old APIs
+//	@Description	Control a "stg" group to fade in
 //	@Tags			DMX,Legacy
 //	@Accept			json
 //	@Produce		json
@@ -72,7 +72,7 @@ func FadeInLegacy(g *gin.Context) {
 //
 //	@Summary	Control a DMX
 //	@Schemes
-//	@Description	Control a DXM using fade out for old APIs
+//	@Description	Control a "stg" group to fade out
 //	@Tags			DMX,Legacy
 //	@Accept			json
 //	@Produce		json
@@ -93,7 +93,7 @@ func FadeOutLegacy(g *gin.Context) {
 //
 //	@Summary	Control a DMX
 //	@Schemes
-//	@Description	Control a DXM using fade in for old APIs
+//	@Description	Control a "aug" group to fade in
 //	@Tags			DMX,Legacy
 //	@Accept			json
 //	@Produce		json
@@ -114,7 +114,7 @@ func AddFadeInLegacy(g *gin.Context) {
 //
 //	@Summary	Control a DMX
 //	@Schemes
-//	@Description	Control a DXM using fade out for old APIs
+//	@Description	Control a "aug" group to fade out
 //	@Tags			DMX,Legacy
 //	@Accept			json
 //	@Produce		json
