@@ -10,7 +10,7 @@ import (
 
 // Mute control
 //
-//	@Summary	Control a DMX
+//	@Summary	Control a OSC
 //	@Schemes
 //	@Description	Control a mute status using OSC
 //	@Tags			OSC,Legacy

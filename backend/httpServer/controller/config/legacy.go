@@ -11,7 +11,7 @@ import (
 //
 //	@Summary	Save all config
 //	@Description	Save all config
-//	@Tags			Config,legacy
+//	@Tags			Config,Legacy
 //	@Accept			json
 //	@Produce		json
 //
