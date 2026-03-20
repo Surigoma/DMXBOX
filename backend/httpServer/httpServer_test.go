@@ -4,12 +4,14 @@ import (
 	"backend/config"
 	"backend/httpServer"
 	"backend/httpServer/controller"
+	"backend/httpServer/controller/dmx"
 	"backend/message"
 	"backend/packageModule"
 	"encoding/json"
 	"log/slog"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -122,18 +124,58 @@ func TestViewStaticFile(t *testing.T) {
 
 func TestAPIResp(t *testing.T) {
 	config.InitializeConfig()
+	config.Set(config.Config{
+		Modules: map[string]bool{
+			"http": true,
+		},
+		Http: config.HttpServer{
+			IP:          "127.0.0.1",
+			Port:        8080,
+			AcceptHosts: []string{"*"},
+		},
+		Dmx: config.DMXServer{
+			Groups: map[string]config.DMXGroup{
+				"test": {
+					Name: "test",
+					Devices: []config.DMXDevice{
+						{
+							Model:    "dimmer",
+							Channel:  1,
+							MaxValue: []uint{255},
+						},
+					},
+				},
+			},
+		},
+		Output: config.OutputTargets{
+			Target: []string{"console"},
+		},
+	})
 	configData := config.Get()
 	configDataB, _ := json.Marshal(configData)
 
 	module := packageModule.PackageModule{}
-	module.Logger = slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
-	t.Chdir("../test/data")
-	if !httpServer.HttpServer.Initialize(&module, &configData) {
-		t.Error("Failed to setup http server")
+	sharedLogger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
+	packageModule.ModuleManager.Initialize(sharedLogger)
+	dummyModule := packageModule.PackageModule{
+		MessageHandler: func(msg message.Message) int {
+			t.Log(msg)
+			return 0
+		},
+		Initialize: func(module *packageModule.PackageModule, config *config.Config) bool { return true },
+		Run:        func() {},
+		Stop:       func() {},
+		ModuleName: "dummy",
 	}
+	packageModule.ModuleManager.RegisterModule("dmx", &dummyModule)
+	h := sharedLogger.Handler()
+	packageModule.ModuleManager.ModuleInitialize(&h)
+	packageModule.ModuleManager.ModuleRun()
+	defer packageModule.ModuleManager.Finalize()
 	tests := []struct {
 		name   string
 		path   string
+		args   *map[string]string
 		method string
 		want   func(code int, body string) bool
 	}{
@@ -158,13 +200,44 @@ func TestAPIResp(t *testing.T) {
 				return code == 200 && body == string(configDataB)
 			},
 		},
+		{
+			name:   "Can fade",
+			method: "POST",
+			path:   "/api/v1/fade/test",
+			args:   &map[string]string{"isIn": "true"},
+			want: func(code int, body string) bool {
+				var v = dmx.FadeResult{}
+				err := json.Unmarshal([]byte(body), &v)
+				if err != nil {
+					return false
+				}
+				return code == 200 && v.Result == "OK"
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			module.Logger = slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
+			if !httpServer.HttpServer.Initialize(&module, &configData) {
+				t.Error("Failed to setup http server")
+			}
+			gin.SetMode(gin.TestMode)
+			t.Parallel()
 			engine := httpServer.RegisterEndPoints(&configData.Http)
 			w := httptest.NewRecorder()
-			req, _ := http.NewRequest(tt.method, tt.path, nil)
+			args := ""
+			if tt.args != nil {
+				args += "?"
+				joined := []string{}
+				for key, value := range *tt.args {
+					joined = append(joined, strings.Join([]string{key, value}, "="))
+				}
+				args += strings.Join(joined, "&")
+			}
+			req, _ := http.NewRequest(tt.method, tt.path+args, nil)
 			engine.ServeHTTP(w, req)
+			t.Log("request:", tt.method, req.URL.String())
+			t.Log("response:", w.Body.String())
 			if !tt.want(w.Code, w.Body.String()) {
 				t.Error("Failed to check response", "code", w.Code, "body", w.Body.String())
 			}

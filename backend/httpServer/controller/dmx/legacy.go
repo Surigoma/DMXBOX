@@ -9,7 +9,7 @@ import (
 )
 
 const BASE_TARGET = "stg"
-const ADDITIONAL_TARGET = "stg"
+const ADDITIONAL_TARGET = "aud"
 
 func createMessageTemplate(g *gin.Context, id string, isIn bool) message.Message {
 	isInStr := "false"
@@ -60,7 +60,8 @@ func sendMessage(g *gin.Context, msg message.Message) {
 //	@Param			interval	query		int		false	"Onetime duration"
 //
 //	@Success		200		{object}	FadeResult
-//	@Success		400		{object}	FadeResult
+//	@Failure		400		{object}	FadeResult
+//	@Failure		500		{object}	FadeResult
 //	@Router			/fadeIn [get]
 func FadeInLegacy(g *gin.Context) {
 	msg := createMessageTemplate(g, BASE_TARGET, true)
@@ -80,7 +81,8 @@ func FadeInLegacy(g *gin.Context) {
 //	@Param			interval	query		int		false	"Onetime duration"
 //
 //	@Success		200		{object}	FadeResult
-//	@Success		400		{object}	FadeResult
+//	@Failure		400		{object}	FadeResult
+//	@Failure		500		{object}	FadeResult
 //	@Router			/fadeOut [get]
 func FadeOutLegacy(g *gin.Context) {
 	msg := createMessageTemplate(g, BASE_TARGET, false)
@@ -100,7 +102,8 @@ func FadeOutLegacy(g *gin.Context) {
 //	@Param			interval	query		int		false	"Onetime duration"
 //
 //	@Success		200		{object}	FadeResult
-//	@Success		400		{object}	FadeResult
+//	@Failure		400		{object}	FadeResult
+//	@Failure		500		{object}	FadeResult
 //	@Router			/fadeAddIn [get]
 func AddFadeInLegacy(g *gin.Context) {
 	msg := createMessageTemplate(g, ADDITIONAL_TARGET, true)
@@ -120,7 +123,8 @@ func AddFadeInLegacy(g *gin.Context) {
 //	@Param			interval	query		int		false	"Onetime duration"
 //
 //	@Success		200		{object}	FadeResult
-//	@Success		400		{object}	FadeResult
+//	@Failure		400		{object}	FadeResult
+//	@Failure		500		{object}	FadeResult
 //	@Router			/fadeAddOut [get]
 func AddFadeOutLegacy(g *gin.Context) {
 	msg := createMessageTemplate(g, ADDITIONAL_TARGET, false)

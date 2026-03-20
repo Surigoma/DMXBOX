@@ -29,7 +29,8 @@ type FadeResult struct {
 //	@Param			duration	query		int		false	"Onetime duration"
 //
 //	@Success		200		{object}	FadeResult
-//	@Success		400		{object}	FadeResult
+//	@Failure		400		{object}	FadeResult
+//	@Failure		500		{object}	FadeResult
 //	@Router			/v1/fade/{group} [post]
 func FadeV1(g *gin.Context) {
 	group := g.Param("group")
@@ -61,9 +62,11 @@ func FadeV1(g *gin.Context) {
 	}
 	ok := packageModule.ModuleManager.SendMessage(msg)
 	if !ok {
-		g.JSON(http.StatusInternalServerError, map[string]any{
-			"result": "Message send error",
-			"arg":    msg,
+		g.JSON(http.StatusInternalServerError, FadeResult{
+			Result: "Message send error",
+			Error: map[string]any{
+				"arg": msg,
+			},
 		})
 	}
 	g.JSON(http.StatusOK, FadeResult{
@@ -80,7 +83,7 @@ func FadeV1(g *gin.Context) {
 //	@Accept			json
 //	@Produce		json
 //
-//	@Success		200		{object}	map[string][]config.DMXDevice
+//	@Success		200		{object}	map[string]config.DMXGroup
 //	@Router			/v1/config/fade [get]
 func GetFadeConfigV1(g *gin.Context) {
 	config := dmxserver.GetConfig()
