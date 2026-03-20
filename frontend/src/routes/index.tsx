@@ -12,6 +12,7 @@ import {
 import ErrorComponent from "../component/Error";
 import { useContext, useState } from "react";
 import type { DMXGroupInfo } from "../types";
+import MuteControl from "../component/MuteControl";
 
 export const Route = createFileRoute("/")({
     component: ControlPage,
@@ -52,49 +53,74 @@ function ControlPage() {
         );
     }
     return (
-        <>
-            <Grid
-                container
-                direction="row"
-                justifyContent="center"
-                alignItems="center"
-            >
-                <Grid size="grow">
-                    <Typography variant="h5" margin={2}>
-                        Control
-                    </Typography>
+        <Grid container direction="column">
+            <Grid size="grow">
+                <Grid
+                    container
+                    direction="row"
+                    justifyContent="center"
+                    alignItems="center"
+                >
+                    <Grid size="grow">
+                        <Typography variant="h5" margin={2}>
+                            Control
+                        </Typography>
+                    </Grid>
+                    <Grid
+                        size="auto"
+                        justifyContent="center"
+                        alignContent="center"
+                    >
+                        <FormGroup>
+                            <FormControlLabel
+                                label="CUT"
+                                control={
+                                    <Switch
+                                        onChange={(e) => {
+                                            setCutin(e.target.checked);
+                                        }}
+                                        checked={showCutin}
+                                    />
+                                }
+                            ></FormControlLabel>
+                        </FormGroup>
+                    </Grid>
                 </Grid>
-                <Grid size="auto" justifyContent="center" alignContent="center">
-                    <FormGroup>
-                        <FormControlLabel
-                            label="CUT"
-                            control={
-                                <Switch
-                                    onChange={(e) => {
-                                        setCutin(e.target.checked);
-                                    }}
-                                    checked={showCutin}
-                                />
-                            }
-                        ></FormControlLabel>
-                    </FormGroup>
+                <Grid container spacing={3} padding={2}>
+                    {Object.keys(dmxInfo).map((k) => {
+                        {
+                            return (
+                                <Grid size={{ xs: 12, md: 6, lg: 4 }} key={k}>
+                                    <FadeControl
+                                        name={k}
+                                        data={dmxInfo[k]}
+                                        showCutin={showCutin}
+                                    ></FadeControl>
+                                </Grid>
+                            );
+                        }
+                    })}
                 </Grid>
             </Grid>
-            <Grid container spacing={3} padding={2}>
-                {Object.keys(dmxInfo).map((k) => {
-                    {
-                        return (
-                            <Grid size={{ xs: 12, md: 6, lg: 4 }} key={k}>
-                                <FadeControl
-                                    name={k}
-                                    data={dmxInfo[k]}
-                                    showCutin={showCutin}
-                                ></FadeControl>
-                            </Grid>
-                        );
-                    }
-                })}
+            <Grid size="grow">
+                <Grid
+                    container
+                    direction="row"
+                    justifyContent="center"
+                    alignItems="center"
+                >
+                    <Grid size="grow">
+                        <Typography variant="h5" margin={2}>
+                            Mute
+                        </Typography>
+                    </Grid>
+                </Grid>
+                <Grid container spacing={3} padding={2}>
+                    <Grid size="grow">
+                        <MuteControl />
+                    </Grid>
+                </Grid>
             </Grid>
-        </>
+        </Grid>
     );
 }
