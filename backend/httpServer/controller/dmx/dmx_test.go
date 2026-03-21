@@ -24,12 +24,17 @@ func Initialize(t *testing.T, msgChan *chan message.Message) *packageModule.Pack
 	if msgChan != nil {
 		dummyModule = &packageModule.PackageModule{
 			MessageHandler: func(msg message.Message) int {
+				if msg.Arg.Action == "stop" {
+					return -1
+				}
 				*msgChan <- msg
 				return 0
 			},
 			Initialize: func(module *packageModule.PackageModule, config *config.Config) bool { return true },
 			Run:        func() {},
-			Stop:       func() {},
+			Stop: func() {
+				dummyModule.Wg.Done()
+			},
 			ModuleName: "dmx",
 		}
 		packageModule.ModuleManager.RegisterModule("dmx", dummyModule)
@@ -261,9 +266,14 @@ func TestAPIDMX(t *testing.T) {
 	t.Run("No group", func(t *testing.T) {
 		msgChan := make(chan message.Message)
 		defer close(msgChan)
-		module := Initialize(t, &msgChan)
+		Initialize(t, &msgChan)
 		defer packageModule.ModuleManager.Finalize()
-		defer module.Wg.Done()
+		defer packageModule.ModuleManager.SendMessage(message.Message{
+			To: "dmx",
+			Arg: message.MessageBody{
+				Action: "stop",
+			},
+		})
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("POST", "/v1/fade", nil)
 		engine.ServeHTTP(w, req)
@@ -274,9 +284,14 @@ func TestAPIDMX(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			msgChan := make(chan message.Message)
 			defer close(msgChan)
-			module := Initialize(t, &msgChan)
+			Initialize(t, &msgChan)
 			defer packageModule.ModuleManager.Finalize()
-			defer module.Wg.Done()
+			defer packageModule.ModuleManager.SendMessage(message.Message{
+				To: "dmx",
+				Arg: message.MessageBody{
+					Action: "stop",
+				},
+			})
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest(tt.method, tt.path, nil)
 			engine.ServeHTTP(w, req)
