@@ -1,5 +1,6 @@
 static/
-docs/
+docs/*
+!docs/docs_test.go
 test/*
 !test/data
 !test/data/static
