@@ -35,3 +35,4 @@ test/**
 !test/unit
 !test/unit/.gitkeep
 __screenshots__
+.vitest-attachments
