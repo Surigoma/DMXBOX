@@ -3,10 +3,10 @@ package httpServer
 import (
 	"backend/config"
 	"backend/docs"
-	"backend/httpServer/controller"
 	configAPI "backend/httpServer/controller/config"
 	"backend/httpServer/controller/console"
 	"backend/httpServer/controller/dmx"
+	"backend/httpServer/controller/health"
 	"backend/httpServer/controller/osc"
 	"backend/message"
 	"backend/packageModule"
@@ -99,7 +99,7 @@ func RegisterEndPoints(config *config.HttpServer) *gin.Engine {
 		{
 			eg := v1.Group("/")
 			{
-				eg.GET("/health", controller.HealthV1)
+				eg.GET("/health", health.HealthV1)
 				eg.POST("/fade/:group", dmx.FadeV1)
 				eg.POST("/mute", osc.SendOSCV1)
 				cfg := eg.Group("/config/")

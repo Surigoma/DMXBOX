@@ -3,8 +3,8 @@ package httpServer_test
 import (
 	"backend/config"
 	"backend/httpServer"
-	"backend/httpServer/controller"
 	"backend/httpServer/controller/dmx"
+	"backend/httpServer/controller/health"
 	"backend/message"
 	"backend/packageModule"
 	"encoding/json"
@@ -184,7 +184,7 @@ func TestAPIResp(t *testing.T) {
 			method: "GET",
 			path:   "/api/v1/health",
 			want: func(code int, body string) bool {
-				var resp *controller.HealthResp = &controller.HealthResp{}
+				var resp *health.HealthResp = &health.HealthResp{}
 				e := json.Unmarshal([]byte(body), resp)
 				if e != nil {
 					return false
