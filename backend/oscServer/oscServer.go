@@ -49,7 +49,7 @@ var OscServer packageModule.PackageModule = packageModule.PackageModule{
 	Initialize:     Initialize,
 	Run:            StartOSC,
 	Stop:           func() {},
-	MessageHandler: handleMessage,
+	MessageHandler: HandleMessage,
 }
 
 func Initialize(module *packageModule.PackageModule, config *config.Config) bool {
@@ -67,7 +67,7 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	return true
 }
 
-func handleMessage(mes message.Message) int {
+func HandleMessage(mes message.Message) int {
 	switch mes.Arg.Action {
 	case "reload":
 		return 1
