@@ -46,7 +46,7 @@ type ConfigResult struct {
 //	@Router			/v1/config/save [post]
 func SetConfigV1(g *gin.Context) {
 	var newConfig config.Config
-	err := g.BindJSON(&newConfig)
+	err := g.ShouldBindJSON(&newConfig)
 	if err != nil {
 		g.JSON(http.StatusBadRequest, ConfigResult{
 			Result:  false,
