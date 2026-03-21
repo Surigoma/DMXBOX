@@ -12,7 +12,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"sync"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/assert/v2"
@@ -288,4 +290,27 @@ func TestMessageHandle(t *testing.T) {
 			assert.Equal(t, got, tt.want)
 		})
 	}
+}
+
+func TestHTTPStartStop(t *testing.T) {
+	t.Run("Can Start/Stop", func(t *testing.T) {
+		httpServer.HttpServer.Wg = &sync.WaitGroup{}
+		httpServer.HttpServer.Wg.Add(1)
+		httpServer.HttpServer.Logger = slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
+		if !httpServer.Initialize(&httpServer.HttpServer, &config.Config{
+			Modules: map[string]bool{
+				"http": true,
+			},
+			Http: config.HttpServer{
+				IP:          "127.0.0.1",
+				Port:        8080,
+				AcceptHosts: []string{"*"},
+			},
+		}) {
+			t.Error("Failed to initialize.")
+		}
+		go httpServer.StartHTTP()
+		time.Sleep(1 * time.Second)
+		httpServer.StopHTTP()
+	})
 }
