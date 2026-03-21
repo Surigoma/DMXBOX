@@ -19,6 +19,7 @@ var listenAddr *net.TCPAddr
 var wg *sync.WaitGroup
 var runningWg sync.WaitGroup
 var running bool = false
+var runningMutex sync.Mutex
 var v1Msgs map[string][]string
 
 var TcpServer packageModule.PackageModule = packageModule.PackageModule{
@@ -26,15 +27,21 @@ var TcpServer packageModule.PackageModule = packageModule.PackageModule{
 	Initialize:     Initialize,
 	Run:            StartTCP,
 	Stop:           StopTCP,
-	MessageHandler: handleMessage,
+	MessageHandler: HandleMessage,
 }
 
+func changeRunning(run bool) {
+	runningMutex.Lock()
+	running = run
+	runningMutex.Unlock()
+}
 func Initialize(module *packageModule.PackageModule, config *config.Config) bool {
 	var err error
 	logger = module.Logger
 	wg = module.Wg
 	runningWg = sync.WaitGroup{}
-	running = true
+	runningMutex = sync.Mutex{}
+	changeRunning(true)
 	v1Msgs = makeV1Messages(config)
 	listenAddr, err = net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", config.Tcp.IP, config.Tcp.Port))
 	if err != nil {
@@ -138,8 +145,8 @@ func handleRequest(conn *net.TCPConn) {
 	logger.Info("Disconnect", "remote", conn.RemoteAddr())
 }
 func tcpThread(ln *net.TCPListener) {
-	defer runningWg.Done()
 	defer wg.Done()
+	defer runningWg.Done()
 	defer ln.Close()
 	for running {
 		err := ln.SetDeadline(time.Now().Add(time.Second))
@@ -156,9 +163,10 @@ func tcpThread(ln *net.TCPListener) {
 		}
 		go handleRequest(conn)
 	}
+	logger.Info("Close TCP Server")
 }
 
-func handleMessage(mes message.Message) int {
+func HandleMessage(mes message.Message) int {
 	switch mes.Arg.Action {
 	case "reload":
 		return 1
@@ -173,6 +181,8 @@ func StartTCP() {
 	ln, err := net.ListenTCP("tcp", listenAddr)
 	if err != nil {
 		logger.Error("Failed to start a tcp server", "error", err)
+		changeRunning(false)
+		wg.Done()
 		return
 	}
 	runningWg.Add(1)
@@ -180,6 +190,8 @@ func StartTCP() {
 }
 
 func StopTCP() {
-	running = false
-	runningWg.Wait()
+	if running {
+		changeRunning(false)
+		runningWg.Wait()
+	}
 }
