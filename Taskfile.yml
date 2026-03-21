@@ -23,9 +23,9 @@ tasks:
       - frontend:dev
       - backend:dev
   test:
-    deps:
-      - frontend:test
-      - backend:test
+    cmds:
+      - task: frontend:test
+      - task: backend:test
   test_watch:
     deps:
       - frontend:test_watch
