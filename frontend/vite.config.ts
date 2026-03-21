@@ -19,17 +19,15 @@ export default defineConfig({
       enabled: true,
       provider: playwright(),
       headless: true,
-      instances: [
-        {browser: "chromium"}
-      ]
+      instances: [{ browser: "chromium" }],
     },
     coverage: {
       reportsDirectory: "./test/coverage/",
-      provider: "v8"
+      provider: "v8",
     },
-    reporters: ['default', "html"],
-    outputFile:{
-      html: "./test/unit/index.html"
-    }
-  }
+    reporters: ["default", "html"],
+    outputFile: {
+      html: "./test/unit/index.html",
+    },
+  },
 });
