@@ -260,6 +260,7 @@ func TestAPIDMX(t *testing.T) {
 
 	t.Run("No group", func(t *testing.T) {
 		msgChan := make(chan message.Message)
+		defer close(msgChan)
 		module := Initialize(t, &msgChan)
 		defer packageModule.ModuleManager.Finalize()
 		defer module.Wg.Done()
@@ -272,6 +273,7 @@ func TestAPIDMX(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			msgChan := make(chan message.Message)
+			defer close(msgChan)
 			module := Initialize(t, &msgChan)
 			defer packageModule.ModuleManager.Finalize()
 			defer module.Wg.Done()

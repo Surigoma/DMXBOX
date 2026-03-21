@@ -108,19 +108,24 @@ func TestFPSController_Run(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 			var testChannel = make(chan bool)
+			isFirst := true
+			defer close(testChannel)
 			var callback = func() bool {
-				testChannel <- true
+				if isFirst {
+					testChannel <- true
+					isFirst = false
+				}
 				return true
 			}
 			var finalize = func() {
-				testChannel <- true
+				testChannel <- false
 			}
 			fps := fps.NewFPS(tt.fps, callback, finalize)
 			go fps.Run()
 			select {
 			case <-testChannel:
 				break
-			case <-time.After(time.Duration((1.2 / tt.fps) * float32(time.Second))):
+			case <-time.After(time.Duration(int64((1.1 / tt.fps) * float32(time.Second)))):
 				t.Error("Failed call callback function")
 				return
 			}

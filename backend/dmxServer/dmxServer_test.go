@@ -447,6 +447,7 @@ func TestMessage(t *testing.T) {
 		}
 		dmxserver.DMXServer.Run()
 		waitCh := make(chan bool)
+		defer close(waitCh)
 		go func() {
 			for range 15 {
 				if dmxserver.FpsController.Running {
@@ -581,6 +582,7 @@ func TestMessage(t *testing.T) {
 			}
 			dmxserver.DMXServer.Run()
 			waitCh := make(chan bool)
+			defer close(waitCh)
 			go func() {
 				for range 15 {
 					if dmxserver.FpsController.Running {

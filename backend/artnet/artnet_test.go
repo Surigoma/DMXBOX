@@ -487,6 +487,7 @@ func TestArtnet_SendDMXData(t *testing.T) {
 			}
 			defer conn.Close()
 			readData := make(chan []byte)
+			defer close(readData)
 			conn.SetDeadline(time.Now().Add(3 * time.Second))
 			go func() {
 				data := make([]byte, 1024)
