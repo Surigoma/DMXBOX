@@ -1,11 +1,11 @@
 import { expect, describe, it } from "vitest";
 import { render } from "vitest-browser-react";
 import { FormProvider, useForm } from "react-hook-form";
-import { userEvent } from "vitest/browser";
 import Dimmer from "./dimmer";
+import { user, UserSetup } from "../../../../test/helper";
 
 describe("Dimmer Element", async () => {
-    const user = userEvent.setup();
+    UserSetup();
     interface testForm {
         test: {
             max: number[];

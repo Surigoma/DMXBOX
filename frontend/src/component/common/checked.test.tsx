@@ -2,10 +2,10 @@ import { expect, describe, it } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 import Checked from "./checked";
 import { FormProvider, useForm } from "react-hook-form";
-import { userEvent } from "vitest/browser";
+import { user, UserSetup } from "../../test/helper";
 
 describe("Checked", async () => {
-    const user = userEvent.setup();
+    UserSetup();
     interface testForm {
         test: boolean;
         test2: string[];

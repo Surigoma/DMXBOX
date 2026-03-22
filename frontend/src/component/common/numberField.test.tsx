@@ -2,16 +2,16 @@ import { expect, describe, it } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 import NumberField from "./numberField";
 import { Controller, FormProvider, useForm } from "react-hook-form";
-import { userEvent } from "vitest/browser";
+import { user, UserSetup } from "../../test/helper";
 
 describe("Number Field", async () => {
+    UserSetup();
     interface testForm {
         test: number;
     }
     const result: testForm = {
         test: 0,
     };
-    const user = userEvent.setup();
     function TestForm(f: {
         callback: (v: testForm) => void;
         min?: number;

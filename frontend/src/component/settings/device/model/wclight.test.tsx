@@ -1,11 +1,11 @@
 import { expect, describe, it } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 import { FormProvider, useForm } from "react-hook-form";
-import { userEvent } from "vitest/browser";
 import WCLight from "./wclight";
+import { user, UserSetup } from "../../../../test/helper";
 
 describe("WCLight option", async () => {
-    const user = userEvent.setup();
+    UserSetup();
     interface testForm {
         test: {
             max: number[];
