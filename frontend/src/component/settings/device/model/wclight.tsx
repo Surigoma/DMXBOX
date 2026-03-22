@@ -40,7 +40,17 @@ function WCLight(prop: WCLightProp) {
             ")",
         [colorTemp, colorPalette],
     );
-    let setTimer: number | undefined = undefined;
+    const maxValue = useMemo(() => {
+        const value: WCInfo = {
+            dimmer: dimmer,
+            temp: colorTemp,
+        };
+        const newValue = convertWCInfoToDMX(value);
+        return newValue;
+    }, [dimmer, colorTemp]);
+    useEffect(() => {
+        setValue(prop.name + ".max", maxValue);
+    }, maxValue);
 
     function convertDMXtoWCInfo(values: number[]): WCInfo {
         if (values === undefined || values.length < 3) {
@@ -57,29 +67,20 @@ function WCLight(prop: WCLightProp) {
             temp: cool / (cool + warm),
         };
     }
-    function convertWCInfotoDMX(values: WCInfo): number[] {
-        const warm = Math.round(values.dimmer * values.temp * 255);
+    function convertWCInfoToDMX(values: WCInfo): number[] {
+        const warm = Math.min(
+            Math.max(Math.round(values.dimmer * values.temp * 255.0), 0),
+            255,
+        );
         const cool = Math.round(255 * values.dimmer - warm);
-        return [cool, warm, 0];
+        return [Math.abs(cool), Math.abs(warm), 0];
     }
     useEffect(() => {
         const values = getValues(prop.name + ".max") as number[];
-        const wcinfo = convertDMXtoWCInfo(values);
-        setDimmer(wcinfo.dimmer);
-        setColorTemp(wcinfo.temp);
+        const wcInfo = convertDMXtoWCInfo(values);
+        setDimmer(wcInfo.dimmer);
+        setColorTemp(wcInfo.temp);
     }, []);
-    function updateValues() {
-        const value: WCInfo = {
-            dimmer: dimmer,
-            temp: colorTemp,
-        };
-        const newValue = convertWCInfotoDMX(value);
-        clearTimeout(setTimer);
-        setTimer = setTimeout(()=>{
-            setValue(prop.name + ".max", newValue);
-            setTimer = undefined;
-        }, 100);
-    }
     return (
         <Stack spacing={2}>
             <Stack
@@ -90,20 +91,20 @@ function WCLight(prop: WCLightProp) {
                 <MdLightbulb />
                 <Slider
                     aria-label="Dimmer"
+                    data-testid="Dimmer"
                     min={0}
                     max={1}
                     step={0.01}
                     value={dimmer}
                     onChange={(_, v) => {
                         setDimmer(v);
-                        updateValues();
                     }}
                 />
                 <MdLightbulbOutline />
                 <Typography
                     variant="caption"
                     noWrap={true}
-                    width="48px"
+                    width="50px"
                     textAlign="right"
                 >
                     {(dimmer * 100).toFixed(0)} %
@@ -122,13 +123,13 @@ function WCLight(prop: WCLightProp) {
                 />
                 <Slider
                     aria-label="Temp"
+                    data-testid="Temp"
                     min={0}
                     max={1}
                     step={0.01}
                     value={colorTemp}
                     onChange={(_, v) => {
                         setColorTemp(v);
-                        updateValues();
                     }}
                 />
                 <Box

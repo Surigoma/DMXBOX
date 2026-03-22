@@ -5,6 +5,7 @@ import { MdLightbulb, MdLightbulbOutline } from "react-icons/md";
 
 interface DimmerProp {
     name: string;
+    id?: string;
 }
 function Dimmer(prop: DimmerProp) {
     const { control, getValues, setValue } = useFormContext();
@@ -23,8 +24,10 @@ function Dimmer(prop: DimmerProp) {
                 render={({ field }) => (
                     <Slider
                         aria-label="Dimmer"
+                        data-testid="Dimmer"
                         min={0}
                         max={255}
+                        id={prop.id}
                         value={field.value}
                         onChange={(e) => field.onChange(e?.valueOf())}
                     />
