@@ -45,7 +45,11 @@ export function AddEditGroup(prop: AddGroupProp) {
         setTitle(getValues(prop.name + ".name"));
     }, [prop, getValues]);
     return (
-        <Dialog open={prop.open} aria-hidden={!prop.open}>
+        <Dialog
+            open={prop.open}
+            aria-hidden={!prop.open}
+            data-testid="GroupEditDialog"
+        >
             <DialogTitle>
                 Group: {title !== "" ? title : "New Group"}
             </DialogTitle>
@@ -57,6 +61,7 @@ export function AddEditGroup(prop: AddGroupProp) {
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             label="Title"
+                            data-testid="OpGroupTitle"
                         />
                     </FormControl>
                     <FormControl fullWidth margin="normal">
@@ -65,6 +70,7 @@ export function AddEditGroup(prop: AddGroupProp) {
                             value={id}
                             onChange={(e) => setId(e.target.value)}
                             label="ID"
+                            data-testid="OpGroupId"
                         />
                     </FormControl>
                 </FormGroup>
@@ -106,12 +112,14 @@ function Group(prop: GroupProp) {
                         <IconButton
                             sx={{ marginRight: "8px" }}
                             onClick={() => setOpenDelete(true)}
+                            data-testid="GroupDeleteButton"
                         >
                             <MdDelete />
                         </IconButton>
                     </Grid>
                     <Grid size="auto">
                         <IconButton
+                            data-testid="GroupEditButton"
                             sx={{ marginRight: "8px" }}
                             onClick={() => setOpenEdit(true)}
                         >
@@ -126,7 +134,11 @@ function Group(prop: GroupProp) {
                     direction={{ xs: "column", md: "row" }}
                 >
                     {group.devices.map((v, i) => (
-                        <Grid key={v.model + "_" + i} size="auto" minWidth="400px">
+                        <Grid
+                            key={v.model + "_" + i}
+                            size="auto"
+                            minWidth="400px"
+                        >
                             <Device base={name} index={i} />
                         </Grid>
                     ))}
@@ -142,6 +154,7 @@ function Group(prop: GroupProp) {
                         });
                         setValue(path, body);
                     }}
+                    data-testid="DeviceAddButton"
                 >
                     Add Device
                 </Button>
@@ -156,8 +169,10 @@ function Group(prop: GroupProp) {
                     }
                     const oldId = prop.name;
                     const newId = r.id;
-                    const body = getValues(parent);
-                    body[oldId].title = r.title;
+                    const body = getValues(parent) as {
+                        [name: string]: DMXGroup;
+                    };
+                    body[oldId].name = r.title;
                     if (oldId !== r.id) {
                         body[newId] = body[oldId];
                         delete body[oldId];
@@ -166,7 +181,11 @@ function Group(prop: GroupProp) {
                     setOpenEdit(false);
                 }}
             />
-            <Dialog open={openDelete} aria-hidden={!openDelete}>
+            <Dialog
+                open={openDelete}
+                aria-hidden={!openDelete}
+                data-testid="GroupDeleteDialog"
+            >
                 <DialogTitle>
                     Are you sure you want to delete this item?
                 </DialogTitle>

@@ -48,7 +48,7 @@ function Device(prop: DeviceProp) {
     const model = watch(name + ".model");
 
     return (
-        <Card style={{ padding: "5px" }}>
+        <Card style={{ padding: "5px" }} data-testid="DMXDevice">
             <Stack gap={2}>
                 <Grid container>
                     <Grid
@@ -61,7 +61,10 @@ function Device(prop: DeviceProp) {
                         </Typography>
                     </Grid>
                     <Grid>
-                        <IconButton onClick={() => setOpenDelete(true)}>
+                        <IconButton
+                            onClick={() => setOpenDelete(true)}
+                            data-testid="DeviceDeleteButton"
+                        >
                             <MdDelete />
                         </IconButton>
                     </Grid>
@@ -76,6 +79,7 @@ function Device(prop: DeviceProp) {
                                 field.onChange(e.target.value);
                             }}
                             value={field.value}
+                            data-testid="OpModelSelect"
                         >
                             <MenuItem value="dimmer">Dimmer</MenuItem>
                             <MenuItem value="wclight">
@@ -92,7 +96,7 @@ function Device(prop: DeviceProp) {
                         <NumberField
                             label="Start Channel"
                             value={field.value}
-                            min={0}
+                            min={1}
                             max={255}
                             format={{ useGrouping: false }}
                             onValueChange={(e) => field.onChange(e?.valueOf())}
@@ -101,7 +105,11 @@ function Device(prop: DeviceProp) {
                 ></Controller>
                 {ModelSelector(model, name)}
             </Stack>
-            <Dialog open={openDelete} aria-hidden={!openDelete}>
+            <Dialog
+                open={openDelete}
+                aria-hidden={!openDelete}
+                data-testid="DeviceDeleteDialog"
+            >
                 <DialogTitle>
                     Are you sure you want to delete this item?
                 </DialogTitle>
@@ -119,7 +127,7 @@ function Device(prop: DeviceProp) {
                             const body = getValues(prop.base) as DMXGroup;
                             body.devices.splice(prop.index, 1);
                             setValue(prop.base, body);
-                            console.log(body)
+                            console.log(body);
                             setOpenDelete(false);
                         }}
                     >
