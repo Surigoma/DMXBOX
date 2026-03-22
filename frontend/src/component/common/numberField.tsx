@@ -120,11 +120,11 @@ export default function NumberField({
                     />
                 )}
             />
-            {help !== undefined ? 
+            {help !== undefined ? (
                 <FormHelperText sx={{ ml: 0, "&:empty": { mt: 0 } }}>
                     {help}
                 </FormHelperText>
-            : other.min !== undefined && other.max !== undefined ? (
+            ) : other.min !== undefined && other.max !== undefined ? (
                 <FormHelperText sx={{ ml: 0, "&:empty": { mt: 0 } }}>
                     Enter value between {other.min} and {other.max}
                 </FormHelperText>
