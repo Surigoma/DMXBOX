@@ -46,7 +46,7 @@ describe("WCLight option", async () => {
     describe("Dimmer", async () => {
         it("Can change value using mouse", async () => {
             const { getByTestId, getByRole } = await CreateTestComponent();
-            const dimmer = getByTestId("Dimmer");
+            const dimmer = getByTestId("OpDimmer");
             const DimmerSlider = getByRole("slider").first();
             await expect.element(dimmer).toBeVisible();
             const DimmerHeight = dimmer.element().clientHeight;
@@ -71,7 +71,7 @@ describe("WCLight option", async () => {
     describe("Color Temp", async () => {
         it("Can change value using mouse", async () => {
             const { getByTestId, getByRole } = await CreateTestComponent();
-            const temp = getByTestId("Temp");
+            const temp = getByTestId("OpTemp");
             const TempSlider = getByRole("slider").nth(1);
             await expect.element(temp).toBeVisible();
             const TempHeight = temp.element().clientHeight;
@@ -155,12 +155,12 @@ describe("WCLight option", async () => {
         tests.forEach((v) => {
             it(v.name, async () => {
                 const { getByTestId, getByText } = await CreateTestComponent();
-                const dimmer = getByTestId("Dimmer");
+                const dimmer = getByTestId("OpDimmer");
                 const submit = getByText("SUBMIT");
                 await expect.element(dimmer).toBeVisible();
                 const DimmerHeight = dimmer.element().clientHeight;
                 const DimmerWidth = dimmer.element().clientWidth;
-                const temp = getByTestId("Temp");
+                const temp = getByTestId("OpTemp");
                 await expect.element(temp).toBeVisible();
                 const TempHeight = temp.element().clientHeight;
                 const TempWidth = temp.element().clientWidth;
@@ -184,7 +184,7 @@ describe("WCLight option", async () => {
     it("Can submit", async () => {
         const { getByTestId, getByRole, getByText } =
             await CreateTestComponent();
-        const dimmer = getByTestId("Dimmer");
+        const dimmer = getByTestId("OpDimmer");
         const DimmerSlider = getByRole("slider").first();
         const submit = getByText("SUBMIT");
         await expect.element(dimmer).toBeVisible();
@@ -208,7 +208,7 @@ describe("WCLight option", async () => {
         result.test.max = [0];
         const { getByTestId, getByRole, getByText } =
             await CreateTestComponent();
-        const dimmer = getByTestId("Dimmer");
+        const dimmer = getByTestId("OpDimmer");
         const DimmerSlider = getByRole("slider").first();
         const submit = getByText("SUBMIT");
         await expect.element(dimmer).toBeVisible();

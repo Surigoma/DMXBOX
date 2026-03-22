@@ -62,9 +62,11 @@ function WCLight(prop: WCLightProp) {
         const target = values.slice(0, 2);
         const cool = target[0];
         const warm = target[1];
+        const dimmer = Math.max(...target) / 255;
+        const temp = cool / (cool + warm);
         return {
-            dimmer: Math.max(...target) / 255,
-            temp: cool / (cool + warm),
+            dimmer: dimmer,
+            temp: !isNaN(temp) ? temp : 0,
         };
     }
     function convertWCInfoToDMX(values: WCInfo): number[] {
@@ -82,7 +84,7 @@ function WCLight(prop: WCLightProp) {
         setColorTemp(wcInfo.temp);
     }, []);
     return (
-        <Stack spacing={2}>
+        <Stack spacing={2} data-testid="WCLight">
             <Stack
                 spacing={2}
                 direction="row"
@@ -91,7 +93,7 @@ function WCLight(prop: WCLightProp) {
                 <MdLightbulb />
                 <Slider
                     aria-label="Dimmer"
-                    data-testid="Dimmer"
+                    data-testid="OpDimmer"
                     min={0}
                     max={1}
                     step={0.01}
@@ -123,7 +125,7 @@ function WCLight(prop: WCLightProp) {
                 />
                 <Slider
                     aria-label="Temp"
-                    data-testid="Temp"
+                    data-testid="OpTemp"
                     min={0}
                     max={1}
                     step={0.01}

@@ -16,7 +16,12 @@ function Dimmer(prop: DimmerProp) {
         }
     });
     return (
-        <Stack spacing={2} direction="row" sx={{ alignItems: "center", mb: 1 }}>
+        <Stack
+            spacing={2}
+            direction="row"
+            sx={{ alignItems: "center", mb: 1 }}
+            data-testid="Dimmer"
+        >
             <MdLightbulb />
             <Controller
                 name={prop.name + ".max[0]"}
@@ -24,7 +29,7 @@ function Dimmer(prop: DimmerProp) {
                 render={({ field }) => (
                     <Slider
                         aria-label="Dimmer"
-                        data-testid="Dimmer"
+                        data-testid="OpDimmer"
                         min={0}
                         max={255}
                         id={prop.id}

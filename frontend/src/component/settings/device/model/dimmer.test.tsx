@@ -51,7 +51,7 @@ describe("Dimmer Element", async () => {
     it("Can change value using Click", async () => {
         const { getByTestId, getByRole } = await CreateTestComponent();
 
-        const dimmer = getByTestId("Dimmer");
+        const dimmer = getByTestId("OpDimmer");
         const slider = getByRole("slider");
         await expect.element(dimmer).toBeVisible();
         const height = dimmer.element().clientHeight;
@@ -75,7 +75,7 @@ describe("Dimmer Element", async () => {
     it("Shown", async () => {
         const { getByTestId, getByRole, getByText } =
             await CreateTestComponent();
-        const dimmer = getByTestId("Dimmer");
+        const dimmer = getByTestId("OpDimmer");
         const slider = getByRole("slider");
         const submit = getByText("SUBMIT");
 
@@ -96,7 +96,7 @@ describe("Dimmer Element", async () => {
         result.test.max = [0, 0, 0];
         const { getByTestId, getByRole, getByText } =
             await CreateTestComponent();
-        const dimmer = getByTestId("Dimmer");
+        const dimmer = getByTestId("OpDimmer");
         const slider = getByRole("slider");
         const submit = getByText("SUBMIT");
 
