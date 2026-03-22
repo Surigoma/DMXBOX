@@ -24,6 +24,8 @@ export default defineConfig({
     coverage: {
       reportsDirectory: "./test/coverage/",
       provider: "v8",
+      include: ["./src/**/*.ts", "./src/**/*.tsx"],
+      exclude: ["./src/**/*.test.ts", "./src/**/*.test.tsx"],
     },
     reporters: ["default", "html"],
     outputFile: {
