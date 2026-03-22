@@ -1,47 +1,97 @@
-import { test, expect } from "vitest";
-import { render } from "vitest-browser-react";
+import { expect, describe, it } from "vitest";
+import { render, type RenderResult } from "vitest-browser-react";
 import Checked from "./checked";
 import { FormProvider, useForm } from "react-hook-form";
 import { userEvent } from "vitest/browser";
 
-test("Check box is work", async () => {
+describe("Checked", async () => {
+    const user = userEvent.setup();
     interface testForm {
         test: boolean;
+        test2: string[];
     }
-    const result: testForm = {
+    let result: testForm = {
         test: false,
+        test2: [],
     };
-    function TestForm(f: { callback: (v: testForm) => void }) {
+    function TestForm(f: {
+        callback: (v: testForm) => void;
+        target: string;
+        value?: string;
+    }) {
         const configForm = useForm<testForm>({
             defaultValues: {
                 test: false,
+                test2: [],
             },
         });
         return (
             <FormProvider {...configForm}>
                 <form onSubmit={configForm.handleSubmit((v) => f.callback(v))}>
-                    <Checked target="test" title="test" />
+                    <Checked target={f.target} title="test" value={f.value} />
                     <input type="submit" value="SUBMIT" />
                 </form>
             </FormProvider>
         );
     }
-    const { getByRole, getByText } = await render(
-        <TestForm
-            callback={(v) => {
-                result.test = v.test;
-            }}
-        ></TestForm>,
-    );
-    const checked = getByRole("checkbox");
-    const submit = getByText("SUBMIT");
-    await expect.element(checked).not.toBeChecked();
-    await userEvent.click(checked);
-    await expect.element(checked).toBeChecked();
-    await userEvent.click(submit);
-    await expect(result.test).toBe(true);
-    await userEvent.click(checked);
-    await expect.element(checked).not.toBeChecked();
-    await userEvent.click(submit);
-    await expect(result.test).toBe(false);
+    function CreateTestComponent(
+        target: string,
+        value?: string,
+    ): Promise<RenderResult> {
+        return render(
+            <TestForm
+                target={target}
+                value={value}
+                callback={(v) => {
+                    console.log(v);
+                    result = v;
+                }}
+            ></TestForm>,
+        );
+    }
+    it("Shown", async () => {
+        const { getByRole } = await CreateTestComponent("test");
+        const checked = getByRole("checkbox");
+        await expect.element(checked).toBeVisible();
+    });
+    it("Can checkable", async () => {
+        const { getByRole } = await CreateTestComponent("test");
+        const checked = getByRole("checkbox");
+        await expect.element(checked).not.toBeChecked();
+        await user.click(checked);
+        await expect.element(checked).toBeChecked();
+        await user.click(checked);
+        await expect.element(checked).not.toBeChecked();
+    });
+    describe("Types", async () => {
+        it("Can submit for boolean", async () => {
+            const { getByRole, getByText } = await CreateTestComponent("test");
+            const checked = getByRole("checkbox");
+            const submit = getByText("SUBMIT");
+            await user.click(checked);
+            await user.click(submit);
+            await expect(result.test).toBe(true);
+            await user.click(checked);
+            await expect.element(checked).not.toBeChecked();
+            await user.click(submit);
+            await expect(result.test).toBe(false);
+        });
+        it("Can submit for list of string", async () => {
+            const { getByRole, getByText } = await CreateTestComponent(
+                "test2",
+                "test3",
+            );
+            const checked = getByRole("checkbox");
+            const submit = getByText("SUBMIT");
+            await expect.element(checked).toBeVisible();
+            await user.click(checked);
+            await user.click(submit);
+            await expect.element(checked).toBeChecked();
+            await expect(result.test2).toEqual(["test3"]);
+            await user.click(checked);
+            await expect.element(checked).not.toBeChecked();
+            await user.click(submit);
+            await expect(result.test2).toEqual([]);
+        });
+    });
 });
