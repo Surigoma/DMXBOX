@@ -48,7 +48,7 @@ var OscServer packageModule.PackageModule = packageModule.PackageModule{
 	ModuleName:     "osc",
 	Initialize:     Initialize,
 	Run:            StartOSC,
-	Stop:           func() {},
+	Stop:           func() { wg.Done() },
 	MessageHandler: HandleMessage,
 }
 
