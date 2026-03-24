@@ -2,13 +2,13 @@ import { expect, describe, it } from "vitest";
 import { render } from "vitest-browser-react";
 import { FormProvider, useForm } from "react-hook-form";
 import Device from "./device";
-import type { DMXGroup } from "../../../types";
+import type { TDMXGroup } from "../../../types";
 import { user, UserSetup } from "../../../test/helper";
 
 describe("DMXDevice Component", async () => {
     UserSetup();
     interface testForm {
-        test: DMXGroup;
+        test: TDMXGroup;
     }
     const result: testForm = {
         test: {

@@ -3,10 +3,10 @@ import json from "react-syntax-highlighter/dist/esm/languages/hljs/json";
 import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
 import { createFileRoute } from "@tanstack/react-router";
 import useSWR from "swr";
-import { FrontConfigContext, fetcher, genBackendPath } from "./__root";
+import { FrontConfigContext, genBackendPath, typedFetcher } from "./__root";
 import { useContext, useEffect, useState, type ReactElement } from "react";
 import Grid from "@mui/material/Grid";
-import type { Config } from "../types";
+import { Config, type TConfig } from "../types";
 import {
     Accordion,
     AccordionDetails,
@@ -43,24 +43,24 @@ function RouteComponent() {
     const config = useContext(FrontConfigContext);
     const { data, error, isLoading } = useSWR(
         genBackendPath(config, "/api/v1/config/all"),
-        fetcher,
+        typedFetcher(Config),
     );
-    const [result, setResult] = useState(data as Config);
+    const [result, setResult] = useState(data as TConfig);
     const [sendResultShow, setSendResultShow] = useState(false);
     const [sendResult, setSendResult] = useState<postResult>({
         success: false,
         message: <>Not ready</>,
     });
     const [resultShow, setResultShow] = useState(false);
-    const configForm = useForm<Config>({});
+    const configForm = useForm<TConfig>({});
     useEffect(() => {
-        setResult(data);
-        configForm.reset(data as Config, {
+        setResult(data as TConfig);
+        configForm.reset(data as TConfig, {
             keepDefaultValues: false,
         });
     }, [data, configForm]);
 
-    async function onSubmit(data: Config) {
+    async function onSubmit(data: TConfig) {
         setResult(data);
         const result = await fetch(genBackendPath(config, "/api/v1/config/save"), {
             method: "POST",

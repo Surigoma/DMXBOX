@@ -20,7 +20,7 @@ import Dimmer from "./model/dimmer";
 import NumberField from "../../common/numberField";
 import WCLight from "./model/wclight";
 import { MdDelete } from "react-icons/md";
-import type { DMXGroup } from "../../../types";
+import type { TDMXGroup } from "../../../types";
 
 interface DeviceProp {
     index: number;
@@ -124,7 +124,7 @@ function Device(prop: DeviceProp) {
                     <Button
                         color="error"
                         onClick={() => {
-                            const body = getValues(prop.base) as DMXGroup;
+                            const body = getValues(prop.base) as TDMXGroup;
                             body.devices.splice(prop.index, 1);
                             setValue(prop.base, body);
                             console.log(body);

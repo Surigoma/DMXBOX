@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { FrontConfigContext, genBackendPath } from "../routes/__root";
 import { useContext, useMemo } from "react";
-import type { DMXGroupInfo } from "../types";
+import type { TDMXGroup } from "../types";
 
 function FadeControl({
     name,
@@ -16,7 +16,7 @@ function FadeControl({
     showCutin,
 }: {
     name: string;
-    data: DMXGroupInfo;
+    data: TDMXGroup;
     showCutin: boolean;
 }) {
     const config = useContext(FrontConfigContext);

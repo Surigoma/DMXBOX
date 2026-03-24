@@ -1,6 +1,6 @@
 import useSWR from "swr";
 import {
-    fetcher,
+    typedFetcher,
     FrontConfigContext,
     genBackendPath,
 } from "../../../routes/__root";
@@ -15,13 +15,14 @@ import {
     Typography,
 } from "@mui/material";
 import { Controller, useFormContext } from "react-hook-form";
+import { ConsoleAPIResult } from "../../../types";
 
 function OutputDMX() {
     const { control } = useFormContext();
     const config = useContext(FrontConfigContext);
     const { data, error, isLoading } = useSWR<string[]>(
         genBackendPath(config, "/api/v1/config/console"),
-        fetcher,
+        typedFetcher(ConsoleAPIResult),
     );
     if (isLoading) {
         return <Alert severity="error">Failed to get Console ports.</Alert>;

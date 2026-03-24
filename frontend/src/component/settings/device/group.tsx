@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
-import type { DMXDevice, DMXGroup } from "../../../types";
+import type { TDMXDevice, TDMXGroup, TDMXGroupMap } from "../../../types";
 import { MdDelete, MdEdit } from "react-icons/md";
 import Device from "./device";
 
@@ -93,7 +93,7 @@ function Group(prop: GroupProp) {
     const name = useMemo(() => parent + "." + prop.name, [prop]);
     const [openEdit, setOpenEdit] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
-    const group = watch(name) as DMXGroup;
+    const group = watch(name) as TDMXGroup;
     return (
         <Card variant="outlined">
             <Grid container direction="column">
@@ -146,7 +146,7 @@ function Group(prop: GroupProp) {
                 <Button
                     onClick={() => {
                         const path = name + ".devices";
-                        const body = getValues(path) as DMXDevice[];
+                        const body = getValues(path) as TDMXDevice[];
                         body.push({
                             model: "dimmer",
                             channel: 1,
@@ -169,9 +169,7 @@ function Group(prop: GroupProp) {
                     }
                     const oldId = prop.name;
                     const newId = r.id;
-                    const body = getValues(parent) as {
-                        [name: string]: DMXGroup;
-                    };
+                    const body = getValues(parent) as TDMXGroupMap;
                     body[oldId].name = r.title;
                     if (oldId !== r.id) {
                         body[newId] = body[oldId];

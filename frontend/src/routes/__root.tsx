@@ -17,14 +17,17 @@ import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
+import z from "zod";
 
 const Config = new Configuration();
 export const FrontConfigContext = createContext(Config.body);
 
-export function fetcher(url: string) {
-    return fetch(url, { credentials: "include", mode: "cors" }).then((r) =>
-        r.json(),
-    );
+export function typedFetcher<T extends z.ZodTypeAny>(type: T) {
+    return (url: string) =>{
+        return fetch(url, {credentials: "include", mode: "cors"}).then((r)=>r.json()).then((r)=>{
+            return type.parse(r);
+        })
+    }
 }
 
 export function genBackendPath(

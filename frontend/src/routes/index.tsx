@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { FrontConfigContext, fetcher, genBackendPath } from "./__root";
+import { FrontConfigContext, genBackendPath, typedFetcher } from "./__root";
 import useSWR from "swr";
 import FadeControl from "../component/FadeControl";
 import {
@@ -11,8 +11,12 @@ import {
 } from "@mui/material";
 import ErrorComponent from "../component/Error";
 import { useContext, useState } from "react";
-import type { DMXGroupInfo } from "../types";
+import { DMXGroupMap, type TDMXGroupMap } from "../types";
 import MuteControl from "../component/MuteControl";
+import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
+import json from "react-syntax-highlighter/dist/esm/languages/hljs/json";
+import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
+SyntaxHighlighter.registerLanguage("json", json);
 
 export const Route = createFileRoute("/")({
     component: ControlPage,
@@ -22,10 +26,10 @@ function ControlPage() {
     const config = useContext(FrontConfigContext);
     const { data, error, isLoading } = useSWR(
         genBackendPath(config, "/api/v1/config/fade"),
-        fetcher,
+        typedFetcher(DMXGroupMap),
     );
     const [showCutin, setCutin] = useState(false);
-    const dmxInfo = data as { [group: string]: DMXGroupInfo };
+    const dmxInfo = data as TDMXGroupMap;
     if (error) {
         return (
             <ErrorComponent>
@@ -37,6 +41,13 @@ function ControlPage() {
                 >
                     config.json
                 </Link>
+                <SyntaxHighlighter
+                    language="json"
+                    style={atomOneDark}
+                    wrapLines
+                >
+                    {JSON.stringify(error, undefined, 4)}
+                </SyntaxHighlighter>
             </ErrorComponent>
         );
     }

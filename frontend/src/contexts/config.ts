@@ -1,6 +1,8 @@
-export type ConfigBody = {
-    backendPort: number;
-};
+import z from "zod";
+const ConfigBody = z.object({
+    backendPort: z.number().min(0).max(65535)
+})
+export type ConfigBody = z.infer<typeof ConfigBody>;
 
 class Configuration {
     body: ConfigBody = {

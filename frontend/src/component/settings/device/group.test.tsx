@@ -1,7 +1,7 @@
 import { expect, describe, it } from "vitest";
 import { render } from "vitest-browser-react";
 import { FormProvider, useForm } from "react-hook-form";
-import type { DMXGroup, DMXServer } from "../../../types";
+import type { TDMXGroup, TDMXServer } from "../../../types";
 import Group from "./group";
 import { user, UserSetup } from "../../../test/helper";
 import { useMemo } from "react";
@@ -9,7 +9,7 @@ import { useMemo } from "react";
 describe("DMXGroup Component", async () => {
     UserSetup();
     interface testForm {
-        dmx: DMXServer;
+        dmx: TDMXServer;
     }
     const defaultValue: testForm = {
         dmx: {
@@ -36,7 +36,7 @@ describe("DMXGroup Component", async () => {
             defaultValues: defaultValue,
         });
         const groups = configForm.watch("dmx.groups") as {
-            [key: string]: DMXGroup;
+            [key: string]: TDMXGroup;
         };
         const groupKeys = useMemo(() => Object.keys(groups ?? {}), [groups]);
         return (
