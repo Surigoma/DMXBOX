@@ -22,7 +22,7 @@ const Item = styled(Paper)(({ theme }) => ({
 function InputHTTP() {
     const { control, register, setValue } = useFormContext();
     return (
-        <Grid direction="column" spacing={1}>
+        <Grid direction="column" spacing={1} data-testid="InputHTTP">
             <Typography variant="h5">HTTP</Typography>
             <FormGroup>
                 <FormControl margin="normal">
@@ -30,6 +30,7 @@ function InputHTTP() {
                         <Grid size="grow">
                             <TextField
                                 fullWidth
+                                data-testid="OpIP"
                                 label="Address"
                                 {...register("http.ip")}
                             />
@@ -41,6 +42,8 @@ function InputHTTP() {
                                 render={({ field }) => (
                                     <NumberField
                                         label="Port"
+                                        name="OpPort"
+                                        data-testid="OpPort"
                                         value={field.value}
                                         min={1}
                                         max={65535}
@@ -60,6 +63,8 @@ function InputHTTP() {
                             render={({ field }) => (
                                 <TextField
                                     fullWidth
+                                    name="OpAccepts"
+                                    data-testid="OpAccepts"
                                     label="Accept addresses"
                                     onKeyDown={(e) => {
                                         if (e.key === "Enter") {

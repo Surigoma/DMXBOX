@@ -11,7 +11,7 @@ import NumberField from "../../common/numberField";
 function InputTCP() {
     const { control, register } = useFormContext();
     return (
-        <Grid direction="column" spacing={1}>
+        <Grid direction="column" spacing={1} data-testid="InputTCP">
             <Typography variant="h5">TCP</Typography>
             <FormGroup>
                 <FormControl margin="normal">
@@ -20,6 +20,7 @@ function InputTCP() {
                             <TextField
                                 fullWidth
                                 label="Address"
+                                data-testid="OpIp"
                                 {...register("tcp.ip")}
                             />
                         </Grid>
