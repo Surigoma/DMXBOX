@@ -23,11 +23,13 @@ const Config = new Configuration();
 export const FrontConfigContext = createContext(Config.body);
 
 export function typedFetcher<T extends z.ZodTypeAny>(type: T) {
-    return (url: string) =>{
-        return fetch(url, {credentials: "include", mode: "cors"}).then((r)=>r.json()).then((r)=>{
-            return type.parse(r);
-        })
-    }
+    return (url: string) => {
+        return fetch(url, { credentials: "include", mode: "cors" })
+            .then((r) => r.json())
+            .then((r) => {
+                return type.parse(r);
+            });
+    };
 }
 
 export function genBackendPath(
