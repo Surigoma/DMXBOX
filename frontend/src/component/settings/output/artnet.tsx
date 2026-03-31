@@ -38,7 +38,7 @@ function OutputArtnet() {
         },
     ];
     return (
-        <Grid spacing={2}>
+        <Grid spacing={2} data-testid="OutputArtnet">
             <Typography variant="h5">Artnet</Typography>
             <FormGroup>
                 <FormControl margin="normal">

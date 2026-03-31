@@ -34,7 +34,7 @@ function OutputDMX() {
         return <Alert severity="warning">DMX Port is not found.</Alert>;
     }
     return (
-        <Grid spacing={2}>
+        <Grid spacing={2} data-testid="OutputDMX">
             <Typography variant="h5">DMX</Typography>
             <FormControl fullWidth margin="normal">
                 <InputLabel id="output-dmx-port">Port</InputLabel>
@@ -46,12 +46,17 @@ function OutputDMX() {
                             value={field.value}
                             labelId="output-dmx-port"
                             label="Port"
+                            data-testid="OpPort"
                             onChange={(e) => {
                                 field.onChange(e.target.value);
                             }}
                         >
                             {data.map((v) => (
-                                <MenuItem key={v} value={v}>
+                                <MenuItem
+                                    key={v}
+                                    value={v}
+                                    data-testid={"OpPort" + v}
+                                >
                                     {v}
                                 </MenuItem>
                             ))}
