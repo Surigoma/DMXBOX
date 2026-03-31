@@ -25,10 +25,13 @@ function OutputDMX() {
         typedFetcher(ConsoleAPIResult),
     );
     if (isLoading) {
-        return <Alert severity="error">Failed to get Console ports.</Alert>;
+        return "Loading...";
     }
     if (data === undefined || error) {
         return <Alert severity="error">Failed to get Console ports.</Alert>;
+    }
+    if (data.length <= 0) {
+        return <Alert severity="warning">DMX Port is not found.</Alert>;
     }
     return (
         <Grid spacing={2}>
