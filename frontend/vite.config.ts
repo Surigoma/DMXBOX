@@ -15,6 +15,7 @@ export default defineConfig({
     react(),
   ],
   test: {
+    testTimeout: 3000,
     browser: {
       enabled: true,
       provider: playwright(),
