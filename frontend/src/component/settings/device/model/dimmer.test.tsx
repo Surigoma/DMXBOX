@@ -2,7 +2,7 @@ import { expect, describe, it } from "vitest";
 import { render } from "vitest-browser-react";
 import { FormProvider, useForm } from "react-hook-form";
 import Dimmer from "./dimmer";
-import { user, UserSetup } from "../../../../test/helper";
+import { user, UserSetup } from "../../../../test/user_helper";
 
 describe("Dimmer Element", async () => {
     UserSetup();

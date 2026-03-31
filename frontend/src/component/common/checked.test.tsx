@@ -2,7 +2,7 @@ import { expect, describe, it } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 import Checked from "./checked";
 import { FormProvider, useForm } from "react-hook-form";
-import { user, UserSetup } from "../../test/helper";
+import { user, UserSetup } from "../../test/user_helper";
 
 describe("Checked", async () => {
     UserSetup();

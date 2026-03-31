@@ -1,7 +1,7 @@
 import { expect, describe, it } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 import { FormProvider, useForm } from "react-hook-form";
-import { user, UserSetup } from "../../../test/helper";
+import { user, UserSetup } from "../../../test/user_helper";
 import type { TTCPServer } from "../../../types";
 import InputTCP from "./tcp";
 

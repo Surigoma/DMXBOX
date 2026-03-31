@@ -3,7 +3,7 @@ import { render } from "vitest-browser-react";
 import { FormProvider, useForm } from "react-hook-form";
 import Device from "./device";
 import type { TDMXGroup } from "../../../types";
-import { user, UserSetup } from "../../../test/helper";
+import { user, UserSetup } from "../../../test/user_helper";
 
 describe("DMXDevice Component", async () => {
     UserSetup();

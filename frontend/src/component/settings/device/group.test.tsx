@@ -3,7 +3,7 @@ import { render } from "vitest-browser-react";
 import { FormProvider, useForm } from "react-hook-form";
 import type { TDMXGroup, TDMXServer } from "../../../types";
 import Group from "./group";
-import { user, UserSetup } from "../../../test/helper";
+import { user, UserSetup } from "../../../test/user_helper";
 import { useMemo } from "react";
 
 describe("DMXGroup Component", async () => {
