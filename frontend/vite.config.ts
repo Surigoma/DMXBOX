@@ -16,6 +16,11 @@ export default defineConfig({
   ],
   test: {
     testTimeout: 3000,
+    fileParallelism: true,
+    sequence: {
+      concurrent: false,
+    },
+    isolate: true,
     browser: {
       enabled: true,
       provider: playwright(),
