@@ -20,7 +20,7 @@ function OutputOSC() {
         (i + 1).toString(),
     );
     return (
-        <Grid spacing={2}>
+        <Grid spacing={2} data-testid="OutputOSC">
             <FormGroup>
                 <Typography variant="h5">OSC</Typography>
                 <FormControl fullWidth margin="normal">
@@ -72,6 +72,7 @@ function OutputOSC() {
                                     <Select
                                         labelId="osc-type"
                                         label="Sending data type"
+                                        data-testid="OpSendingDataType"
                                         value={field.value}
                                         onChange={(e) => {
                                             field.onChange(e.target.value);
