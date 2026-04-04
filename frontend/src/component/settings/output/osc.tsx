@@ -71,7 +71,7 @@ function OutputOSC() {
                                 render={({ field }) => (
                                     <Select
                                         labelId="osc-type"
-                                        label="Sending data typ"
+                                        label="Sending data type"
                                         value={field.value}
                                         onChange={(e) => {
                                             field.onChange(e.target.value);
