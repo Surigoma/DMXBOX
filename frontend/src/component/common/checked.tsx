@@ -23,7 +23,7 @@ function Checked(param: CheckedParam) {
             return checked;
         } else if (value instanceof Array) {
             return checked
-                ? [...(value || []), param.value]
+                ? [...value, param.value]
                 : value.filter((v) => v !== param.value);
         }
     }

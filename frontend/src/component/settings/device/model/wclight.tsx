@@ -53,9 +53,9 @@ function WCLight(prop: WCLightProp) {
     }, maxValue);
 
     function convertDMXtoWCInfo(values: number[]): WCInfo {
-        if (values === undefined || values.length < 3) {
+        if ( values == null || values.length < 3) {
             return {
-                dimmer: values[0] !== undefined ? values[0] / 255 : 1,
+                dimmer: values[0] != null ? values[0] / 255 : 1,
                 temp: 0.5,
             };
         }

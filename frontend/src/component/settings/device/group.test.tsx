@@ -196,30 +196,60 @@ describe("DMXGroup Component", async () => {
                 },
             } as testForm);
         });
-        it("Can remove device", async () => {
-            const { getByTestId, getByText } = await CreateTestComponent();
+        describe("Delete dialog", async () => {
+            it("Can remove device", async () => {
+                const { getByTestId, getByText } = await CreateTestComponent();
 
-            const deleteButton = getByTestId("DeviceDeleteButton");
-            const deleteDialog = getByTestId("DeviceDeleteDialog");
-            const Confirm = getByText("Confirm");
-            const submit = getByText("SUBMIT");
-            await user.click(deleteButton);
-            await expect.element(deleteDialog).toBeVisible();
-            await user.click(Confirm);
-            await user.click(submit);
-            await expect(result).toEqual({
-                dmx: {
-                    delay: 0,
-                    fadeInterval: 0,
-                    fps: 30,
-                    groups: {
-                        test: {
-                            name: "test",
-                            devices: [],
+                const deleteButton = getByTestId("GroupDeleteButton");
+                const deleteDialog = getByTestId("GroupDeleteDialog");
+                const Confirm = getByText("Confirm");
+                const submit = getByText("SUBMIT");
+                await user.click(deleteButton);
+                await expect.element(deleteDialog).toBeVisible();
+                await user.click(Confirm);
+                await user.click(submit);
+                await expect(result).toEqual({
+                    dmx: {
+                        delay: 0,
+                        fadeInterval: 0,
+                        fps: 30,
+                        groups: {
                         },
                     },
-                },
-            } as testForm);
+                } as testForm);
+            });
+
+            it("Can cancel", async () => {
+                const { getByTestId, getByText } = await CreateTestComponent();
+
+                const deleteButton = getByTestId("GroupDeleteButton");
+                const deleteDialog = getByTestId("GroupDeleteDialog");
+                const Cancel = getByText("Cancel");
+                const submit = getByText("SUBMIT");
+                await user.click(deleteButton);
+                await expect.element(deleteDialog).toBeVisible();
+                await user.click(Cancel);
+                await user.click(submit);
+                await expect(result).toEqual({
+                    dmx: {
+                        delay: 0,
+                        fadeInterval: 0,
+                        fps: 30,
+                        groups: {
+                            test: {
+                                name: "test",
+                                devices: [
+                                    {
+                                        model: "dimmer",
+                                        channel: 1,
+                                        max: [0],
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                } as testForm);
+            });
         });
     });
 });

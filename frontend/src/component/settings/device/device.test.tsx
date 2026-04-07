@@ -123,23 +123,50 @@ describe("DMXDevice Component", async () => {
             },
         } as testForm);
     });
-    it("Can remove", async () => {
-        const { getByTestId, getByText } = await CreateTestComponent();
-        const device = getByTestId("DMXDevice");
-        const deleteButton = getByTestId("DeviceDeleteButton");
-        const deleteDialog = getByTestId("DeviceDeleteDialog");
-        const Confirm = getByText("Confirm");
-        const submit = getByText("SUBMIT");
-        await expect.element(device).toBeVisible();
-        await user.click(deleteButton);
-        await expect.element(deleteDialog).toBeVisible();
-        await user.click(Confirm);
-        await user.click(submit);
-        await expect(result).toEqual({
-            test: {
-                name: "test",
-                devices: [],
-            },
-        } as testForm);
+    describe("Delete dialog", async () => {
+        it("Can remove", async () => {
+            const { getByTestId, getByText } = await CreateTestComponent();
+            const device = getByTestId("DMXDevice");
+            const deleteButton = getByTestId("DeviceDeleteButton");
+            const deleteDialog = getByTestId("DeviceDeleteDialog");
+            const Confirm = getByText("Confirm");
+            const submit = getByText("SUBMIT");
+            await expect.element(device).toBeVisible();
+            await user.click(deleteButton);
+            await expect.element(deleteDialog).toBeVisible();
+            await user.click(Confirm);
+            await user.click(submit);
+            await expect(result).toEqual({
+                test: {
+                    name: "test",
+                    devices: [],
+                },
+            } as testForm);
+        });
+        it("Can cancel", async () => {
+            const { getByTestId, getByText } = await CreateTestComponent();
+            const device = getByTestId("DMXDevice");
+            const deleteButton = getByTestId("DeviceDeleteButton");
+            const deleteDialog = getByTestId("DeviceDeleteDialog");
+            const Cancel = getByText("Cancel");
+            const submit = getByText("SUBMIT");
+            await expect.element(device).toBeVisible();
+            await user.click(deleteButton);
+            await expect.element(deleteDialog).toBeVisible();
+            await user.click(Cancel);
+            await user.click(submit);
+            await expect(result).toEqual({
+                test: {
+                    name: "test",
+                    devices: [
+                        {
+                            model: "dimmer",
+                            channel: 1,
+                            max: [0],
+                        },
+                    ],
+                },
+            } as testForm);
+        });
     });
 });

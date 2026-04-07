@@ -8,7 +8,7 @@ describe("WCLight option", async () => {
     UserSetup();
     interface testForm {
         test: {
-            max: number[];
+            max: number[] | undefined[];
         };
     }
     const result: testForm = {
@@ -16,13 +16,20 @@ describe("WCLight option", async () => {
             max: [255, 255, 0],
         },
     };
-    function TestForm(f: { callback: (v: testForm) => void }) {
+    function TestForm(f: {
+        callback: (v: testForm) => void;
+        defaultValue?: testForm;
+    }) {
+        const d: testForm =
+            f.defaultValue !== undefined
+                ? JSON.parse(JSON.stringify(f.defaultValue))
+                : {
+                      test: {
+                          max: [255, 255, 0],
+                      },
+                  };
         const configForm = useForm<testForm>({
-            defaultValues: {
-                test: {
-                    max: [255, 255, 0],
-                },
-            },
+            defaultValues: d,
         });
         return (
             <FormProvider {...configForm}>
@@ -33,13 +40,16 @@ describe("WCLight option", async () => {
             </FormProvider>
         );
     }
-    function CreateTestComponent(): Promise<RenderResult> {
+    function CreateTestComponent(
+        defaultValue?: testForm,
+    ): Promise<RenderResult> {
         return render(
             <TestForm
                 callback={(v) => {
                     console.log(v);
                     result.test = v.test;
                 }}
+                defaultValue={defaultValue}
             ></TestForm>,
         );
     }
@@ -205,9 +215,40 @@ describe("WCLight option", async () => {
     });
 
     it("Can convert data when min length", async () => {
-        result.test.max = [0];
-        const { getByTestId, getByRole, getByText } =
-            await CreateTestComponent();
+        const { getByTestId, getByRole, getByText } = await CreateTestComponent(
+            {
+                test: {
+                    max: [255],
+                },
+            },
+        );
+        const dimmer = getByTestId("OpDimmer");
+        const DimmerSlider = getByRole("slider").first();
+        const submit = getByText("SUBMIT");
+        await expect.element(dimmer).toBeVisible();
+        const DimmerHeight = dimmer.element().clientHeight;
+        const DimmerWidth = dimmer.element().clientWidth;
+        await expect.element(DimmerSlider).toHaveValue("1");
+        await user.click(dimmer, {
+            position: {
+                x: DimmerWidth / 2,
+                y: DimmerHeight / 2,
+            },
+        });
+        await expect.element(DimmerSlider).toHaveValue("0.5");
+
+        await user.click(submit);
+
+        await expect(result.test.max).toEqual([64, 64, 0]);
+    });
+    it("Can convert data when undefined", async () => {
+        const { getByTestId, getByRole, getByText } = await CreateTestComponent(
+            {
+                test: {
+                    max: [undefined],
+                },
+            },
+        );
         const dimmer = getByTestId("OpDimmer");
         const DimmerSlider = getByRole("slider").first();
         const submit = getByText("SUBMIT");

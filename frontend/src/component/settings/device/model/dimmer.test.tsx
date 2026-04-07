@@ -16,13 +16,20 @@ describe("Dimmer Element", async () => {
             max: [0],
         },
     };
-    function TestForm(f: { callback: (v: testForm) => void }) {
+    function TestForm(f: {
+        callback: (v: testForm) => void;
+        defaultValue?: testForm;
+    }) {
+        const d: testForm =
+            f.defaultValue !== undefined
+                ? JSON.parse(JSON.stringify(f.defaultValue))
+                : {
+                      test: {
+                          max: [0],
+                      },
+                  };
         const configForm = useForm<testForm>({
-            defaultValues: {
-                test: {
-                    max: [0],
-                },
-            },
+            defaultValues: d,
         });
         return (
             <FormProvider {...configForm}>
@@ -33,13 +40,14 @@ describe("Dimmer Element", async () => {
             </FormProvider>
         );
     }
-    function CreateTestComponent() {
+    function CreateTestComponent(defaultValue?: testForm) {
         return render(
             <TestForm
                 callback={(v) => {
                     console.log(v);
                     result.test = v.test;
                 }}
+                defaultValue={defaultValue}
             ></TestForm>,
         );
     }
@@ -93,9 +101,13 @@ describe("Dimmer Element", async () => {
         await expect(result.test.max).toEqual([255]);
     });
     it("Can cutout data when over length", async () => {
-        result.test.max = [0, 0, 0];
-        const { getByTestId, getByRole, getByText } =
-            await CreateTestComponent();
+        const { getByTestId, getByRole, getByText } = await CreateTestComponent(
+            {
+                test: {
+                    max: [0, 0, 0],
+                },
+            },
+        );
         const dimmer = getByTestId("OpDimmer");
         const slider = getByRole("slider");
         const submit = getByText("SUBMIT");

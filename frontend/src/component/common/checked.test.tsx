@@ -7,12 +7,13 @@ import { user, UserSetup } from "../../test/user_helper";
 describe("Checked", async () => {
     UserSetup();
     interface testForm {
-        test: boolean;
-        test2: string[];
+        bool: boolean;
+        strArray: string[];
+        un?: undefined;
     }
     let result: testForm = {
-        test: false,
-        test2: [],
+        bool: false,
+        strArray: [],
     };
     function TestForm(f: {
         callback: (v: testForm) => void;
@@ -21,8 +22,8 @@ describe("Checked", async () => {
     }) {
         const configForm = useForm<testForm>({
             defaultValues: {
-                test: false,
-                test2: [],
+                bool: false,
+                strArray: [],
             },
         });
         return (
@@ -50,12 +51,12 @@ describe("Checked", async () => {
         );
     }
     it("Shown", async () => {
-        const { getByRole } = await CreateTestComponent("test");
+        const { getByRole } = await CreateTestComponent("bool");
         const checked = getByRole("checkbox");
         await expect.element(checked).toBeVisible();
     });
     it("Can checkable", async () => {
-        const { getByRole } = await CreateTestComponent("test");
+        const { getByRole } = await CreateTestComponent("bool");
         const checked = getByRole("checkbox");
         await expect.element(checked).not.toBeChecked();
         await user.click(checked);
@@ -64,21 +65,33 @@ describe("Checked", async () => {
         await expect.element(checked).not.toBeChecked();
     });
     describe("Types", async () => {
-        it("Can submit for boolean", async () => {
-            const { getByRole, getByText } = await CreateTestComponent("test");
+        it("Can submit for undefined", async () => {
+            const { getByRole, getByText } = await CreateTestComponent("un");
             const checked = getByRole("checkbox");
             const submit = getByText("SUBMIT");
             await user.click(checked);
             await user.click(submit);
-            await expect(result.test).toBe(true);
+            await expect(result.bool).toBe(false);
             await user.click(checked);
             await expect.element(checked).not.toBeChecked();
             await user.click(submit);
-            await expect(result.test).toBe(false);
+            await expect(result.bool).toBe(false);
+        });
+        it("Can submit for boolean", async () => {
+            const { getByRole, getByText } = await CreateTestComponent("bool");
+            const checked = getByRole("checkbox");
+            const submit = getByText("SUBMIT");
+            await user.click(checked);
+            await user.click(submit);
+            await expect(result.bool).toBe(true);
+            await user.click(checked);
+            await expect.element(checked).not.toBeChecked();
+            await user.click(submit);
+            await expect(result.bool).toBe(false);
         });
         it("Can submit for list of string", async () => {
             const { getByRole, getByText } = await CreateTestComponent(
-                "test2",
+                "strArray",
                 "test3",
             );
             const checked = getByRole("checkbox");
@@ -87,11 +100,11 @@ describe("Checked", async () => {
             await user.click(checked);
             await user.click(submit);
             await expect.element(checked).toBeChecked();
-            await expect(result.test2).toEqual(["test3"]);
+            await expect(result.strArray).toEqual(["test3"]);
             await user.click(checked);
             await expect.element(checked).not.toBeChecked();
             await user.click(submit);
-            await expect(result.test2).toEqual([]);
+            await expect(result.strArray).toEqual([]);
         });
     });
 });

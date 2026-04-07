@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useId, type ChangeEventHandler, type ReactNode } from "react";
 import { NumberField as BaseNumberField } from "@base-ui/react/number-field";
 import IconButton from "@mui/material/IconButton";
 import FormControl from "@mui/material/FormControl";
@@ -25,13 +25,13 @@ export default function NumberField({
     help,
     ...other
 }: BaseNumberField.Root.Props & {
-    label?: React.ReactNode;
+    label?: ReactNode;
     size?: "small" | "medium";
     error?: boolean;
     help?: string;
-    onChange?: React.ChangeEventHandler;
+    onChange?: ChangeEventHandler;
 }) {
-    let id = React.useId();
+    let id = useId();
     if (idProp) {
         id = idProp;
     }
