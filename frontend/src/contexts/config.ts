@@ -13,6 +13,7 @@ class Configuration {
     constructor() {
         fetch("./config.json", {}).then((data) => {
             if (!data.ok) {
+                this.isLoading = false;
                 this.isError = true;
                 return;
             }
