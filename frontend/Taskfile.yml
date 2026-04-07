@@ -7,7 +7,7 @@ tasks:
   dev:
     cmd: yarn run dev --host 0.0.0.0
   test:
-    cmd: yarn run test:coverage
+    cmd: yarn run test:coverage --browser.headless
   test_watch:
     cmd: yarn run test:watch
   test_view:
