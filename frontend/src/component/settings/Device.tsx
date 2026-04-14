@@ -18,7 +18,7 @@ function Devices() {
     const groups = watch(parent) as TDMXGroupMap;
     const groupKeys = useMemo(() => Object.keys(groups ?? {}), [groups]);
     return (
-        <Grid container spacing={2} direction="column">
+        <Grid container spacing={2} direction="column" data-testid="Devices">
             <Grid>
                 <Typography variant="h6">Global Options</Typography>
                 <FormGroup>
