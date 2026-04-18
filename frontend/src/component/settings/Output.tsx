@@ -9,7 +9,7 @@ import OutputOSC from "./output/osc";
 function Outputs() {
     const { control } = useFormContext();
     return (
-        <Grid>
+        <Grid data-testid="Outputs">
             <Grid container alignItems="center" spacing={2} margin={2}>
                 <InputLabel id="demo-multiple-chip-label">
                     <Typography variant="h5">Target: </Typography>
