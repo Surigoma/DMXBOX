@@ -7,7 +7,7 @@ import InputTCP from "./input/tcp";
 function Inputs() {
     const { control } = useFormContext();
     return (
-        <Grid container spacing={2} direction="column">
+        <Grid container spacing={2} direction="column" data-testid="Inputs">
             <Grid container margin={2} spacing={2} alignItems="center">
                 <InputLabel>
                     <Typography variant="h5">Modules: </Typography>
