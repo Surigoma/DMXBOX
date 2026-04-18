@@ -24,8 +24,31 @@
             "http://localhost:5173"
         ]
     },
+    "tcp": {
+        "ip": "127.0.0.1",
+        "port": 50000
+    },
     "dmx": {
         "groups": {
+            "aud": {
+                "name": "Audience",
+                "devices": [
+                    {
+                        "model": "dimmer",
+                        "channel": 7,
+                        "max": [
+                            255
+                        ]
+                    },
+                    {
+                        "model": "dimmer",
+                        "channel": 8,
+                        "max": [
+                            255
+                        ]
+                    }
+                ]
+            },
             "stg": {
                 "name": "Stage",
                 "devices": [
@@ -48,35 +71,11 @@
                         ]
                     }
                 ]
-            },
-            "aud": {
-                "name": "Audience",
-                "devices": [
-                    {
-                        "model": "dimmer",
-                        "channel": 7,
-                        "max": [
-                            255
-                        ]
-                    },
-                    {
-                        "model": "dimmer",
-                        "channel": 8,
-                        "max": [
-                            255
-                        ]
-                    }
-                ]
             }
         },
         "fadeInterval": 0.7,
-        "delay": 0.0,
-        "fps": 30,
-        "preStatus": false
-    },
-    "tcp": {
-        "ip": "127.0.0.1",
-        "port": 50000
+        "delay": 0,
+        "fps": 30
     },
     "osc": {
         "ip": "127.0.0.1",
