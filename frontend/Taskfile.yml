@@ -17,4 +17,4 @@ tasks:
     dir: ./frontend
     cmds:
       - yarn
-      - yarn run build --outDir ../dist/static
+      - yarn run build --outDir ../dist/static --emptyOutDir
