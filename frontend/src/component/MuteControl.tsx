@@ -11,7 +11,7 @@ function MuteControl() {
         await fetch(path, { method: "POST" });
     }
     return (
-        <Card variant="outlined">
+        <Card variant="outlined" data-testid="MuteControl">
             <CardContent
                 style={{
                     margin: 0,

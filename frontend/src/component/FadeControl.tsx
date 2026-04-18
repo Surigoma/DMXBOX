@@ -38,7 +38,7 @@ function FadeControl({
         await fetch(path, { method: "POST" });
     }
     return (
-        <Card variant="outlined">
+        <Card variant="outlined" data-testid="FadeControl">
             <CardContent
                 style={{
                     margin: 0,
@@ -107,36 +107,40 @@ function FadeControl({
                             </Button>
                         </Stack>
                     </Grid>
-                    <Grid
-                        size="grow"
-                        height={CutHeight + "%"}
-                        sx={{ minHeight: 0 }}
-                    >
-                        <Stack direction="row" spacing={0} height="100%">
-                            <Button
-                                style={{ width: "100%", height: "100%" }}
-                                color="primary"
-                                size="large"
-                                variant="text"
-                                onClick={async () => {
-                                    await fade(true, true);
-                                }}
-                            >
-                                Cut In
-                            </Button>
-                            <Button
-                                style={{ width: "100%", height: "100%" }}
-                                color="secondary"
-                                size="large"
-                                variant="text"
-                                onClick={async () => {
-                                    await fade(false, true);
-                                }}
-                            >
-                                Cut Out
-                            </Button>
-                        </Stack>
-                    </Grid>
+                    {showCutin ? (
+                        <Grid
+                            size="grow"
+                            height={CutHeight + "%"}
+                            sx={{ minHeight: 0 }}
+                        >
+                            <Stack direction="row" spacing={0} height="100%">
+                                <Button
+                                    style={{ width: "100%", height: "100%" }}
+                                    color="primary"
+                                    size="large"
+                                    variant="text"
+                                    onClick={async () => {
+                                        await fade(true, true);
+                                    }}
+                                >
+                                    Cut In
+                                </Button>
+                                <Button
+                                    style={{ width: "100%", height: "100%" }}
+                                    color="secondary"
+                                    size="large"
+                                    variant="text"
+                                    onClick={async () => {
+                                        await fade(false, true);
+                                    }}
+                                >
+                                    Cut Out
+                                </Button>
+                            </Stack>
+                        </Grid>
+                    ) : (
+                        <></>
+                    )}
                 </Grid>
             </CardContent>
         </Card>
