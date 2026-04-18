@@ -38,4 +38,12 @@ export default defineConfig({
       html: "./test/unit/index.html",
     },
   },
+  build: {
+    rolldownOptions: {
+      output: {
+        minify: true,
+        codeSplitting: false,
+      },
+    },
+  },
 });
