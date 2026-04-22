@@ -3,6 +3,7 @@ package httpServer
 import (
 	"backend/config"
 	"backend/docs"
+	"backend/httpServer/controller"
 	configAPI "backend/httpServer/controller/config"
 	"backend/httpServer/controller/console"
 	"backend/httpServer/controller/dmx"
@@ -56,7 +57,7 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	gin.SetMode(gin.ReleaseMode)
 	listenAddr = fmt.Sprintf("%s:%d", config.Http.IP, config.Http.Port)
 	logger = module.Logger
-	engine = RegisterEndPoints(&config.Http)
+	engine = RegisterEndPoints(&config.Http, module.Version)
 	wg = module.Wg
 	server = &http.Server{
 		Addr:    listenAddr,
@@ -66,7 +67,7 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	return true
 }
 
-func RegisterEndPoints(config *config.HttpServer) *gin.Engine {
+func RegisterEndPoints(config *config.HttpServer, version string) *gin.Engine {
 	route := gin.Default()
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = config.AcceptHosts
@@ -95,6 +96,7 @@ func RegisterEndPoints(config *config.HttpServer) *gin.Engine {
 	docs.SwaggerInfo.BasePath = "/api"
 	api := route.Group("/api")
 	{
+		api.GET("/version", controller.GetVersion(version))
 		v1 := api.Group("/v1")
 		{
 			eg := v1.Group("/")

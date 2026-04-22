@@ -40,7 +40,7 @@ func Initialize(t *testing.T, msgChan *chan message.Message) *packageModule.Pack
 		packageModule.ModuleManager.RegisterModule("dmx", dummyModule)
 	}
 	h := sharedLogger.Handler()
-	packageModule.ModuleManager.ModuleInitialize(&h)
+	packageModule.ModuleManager.ModuleInitialize(&h, "test")
 	packageModule.ModuleManager.ModuleRun()
 	return dummyModule
 }

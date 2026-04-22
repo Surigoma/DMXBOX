@@ -17,6 +17,7 @@ type PackageModule struct {
 	Logger         *slog.Logger
 	ModuleName     string
 	MessageHandler func(msg message.Message) int
+	Version        string
 }
 
 type ModuleManagerType struct {
@@ -61,11 +62,12 @@ func (mgr *ModuleManagerType) RegisterModule(name string, module *PackageModule)
 	return true
 }
 
-func (mgr *ModuleManagerType) ModuleInitialize(logHandler *slog.Handler) {
+func (mgr *ModuleManagerType) ModuleInitialize(logHandler *slog.Handler, version string) {
 	configData := config.Get()
 	for name, module := range mgr.modules {
 		module.Logger = slog.New(*logHandler).With("module", name)
 		module.Wg = &mgr.wg
+		module.Version = version
 		module.Channel = make(chan message.Message, 10)
 		if !module.Initialize(module, &configData) {
 			mgr.logger.Error("Failed to initialize", "module", name)

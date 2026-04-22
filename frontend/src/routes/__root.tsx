@@ -58,6 +58,9 @@ function RootLayout() {
         "/config": {
             title: "Config",
         },
+        "/version": {
+            title: "Version",
+        },
     };
     const navigate = useNavigate();
     const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);

@@ -28,7 +28,7 @@ func TestOSCModule(t *testing.T) {
 		packageModule.ModuleManager.Initialize(logger)
 		packageModule.ModuleManager.RegisterModule("osc", &oscserver.OscServer)
 		handler := logger.Handler()
-		packageModule.ModuleManager.ModuleInitialize(&handler)
+		packageModule.ModuleManager.ModuleInitialize(&handler, "test")
 		packageModule.ModuleManager.ModuleRun()
 		packageModule.ModuleManager.SendMessage(message.Message{
 			To: "osc",

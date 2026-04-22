@@ -8,6 +8,7 @@ import (
 	oscserver "backend/oscServer"
 	"backend/packageModule"
 	tcpserver "backend/tcpServer"
+	_ "embed"
 	"fmt"
 	"log/slog"
 	"maps"
@@ -23,6 +24,9 @@ var logHandler slog.Handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOption
 	Level: slog.LevelDebug,
 })
 var modules map[string]*packageModule.PackageModule = make(map[string]*packageModule.PackageModule)
+
+//go:embed .version
+var Version string
 
 func registerModule() {
 	modules["http"] = &httpServer.HttpServer
@@ -99,10 +103,10 @@ func main() {
 	channel = make(chan message.Message, 10)
 	packageModule.ModuleManager.Initialize(registerLog("manager"))
 	log = registerLog("main")
-	log.Info("Start Main process")
+	log.Info("Start Main process", "version", Version)
 	config.Load(registerLog("config"))
 	registerModule()
-	packageModule.ModuleManager.ModuleInitialize(&logHandler)
+	packageModule.ModuleManager.ModuleInitialize(&logHandler, Version)
 	go signalProcess()
 	defer packageModule.ModuleManager.Finalize()
 	packageModule.ModuleManager.ModuleRun()

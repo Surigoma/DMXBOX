@@ -50,7 +50,7 @@ func TestTCPModule(t *testing.T) {
 		packageModule.ModuleManager.Initialize(logger)
 		packageModule.ModuleManager.RegisterModule("tcp", &tcpserver.TcpServer)
 		handler := logger.Handler()
-		packageModule.ModuleManager.ModuleInitialize(&handler)
+		packageModule.ModuleManager.ModuleInitialize(&handler, "test")
 		packageModule.ModuleManager.ModuleRun()
 		packageModule.ModuleManager.SendMessage(message.Message{
 			To: "tcp",
@@ -75,7 +75,7 @@ func TestTCPModule(t *testing.T) {
 		packageModule.ModuleManager.Initialize(logger)
 		packageModule.ModuleManager.RegisterModule("tcp", &tcpserver.TcpServer)
 		handler := logger.Handler()
-		packageModule.ModuleManager.ModuleInitialize(&handler)
+		packageModule.ModuleManager.ModuleInitialize(&handler, "test")
 		packageModule.ModuleManager.ModuleRun()
 		packageModule.ModuleManager.SendMessage(message.Message{
 			To: "tcp",
@@ -195,7 +195,7 @@ func TestTCPModuleSocket(t *testing.T) {
 		packageModule.ModuleManager.Initialize(logger)
 		packageModule.ModuleManager.RegisterModule("tcp", &tcpserver.TcpServer)
 		handler := logger.Handler()
-		packageModule.ModuleManager.ModuleInitialize(&handler)
+		packageModule.ModuleManager.ModuleInitialize(&handler, "test")
 		defer packageModule.ModuleManager.Finalize()
 		packageModule.ModuleManager.ModuleRun()
 		defer packageModule.ModuleManager.SendMessageAll(message.Message{
@@ -341,7 +341,7 @@ func TestTCPModuleSocket(t *testing.T) {
 			packageModule.ModuleManager.RegisterModule(tt.moduleName, dummyModule)
 			packageModule.ModuleManager.RegisterModule("tcp", &tcpserver.TcpServer)
 			h := sharedLogger.Handler()
-			packageModule.ModuleManager.ModuleInitialize(&h)
+			packageModule.ModuleManager.ModuleInitialize(&h, "test")
 			packageModule.ModuleManager.ModuleRun()
 			defer packageModule.ModuleManager.SendMessageAll(message.Message{
 				To: "tcp",
