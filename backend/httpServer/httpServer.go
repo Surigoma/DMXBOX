@@ -51,7 +51,7 @@ var HttpServer packageModule.PackageModule = packageModule.PackageModule{
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
 
 //	@host		localhost:8080
-//	@BasePath	/api/v1
+//	@BasePath	/api
 
 func Initialize(module *packageModule.PackageModule, config *config.Config) bool {
 	gin.SetMode(gin.ReleaseMode)
@@ -100,18 +100,15 @@ func RegisterEndPoints(config *config.HttpServer, version string) *gin.Engine {
 		api.GET("/version", controller.GetVersion(version))
 		v1 := api.Group("/v1")
 		{
-			eg := v1.Group("/")
+			v1.GET("/health", health.HealthV1)
+			v1.POST("/fade/:group", dmx.FadeV1)
+			v1.POST("/mute", osc.SendOSCV1)
+			cfg := v1.Group("/config/")
 			{
-				eg.GET("/health", health.HealthV1)
-				eg.POST("/fade/:group", dmx.FadeV1)
-				eg.POST("/mute", osc.SendOSCV1)
-				cfg := eg.Group("/config/")
-				{
-					cfg.GET("/fade", dmx.GetFadeConfigV1)
-					cfg.GET("/all", configAPI.GetConfigV1)
-					cfg.POST("/save", configAPI.SetConfigV1)
-					cfg.GET("/console", console.GetConsolesV1)
-				}
+				cfg.GET("/fade", dmx.GetFadeConfigV1)
+				cfg.GET("/all", configAPI.GetConfigV1)
+				cfg.POST("/save", configAPI.SetConfigV1)
+				cfg.GET("/console", console.GetConsolesV1)
 			}
 		}
 		old := api.Group("/")
