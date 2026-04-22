@@ -115,7 +115,7 @@ function RouteComponent() {
                     onSubmit={configForm.handleSubmit(onSubmit)}
                 >
                     <Grid container margin={2} gap={3} direction="column">
-                        <Typography variant="h4">Configuration</Typography>
+                        <Typography variant="h5">Configuration</Typography>
                         <Grid size="grow">
                             <Accordion defaultExpanded={false} key="input">
                                 <AccordionSummary expandIcon={<MdExpandMore />}>
