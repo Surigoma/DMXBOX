@@ -96,6 +96,7 @@ func RegisterEndPoints(config *config.HttpServer, version string) *gin.Engine {
 	docs.SwaggerInfo.BasePath = "/api"
 	api := route.Group("/api")
 	{
+		api.GET("/endpoints", controller.GetEndpoints(route))
 		api.GET("/version", controller.GetVersion(version))
 		v1 := api.Group("/v1")
 		{

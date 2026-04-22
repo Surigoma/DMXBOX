@@ -58,6 +58,19 @@ func TestAPIResp(t *testing.T) {
 				return code == http.StatusOK && resp.Version == "test"
 			},
 		},
+		{
+			name:   "Endpoints API",
+			method: "GET",
+			path:   "/api/endpoints",
+			want: func(code int, body string) bool {
+				var resp []controller.EndpointInfo = []controller.EndpointInfo{}
+				e := json.Unmarshal([]byte(body), &resp)
+				if e != nil {
+					return false
+				}
+				return code == http.StatusOK && len(resp) > 0
+			},
+		},
 	}
 
 	for _, tt := range tests {
