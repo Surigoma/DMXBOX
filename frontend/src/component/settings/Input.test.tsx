@@ -2,29 +2,26 @@ import { expect, describe, it } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 import { FormProvider, useForm } from "react-hook-form";
 import { user, UserSetup } from "../../test/user_helper";
-import type { THttpServer, TInputModules, TTCPServer } from "../../types";
+import type { THttpServer, TInputTarget, TTCPServer } from "../../types";
 import Inputs from "./Input";
 
 describe("Inputs", async () => {
     UserSetup();
     interface testForm {
-        modules: TInputModules;
-        http: THttpServer;
-        tcp: TTCPServer;
+        input: TInputTarget;
     }
     const defaultValue: testForm = {
-        modules: {
-            http: false,
-            tcp: false,
-        },
-        http: {
-            accepts: [],
-            ip: "localhost",
-            port: 5000,
-        },
-        tcp: {
-            ip: "localhost",
-            port: 8080,
+        input: {
+            modules: [],
+            http: {
+                accepts: [],
+                ip: "localhost",
+                port: 5000,
+            },
+            tcp: {
+                ip: "localhost",
+                port: 8080,
+            },
         },
     };
     const result: testForm = JSON.parse(JSON.stringify(defaultValue));
@@ -49,9 +46,7 @@ describe("Inputs", async () => {
             <TestForm
                 callback={(v) => {
                     console.log(v);
-                    result.modules = v.modules;
-                    result.http = v.http;
-                    result.tcp = v.tcp;
+                    result.input = v.input;
                 }}
                 value={value}
             ></TestForm>,
@@ -113,18 +108,17 @@ describe("Inputs", async () => {
         await user.click(http);
         await user.click(submit);
         await expect(result).toEqual({
-            modules: {
-                http: true,
-                tcp: false,
-            },
-            http: {
-                accepts: [],
-                ip: "localhost",
-                port: 5000,
-            },
-            tcp: {
-                ip: "localhost",
-                port: 8080,
+            input: {
+                modules: ["http"],
+                http: {
+                    accepts: [],
+                    ip: "localhost",
+                    port: 5000,
+                },
+                tcp: {
+                    ip: "localhost",
+                    port: 8080,
+                },
             },
         } as testForm);
     });

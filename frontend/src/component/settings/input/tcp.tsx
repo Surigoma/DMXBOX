@@ -21,12 +21,12 @@ function InputTCP() {
                                 fullWidth
                                 label="Address"
                                 data-testid="OpIp"
-                                {...register("tcp.ip")}
+                                {...register("input.tcp.ip")}
                             />
                         </Grid>
                         <Grid size={3}>
                             <Controller
-                                name={"tcp.port"}
+                                name={"input.tcp.port"}
                                 control={control}
                                 render={({ field }) => (
                                     <NumberField

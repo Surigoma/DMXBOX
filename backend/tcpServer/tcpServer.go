@@ -43,7 +43,7 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	runningMutex = sync.Mutex{}
 	changeRunning(true)
 	v1Msgs = makeV1Messages(config)
-	listenAddr, err = net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", config.Tcp.IP, config.Tcp.Port))
+	listenAddr, err = net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", config.Input.Tcp.IP, config.Input.Tcp.Port))
 	if err != nil {
 		logger.Error("Failed to setup TCP", "error", err)
 		return false

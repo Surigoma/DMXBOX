@@ -15,10 +15,12 @@ import (
 
 func TestTCPModule(t *testing.T) {
 	config.Set(config.Config{
-		Modules: map[string]bool{"tcp": true},
-		Tcp: config.TCPServer{
-			IP:   "127.0.0.1",
-			Port: 50000,
+		Input: config.InputTargets{
+			Modules: []string{"tcp"},
+			Tcp: config.TCPServer{
+				IP:   "127.0.0.1",
+				Port: 50000,
+			},
 		},
 		Dmx: config.DMXServer{
 			Groups: map[string]config.DMXGroup{
@@ -157,10 +159,12 @@ func CreateDummyModule(t *testing.T, msgChan *chan message.Message, moduleName s
 }
 func TestTCPModuleSocket(t *testing.T) {
 	config.Set(config.Config{
-		Modules: map[string]bool{"tcp": true},
-		Tcp: config.TCPServer{
-			IP:   "127.0.0.1",
-			Port: 50000,
+		Input: config.InputTargets{
+			Modules: []string{"tcp"},
+			Tcp: config.TCPServer{
+				IP:   "127.0.0.1",
+				Port: 50000,
+			},
 		},
 		Dmx: config.DMXServer{
 			Groups: map[string]config.DMXGroup{

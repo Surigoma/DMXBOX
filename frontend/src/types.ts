@@ -22,15 +22,6 @@ export const Artnet = z
     .describe("Artnet Configuration");
 export type TArtnet = z.infer<typeof Artnet>;
 
-export const OutputTargets = z.object({
-    target: z
-        .array(z.enum(["ftdi", "artnet", "console"]))
-        .describe("Output target of DMX signal"),
-    dmx: DMXHardware,
-    artnet: Artnet,
-});
-export type TOutputTargets = z.infer<typeof OutputTargets>;
-
 export const HttpServer = z.object({
     ip: IPAddress.describe("Listen address"),
     port: TCPPort.describe("Listen port"),
@@ -85,31 +76,47 @@ export const OSCServer = z.object({
 });
 export type TOSCServer = z.infer<typeof OSCServer>;
 
-export const InputModules = z.record(
-    z.enum(["http", "tcp"]).describe("Input module name"),
-    z.boolean().describe("Enable of Input module"),
-);
-export type TInputModules = z.infer<typeof InputModules>;
+export const OutputTargets = z.object({
+    target: z
+        .array(z.enum(["ftdi", "artnet", "console", "osc"]))
+        .describe("Output target of DMX signal"),
+    ftdi: DMXHardware,
+    artnet: Artnet,
+    osc: OSCServer,
+});
+export type TOutputTargets = z.infer<typeof OutputTargets>;
 
-export const Config = z.object({
-    modules: InputModules,
-    output: OutputTargets,
+export const InputTargets = z.object({
+    modules: z.array(z.enum(["http", "tcp"])).describe("Input module name"),
     http: HttpServer,
     tcp: TCPServer,
+});
+export type TInputTarget = z.infer<typeof InputTargets>;
+
+export const Config = z.object({
+    input: InputTargets,
+    output: OutputTargets,
     dmx: DMXServer,
-    osc: OSCServer,
 });
 export type TConfig = z.infer<typeof Config>;
 
 export function DefaultConfig(): TConfig {
     return {
-        modules: {
-            http: false,
-            tcp: false,
+        input: {
+            modules: [],
+            http: {
+                ip: "127.0.0.1",
+                port: 8080,
+                accepts: [],
+            },
+            tcp: {
+                ip: "127.0.0.1",
+                port: 50000,
+            },
         },
         output: {
             target: [],
-            dmx: {
+            ftdi: {
                 port: "COM1",
             },
             artnet: {
@@ -118,29 +125,20 @@ export function DefaultConfig(): TConfig {
                 subuni: 0,
                 universe: 0,
             },
-        },
-        http: {
-            ip: "127.0.0.1",
-            port: 8080,
-            accepts: [],
-        },
-        tcp: {
-            ip: "127.0.0.1",
-            port: 50000,
+            osc: {
+                ip: "127.0.0.1",
+                port: 49900,
+                format: "",
+                type: "float",
+                inverse: false,
+                channels: [],
+            },
         },
         dmx: {
             delay: 0,
             fadeInterval: 0,
             fps: 30,
             groups: {},
-        },
-        osc: {
-            ip: "127.0.0.1",
-            port: 49900,
-            format: "",
-            type: "float",
-            inverse: false,
-            channels: [],
         },
     };
 }

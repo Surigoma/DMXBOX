@@ -62,10 +62,13 @@ function RouteComponent() {
 
     async function onSubmit(data: TConfig) {
         setResult(data);
-        const result = await fetch(genBackendPath(config, "/api/v1/config/save"), {
-            method: "POST",
-            body: JSON.stringify(data),
-        })
+        const result = await fetch(
+            genBackendPath(config, "/api/v1/config/save"),
+            {
+                method: "POST",
+                body: JSON.stringify(data),
+            },
+        );
         if (result.ok) {
             setSendResult({
                 success: true,
@@ -90,7 +93,14 @@ function RouteComponent() {
     if (isLoading) {
         return <>Please wait</>;
     } else if (error) {
-        return <>Error</>;
+        return (
+            <>
+                Error: {error.name}
+                <pre>
+                    {JSON.stringify(JSON.parse(error.message), undefined, 4)}
+                </pre>
+            </>
+        );
     }
 
     return (

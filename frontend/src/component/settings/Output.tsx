@@ -25,6 +25,11 @@ function Outputs() {
                         title="Artnet"
                         target="output.target"
                     ></Checked>
+                    <Checked
+                        value="osc"
+                        title="OSC"
+                        target="output.target"
+                    ></Checked>
                 </FormGroup>
             </Grid>
             <Watch
@@ -40,6 +45,9 @@ function Outputs() {
                     }
                     if (v.includes("artnet")) {
                         result.push(<OutputArtnet key="artnet"></OutputArtnet>);
+                    }
+                    if (v.includes("osc")) {
+                        result.push(<OutputOSC key="osc" />);
                     }
                     return (
                         <Card variant="outlined" style={{ margin: "2px" }}>
@@ -58,9 +66,6 @@ function Outputs() {
                                 ) : (
                                     <></>
                                 )}
-                                <Grid size="grow">
-                                    <OutputOSC />
-                                </Grid>
                             </Grid>
                         </Card>
                     );

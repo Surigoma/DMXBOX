@@ -1,13 +1,27 @@
 {
-    "modules": {
-        "http": true,
-        "tcp": false
+    "input": {
+        "modules": [
+            "http",
+            "tcp"
+        ],
+        "http": {
+            "ip": "127.0.0.1",
+            "port": 8080,
+            "accepts": [
+                "http://localhost:5173"
+            ]
+        },
+        "tcp": {
+            "ip": "127.0.0.1",
+            "port": 50000
+        }
     },
     "output": {
         "target": [
-            "ftdi"
+            "ftdi",
+            "osc"
         ],
-        "dmx": {
+        "ftdi": {
             "port": "COM3"
         },
         "artnet": {
@@ -15,18 +29,21 @@
             "universe": 1,
             "subuni": 0,
             "net": 0
+        },
+        "osc": {
+            "ip": "127.0.0.1",
+            "port": 49900,
+            "format": "/yosc:req/set/MIXER:Current/InCh/Fader/On/{}/1",
+            "type": "float",
+            "inverse": false,
+            "channels": [
+                9,
+                10,
+                11,
+                12,
+                13
+            ]
         }
-    },
-    "http": {
-        "ip": "127.0.0.1",
-        "port": 8080,
-        "accepts": [
-            "http://localhost:5173"
-        ]
-    },
-    "tcp": {
-        "ip": "127.0.0.1",
-        "port": 50000
     },
     "dmx": {
         "groups": {
@@ -76,19 +93,5 @@
         "fadeInterval": 0.7,
         "delay": 0,
         "fps": 30
-    },
-    "osc": {
-        "ip": "127.0.0.1",
-        "port": 49900,
-        "format": "/yosc:req/set/MIXER:Current/InCh/Fader/On/{}/1",
-        "type": "float",
-        "inverse": false,
-        "channels": [
-            9,
-            10,
-            11,
-            12,
-            13
-        ]
     }
 }

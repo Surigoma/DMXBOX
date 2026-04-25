@@ -33,12 +33,12 @@ describe("Output DMX", async () => {
 
     interface testForm {
         output: {
-            dmx: TDMXHardware;
+            ftdi: TDMXHardware;
         };
     }
     const defaultValue: testForm = {
         output: {
-            dmx: {
+            ftdi: {
                 port: "COM1",
             },
         },
@@ -118,7 +118,7 @@ describe("Output DMX", async () => {
         await user.click(submit);
         await expect(result).toEqual({
             output: {
-                dmx: {
+                ftdi: {
                     port: "COM3",
                 },
             },

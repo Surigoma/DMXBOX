@@ -12,8 +12,16 @@ function Inputs() {
                 <InputLabel>
                     <Typography variant="h5">Modules: </Typography>
                 </InputLabel>
-                <Checked title="HTTP" target="modules.http"></Checked>
-                <Checked title="TCP" target="modules.tcp"></Checked>
+                <Checked
+                    title="HTTP"
+                    target="input.modules"
+                    value="http"
+                ></Checked>
+                <Checked
+                    title="TCP"
+                    target="input.modules"
+                    value="tcp"
+                ></Checked>
             </Grid>
             <Card variant="outlined" style={{ margin: "2px" }}>
                 <Grid
@@ -24,21 +32,21 @@ function Inputs() {
                 >
                     <Watch
                         control={control}
-                        name={["modules.http", "modules.tcp"]}
-                        render={(v) =>
-                            v[0] || v[1] ? (
-                                [
-                                    v[0] ? (
+                        name={"input.modules"}
+                        render={(v: string[] | undefined) =>
+                            v !== undefined && v.length > 0 ? (
+                                <>
+                                    {v.includes("http") ? (
                                         <Grid size="grow" key="http">
                                             <InputHTTP />
                                         </Grid>
-                                    ) : undefined,
-                                    v[1] ? (
+                                    ) : undefined}
+                                    {v.includes("tcp") ? (
                                         <Grid size="grow" key="tcp">
                                             <InputTCP />
                                         </Grid>
-                                    ) : undefined,
-                                ]
+                                    ) : undefined}
+                                </>
                             ) : (
                                 <>Not selected</>
                             )

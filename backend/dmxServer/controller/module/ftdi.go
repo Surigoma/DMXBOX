@@ -32,7 +32,7 @@ func NewFTDI() *controller.Controller {
 
 func InitializeFTDI(config *config.Config, log *slog.Logger) bool {
 	loggerFTDI = log
-	target = config.Output.DMX.Port
+	target = config.Output.FTDI.Port
 	ports, err := serial.GetPortsList()
 	loggerFTDI.Debug("Found devices", "ports", ports)
 	if err != nil {

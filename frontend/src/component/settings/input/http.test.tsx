@@ -8,13 +8,17 @@ import type { THttpServer } from "../../../types";
 describe("Input HTTP", async () => {
     UserSetup();
     interface testForm {
-        http: THttpServer;
+        input: {
+            http: THttpServer;
+        };
     }
     const defaultValue: testForm = {
-        http: {
-            ip: "127.0.0.1",
-            port: 8080,
-            accepts: ["test"],
+        input: {
+            http: {
+                ip: "127.0.0.1",
+                port: 8080,
+                accepts: ["test"],
+            },
         },
     };
     const result: testForm = JSON.parse(JSON.stringify(defaultValue));
@@ -36,7 +40,7 @@ describe("Input HTTP", async () => {
             <TestForm
                 callback={(v) => {
                     console.log(v);
-                    result.http = v.http;
+                    result.input = v.input;
                 }}
             ></TestForm>,
         );
@@ -115,10 +119,12 @@ describe("Input HTTP", async () => {
         await user.fill(port, "10000");
         await user.click(submit);
         await expect(result).toEqual({
-            http: {
-                ip: "127.0.0.1",
-                port: 10000,
-                accepts: ["test"],
+            input: {
+                http: {
+                    ip: "127.0.0.1",
+                    port: 10000,
+                    accepts: ["test"],
+                },
             },
         } as testForm);
     });

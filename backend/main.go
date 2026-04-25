@@ -32,18 +32,19 @@ func registerModule() {
 	modules["http"] = &httpServer.HttpServer
 	modules["tcp"] = &tcpserver.TcpServer
 
-	for k, v := range config.ConfigData.Modules {
-		if !v {
-			continue
-		}
-		if module, ok := modules[k]; ok {
-			packageModule.ModuleManager.RegisterModule(k, module)
+	for _, name := range config.ConfigData.Input.Modules {
+		if module, ok := modules[name]; ok {
+			packageModule.ModuleManager.RegisterModule(name, module)
 		} else {
-			log.Error(fmt.Sprintf("Module %s is not support.\nSupport modules are %v", k, maps.Keys(modules)))
+			log.Error(fmt.Sprintf("Module %s is not support.\nSupport modules are %v", name, maps.Keys(modules)))
 		}
 	}
 	packageModule.ModuleManager.RegisterModule("dmx", &dmxserver.DMXServer)
-	packageModule.ModuleManager.RegisterModule("osc", &oscserver.OscServer)
+	for _, target := range config.ConfigData.Output.Target {
+		if target == "osc" {
+			packageModule.ModuleManager.RegisterModule("osc", &oscserver.OscServer)
+		}
+	}
 }
 
 func handleMessage(mes message.Message) int {

@@ -31,31 +31,31 @@ describe("Outputs", async () => {
     interface testForm {
         output: {
             target?: string[];
-            dmx: TDMXHardware;
+            ftdi: TDMXHardware;
             artnet: TArtnet;
+            osc: TOSCServer;
         };
-        osc: TOSCServer;
     }
     const defaultValue: testForm = {
         output: {
+            target: [],
             artnet: {
                 addr: "localhost",
                 net: 0,
                 subuni: 1,
                 universe: 2,
             },
-            dmx: {
+            ftdi: {
                 port: "COM1",
             },
-            target: [],
-        },
-        osc: {
-            channels: [],
-            format: "{}",
-            inverse: false,
-            ip: "localhost",
-            port: 20000,
-            type: "int",
+            osc: {
+                channels: [],
+                format: "{}",
+                inverse: false,
+                ip: "localhost",
+                port: 20000,
+                type: "int",
+            },
         },
     };
     const result: testForm = JSON.parse(JSON.stringify(defaultValue));
@@ -100,6 +100,31 @@ describe("Outputs", async () => {
                 await expect.element(ftdi).toBeVisible();
                 await expect.element(artnet).toBeVisible();
             });
+            it("Show checkbox for target when target is null", async () => {
+                const { getByTestId } = await CreateTestComponent({
+                    output: {
+                        artnet: {
+                            addr: "localhost",
+                            net: 0,
+                            subuni: 1,
+                            universe: 2,
+                        },
+                        ftdi: {
+                            port: "COM1",
+                        },
+                        osc: {
+                            channels: [],
+                            format: "{}",
+                            inverse: false,
+                            ip: "localhost",
+                            port: 20000,
+                            type: "int",
+                        },
+                    },
+                });
+                const devices = getByTestId("Outputs");
+                await expect.element(devices).toBeVisible();
+            });
             it("Can show FTDI Options", async () => {
                 const { getByRole, getByTestId } = await CreateTestComponent();
                 const ftdi = getByRole("checkbox", { name: "ftdi" });
@@ -114,38 +139,13 @@ describe("Outputs", async () => {
                 await user.click(artnet);
                 await expect.element(artnetOptions).toBeVisible();
             });
-        });
-        it("OSC Option", async () => {
-            const { getByTestId } = await CreateTestComponent();
-            const osc = getByTestId("OutputOSC");
-            await expect.element(osc).toBeVisible();
-        });
-    });
-    describe("", async () => {
-        it("", async () => {
-            const { getByTestId } = await CreateTestComponent({
-                output: {
-                    artnet: {
-                        addr: "localhost",
-                        net: 0,
-                        subuni: 1,
-                        universe: 2,
-                    },
-                    dmx: {
-                        port: "COM1",
-                    },
-                },
-                osc: {
-                    channels: [],
-                    format: "{}",
-                    inverse: false,
-                    ip: "localhost",
-                    port: 20000,
-                    type: "int",
-                },
+            it("Can show OSC Options", async () => {
+                const { getByRole, getByTestId } = await CreateTestComponent();
+                const artnet = getByRole("checkbox", { name: "osc" });
+                const artnetOptions = getByTestId("OutputOSC");
+                await user.click(artnet);
+                await expect.element(artnetOptions).toBeVisible();
             });
-            const devices = getByTestId("Outputs");
-            await expect.element(devices).toBeVisible();
         });
     });
     it("Can submit", async () => {
@@ -156,24 +156,24 @@ describe("Outputs", async () => {
         await user.click(submit);
         await expect(result).toEqual({
             output: {
+                target: ["ftdi"],
                 artnet: {
                     addr: "localhost",
                     net: 0,
                     subuni: 1,
                     universe: 2,
                 },
-                dmx: {
+                ftdi: {
                     port: "COM1",
                 },
-                target: ["ftdi"],
-            },
-            osc: {
-                channels: [],
-                format: "{}",
-                inverse: false,
-                ip: "localhost",
-                port: 20000,
-                type: "int",
+                osc: {
+                    channels: [],
+                    format: "{}",
+                    inverse: false,
+                    ip: "localhost",
+                    port: 20000,
+                    type: "int",
+                },
             },
         } as testForm);
     });

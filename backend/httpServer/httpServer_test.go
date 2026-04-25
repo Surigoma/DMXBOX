@@ -31,13 +31,13 @@ func TestInitialize(t *testing.T) {
 			title:  "Success",
 			module: &packageModule.PackageModule{},
 			config: &config.Config{
-				Modules: map[string]bool{
-					"http": true,
-				},
-				Http: config.HttpServer{
-					IP:          "127.0.0.1",
-					Port:        8080,
-					AcceptHosts: []string{"*"},
+				Input: config.InputTargets{
+					Modules: []string{"http"},
+					Http: config.HttpServer{
+						IP:          "127.0.0.1",
+						Port:        8080,
+						AcceptHosts: []string{"*"},
+					},
 				},
 			},
 			want: true,
@@ -60,13 +60,13 @@ func TestInitialize(t *testing.T) {
 func TestViewStaticFile(t *testing.T) {
 	module := packageModule.PackageModule{}
 	config := config.Config{
-		Modules: map[string]bool{
-			"http": true,
-		},
-		Http: config.HttpServer{
-			IP:          "127.0.0.1",
-			Port:        8080,
-			AcceptHosts: []string{"*"},
+		Input: config.InputTargets{
+			Modules: []string{"http"},
+			Http: config.HttpServer{
+				IP:          "127.0.0.1",
+				Port:        8080,
+				AcceptHosts: []string{"*"},
+			},
 		},
 	}
 	type want struct {
@@ -111,7 +111,7 @@ func TestViewStaticFile(t *testing.T) {
 				t.Error("Failed to setup http server")
 			}
 			gin.SetMode(gin.TestMode)
-			engine := httpServer.RegisterEndPoints(&config.Http, "test")
+			engine := httpServer.RegisterEndPoints(&config.Input.Http, "test")
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest("GET", tt.path, nil)
 			req.RequestURI = tt.path
@@ -127,13 +127,13 @@ func TestViewStaticFile(t *testing.T) {
 func TestAPIResp(t *testing.T) {
 	config.InitializeConfig()
 	config.Set(config.Config{
-		Modules: map[string]bool{
-			"http": true,
-		},
-		Http: config.HttpServer{
-			IP:          "127.0.0.1",
-			Port:        8080,
-			AcceptHosts: []string{"*"},
+		Input: config.InputTargets{
+			Modules: []string{"http"},
+			Http: config.HttpServer{
+				IP:          "127.0.0.1",
+				Port:        8080,
+				AcceptHosts: []string{"*"},
+			},
 		},
 		Dmx: config.DMXServer{
 			Groups: map[string]config.DMXGroup{
@@ -225,7 +225,7 @@ func TestAPIResp(t *testing.T) {
 			}
 			gin.SetMode(gin.TestMode)
 			t.Parallel()
-			engine := httpServer.RegisterEndPoints(&configData.Http, "test")
+			engine := httpServer.RegisterEndPoints(&configData.Input.Http, "test")
 			w := httptest.NewRecorder()
 			args := ""
 			if tt.args != nil {
@@ -298,13 +298,13 @@ func TestHTTPStartStop(t *testing.T) {
 		httpServer.HttpServer.Wg.Add(1)
 		httpServer.HttpServer.Logger = slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
 		if !httpServer.Initialize(&httpServer.HttpServer, &config.Config{
-			Modules: map[string]bool{
-				"http": true,
-			},
-			Http: config.HttpServer{
-				IP:          "127.0.0.1",
-				Port:        8080,
-				AcceptHosts: []string{"*"},
+			Input: config.InputTargets{
+				Modules: []string{"http"},
+				Http: config.HttpServer{
+					IP:          "127.0.0.1",
+					Port:        8080,
+					AcceptHosts: []string{"*"},
+				},
 			},
 		}) {
 			t.Error("Failed to initialize.")

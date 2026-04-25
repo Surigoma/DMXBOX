@@ -29,12 +29,12 @@ function OutputOSC() {
                             <TextField
                                 fullWidth
                                 label="Address"
-                                {...register("osc.ip")}
+                                {...register("output.osc.ip")}
                             />
                         </Grid>
                         <Grid size={3}>
                             <Controller
-                                name={"osc.port"}
+                                name={"output.osc.port"}
                                 control={control}
                                 render={({ field }) => (
                                     <NumberField
@@ -56,7 +56,7 @@ function OutputOSC() {
                     <TextField
                         fullWidth
                         label="OSC Path format"
-                        {...register("osc.format")}
+                        {...register("output.osc.format")}
                     />
                 </FormControl>
                 <Grid container spacing={2} alignItems="center">
@@ -67,7 +67,7 @@ function OutputOSC() {
                             </InputLabel>
                             <Controller
                                 control={control}
-                                name="osc.type"
+                                name="output.osc.type"
                                 render={({ field }) => (
                                     <Select
                                         labelId="osc-type"
@@ -90,7 +90,7 @@ function OutputOSC() {
                             label="Inverse"
                             style={{ userSelect: "none" }}
                             control={
-                                <Switch {...register("osc.inverse")}>
+                                <Switch {...register("output.osc.inverse")}>
                                     Inverse
                                 </Switch>
                             }
@@ -100,7 +100,7 @@ function OutputOSC() {
                 <FormControl margin="normal">
                     <Controller
                         control={control}
-                        name="osc.channels"
+                        name="output.osc.channels"
                         render={({ field }) => (
                             <Autocomplete
                                 multiple

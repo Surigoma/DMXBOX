@@ -66,6 +66,9 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	param.Fps = config.Dmx.Fps
 
 	for _, controller := range config.Output.Target {
+		if controller == "osc" {
+			continue
+		}
 		if !AddController(controller, config) {
 			logger.Error("Failed to setup dmx server: unknown controller", "controller", controller)
 			return false

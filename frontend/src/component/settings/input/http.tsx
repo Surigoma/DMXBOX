@@ -32,12 +32,12 @@ function InputHTTP() {
                                 fullWidth
                                 data-testid="OpIP"
                                 label="Address"
-                                {...register("http.ip")}
+                                {...register("input.http.ip")}
                             />
                         </Grid>
                         <Grid size={3}>
                             <Controller
-                                name={"http.port"}
+                                name={"input.http.port"}
                                 control={control}
                                 render={({ field }) => (
                                     <NumberField
@@ -58,7 +58,7 @@ function InputHTTP() {
                     </Grid>
                     <Stack spacing={1}>
                         <Controller
-                            name={"http.accepts"}
+                            name={"input.http.accepts"}
                             control={control}
                             render={({ field }) => (
                                 <TextField
@@ -85,7 +85,7 @@ function InputHTTP() {
                             )}
                         />
                         <Watch
-                            name={"http.accepts"}
+                            name={"input.http.accepts"}
                             control={control}
                             render={(field: string[]) => {
                                 return field.map((v) => (
@@ -98,7 +98,7 @@ function InputHTTP() {
                                                     size="small"
                                                     onClick={() => {
                                                         setValue(
-                                                            "http.accepts",
+                                                            "input.http.accepts",
                                                             field.filter(
                                                                 (v2) =>
                                                                     v2 !== v,

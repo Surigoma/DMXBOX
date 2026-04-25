@@ -8,16 +8,20 @@ import OutputOSC from "./osc";
 describe("Output OSC", async () => {
     UserSetup();
     interface testForm {
-        osc: TOSCServer;
+        output: {
+            osc: TOSCServer;
+        };
     }
     const defaultValue: testForm = {
-        osc: {
-            ip: "127.0.0.1",
-            port: 49900,
-            format: "/{}/",
-            channels: [1],
-            inverse: false,
-            type: "float",
+        output: {
+            osc: {
+                ip: "127.0.0.1",
+                port: 49900,
+                format: "/{}/",
+                channels: [1],
+                inverse: false,
+                type: "float",
+            },
         },
     };
     const result: testForm = JSON.parse(JSON.stringify(defaultValue));
@@ -39,7 +43,7 @@ describe("Output OSC", async () => {
             <TestForm
                 callback={(v) => {
                     console.log(v);
-                    result.osc = v.osc;
+                    result.output = v.output;
                 }}
             ></TestForm>,
         );
@@ -150,7 +154,7 @@ describe("Output OSC", async () => {
                     channels.getByRole("option", { name: "2", exact: true }),
                 );
                 await user.click(submit);
-                await expect(result.osc.channels).toEqual([1, 2]);
+                await expect(result.output.osc.channels).toEqual([1, 2]);
             });
             it("Can remove channel", async () => {
                 const { getByLabelText, getByText } =
@@ -162,7 +166,7 @@ describe("Output OSC", async () => {
                     channels.getByRole("option", { name: "1", exact: true }),
                 );
                 await user.click(submit);
-                await expect(result.osc.channels).toEqual([]);
+                await expect(result.output.osc.channels).toEqual([]);
             });
         });
     });
@@ -175,13 +179,15 @@ describe("Output OSC", async () => {
         await user.fill(address, "test");
         await user.click(submit);
         await expect(result).toEqual({
-            osc: {
-                ip: "test",
-                port: 49900,
-                format: "/{}/",
-                channels: [1],
-                inverse: false,
-                type: "float",
+            output: {
+                osc: {
+                    ip: "test",
+                    port: 49900,
+                    format: "/{}/",
+                    channels: [1],
+                    inverse: false,
+                    type: "float",
+                },
             },
         } as testForm);
     });

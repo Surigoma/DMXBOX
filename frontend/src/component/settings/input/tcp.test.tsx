@@ -8,12 +8,16 @@ import InputTCP from "./tcp";
 describe("Input TCP", async () => {
     UserSetup();
     interface testForm {
-        tcp: TTCPServer;
+        input: {
+            tcp: TTCPServer;
+        };
     }
     const defaultValue: testForm = {
-        tcp: {
-            ip: "127.0.0.1",
-            port: 8080,
+        input: {
+            tcp: {
+                ip: "127.0.0.1",
+                port: 8080,
+            },
         },
     };
     const result: testForm = JSON.parse(JSON.stringify(defaultValue));
@@ -35,7 +39,7 @@ describe("Input TCP", async () => {
             <TestForm
                 callback={(v) => {
                     console.log(v);
-                    result.tcp = v.tcp;
+                    result.input = v.input;
                 }}
             ></TestForm>,
         );
@@ -83,9 +87,11 @@ describe("Input TCP", async () => {
         await user.fill(port, "10000");
         await user.click(submit);
         await expect(result).toEqual({
-            tcp: {
-                ip: "127.0.0.1",
-                port: 10000,
+            input: {
+                tcp: {
+                    ip: "127.0.0.1",
+                    port: 10000,
+                },
             },
         } as testForm);
     });

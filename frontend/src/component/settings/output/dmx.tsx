@@ -39,7 +39,7 @@ function OutputDMX() {
             <FormControl fullWidth margin="normal">
                 <InputLabel id="output-dmx-port">Port</InputLabel>
                 <Controller
-                    name="output.dmx.port"
+                    name="output.ftdi.port"
                     control={control}
                     render={({ field }) => (
                         <Select

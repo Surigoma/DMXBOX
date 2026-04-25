@@ -55,14 +55,14 @@ var OscServer packageModule.PackageModule = packageModule.PackageModule{
 func Initialize(module *packageModule.PackageModule, config *config.Config) bool {
 	logger = module.Logger
 	wg = module.Wg
-	ip = config.Osc.Ip
-	port = int(config.Osc.Port)
-	sendType = config.Osc.Type
+	ip = config.Output.Osc.Ip
+	port = int(config.Output.Osc.Port)
+	sendType = config.Output.Osc.Type
 	formatter = OSCFormatter{
-		Base:     config.Osc.Format,
-		Type:     config.Osc.Type,
-		Inverse:  config.Osc.Inverse,
-		Channels: config.Osc.Channels,
+		Base:     config.Output.Osc.Format,
+		Type:     config.Output.Osc.Type,
+		Inverse:  config.Output.Osc.Inverse,
+		Channels: config.Output.Osc.Channels,
 	}
 	return true
 }

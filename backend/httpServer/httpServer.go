@@ -55,9 +55,9 @@ var HttpServer packageModule.PackageModule = packageModule.PackageModule{
 
 func Initialize(module *packageModule.PackageModule, config *config.Config) bool {
 	gin.SetMode(gin.ReleaseMode)
-	listenAddr = fmt.Sprintf("%s:%d", config.Http.IP, config.Http.Port)
+	listenAddr = fmt.Sprintf("%s:%d", config.Input.Http.IP, config.Input.Http.Port)
 	logger = module.Logger
-	engine = RegisterEndPoints(&config.Http, module.Version)
+	engine = RegisterEndPoints(&config.Input.Http, module.Version)
 	wg = module.Wg
 	server = &http.Server{
 		Addr:    listenAddr,
@@ -98,6 +98,7 @@ func RegisterEndPoints(config *config.HttpServer, version string) *gin.Engine {
 	{
 		api.GET("/endpoints", controller.GetEndpoints(route))
 		api.GET("/version", controller.GetVersion(version))
+		api.GET("/features", controller.GetFeatures)
 		v1 := api.Group("/v1")
 		{
 			v1.GET("/health", health.HealthV1)

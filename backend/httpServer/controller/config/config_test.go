@@ -44,7 +44,7 @@ func TestConfigAPIv1(t *testing.T) {
 			name: "can save",
 			config: func() string {
 				base := baseConfig.Get()
-				base.Modules = map[string]bool{"http": true}
+				base.Input.Modules = []string{"http"}
 				baseJson, err := json.Marshal(base)
 				if err != nil {
 					t.Error("Failed to marshaling.")
@@ -102,7 +102,7 @@ func TestConfigAPIv1(t *testing.T) {
 	t.Run("Can save current config", func(t *testing.T) {
 		baseConfig.InitializeConfig()
 		base := baseConfig.Get()
-		base.Modules = map[string]bool{"http": true}
+		base.Input.Modules = []string{"http"}
 		baseJson, err := json.Marshal(base)
 		if err != nil {
 			t.Error("Failed to marshaling.")

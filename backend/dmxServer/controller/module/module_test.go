@@ -104,7 +104,7 @@ func TestModule_Initialize(t *testing.T) {
 			config: config.Config{
 				Output: config.OutputTargets{
 					Target: []string{"ftdi"},
-					DMX: config.DMXHardware{
+					FTDI: config.DMXHardware{
 						Port: canOpenPort[0],
 					},
 				},
@@ -117,7 +117,7 @@ func TestModule_Initialize(t *testing.T) {
 			config: config.Config{
 				Output: config.OutputTargets{
 					Target: []string{"ftdi"},
-					DMX: config.DMXHardware{
+					FTDI: config.DMXHardware{
 						Port: "COM10000",
 					},
 				},
@@ -188,7 +188,7 @@ func TestModule_FTDI_Output(t *testing.T) {
 		config := config.Config{
 			Output: config.OutputTargets{
 				Target: []string{"ftdi"},
-				DMX: config.DMXHardware{
+				FTDI: config.DMXHardware{
 					Port: target,
 				},
 			},
@@ -213,7 +213,7 @@ func TestModule_FTDI_Output(t *testing.T) {
 		config := config.Config{
 			Output: config.OutputTargets{
 				Target: []string{"ftdi"},
-				DMX: config.DMXHardware{
+				FTDI: config.DMXHardware{
 					Port: target,
 				},
 			},

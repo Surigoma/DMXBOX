@@ -14,13 +14,15 @@ import (
 
 func TestOSCModule(t *testing.T) {
 	configData := config.Config{
-		Osc: config.OSCServer{
-			Ip:       "127.0.0.1",
-			Port:     3000,
-			Format:   "/{}/1",
-			Type:     "float",
-			Inverse:  false,
-			Channels: []uint{1},
+		Output: config.OutputTargets{
+			Osc: config.OSCServer{
+				Ip:       "127.0.0.1",
+				Port:     3000,
+				Format:   "/{}/1",
+				Type:     "float",
+				Inverse:  false,
+				Channels: []uint{1},
+			},
 		},
 	}
 	t.Run("Can start", func(t *testing.T) {

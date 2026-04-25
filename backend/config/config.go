@@ -43,10 +43,16 @@ type DMXServer struct {
 	Fps          float32             `json:"fps"`
 }
 
+type InputTargets struct {
+	Modules []string   `json:"modules"`
+	Http    HttpServer `json:"http"`
+	Tcp     TCPServer  `json:"tcp"`
+}
 type OutputTargets struct {
 	Target []string    `json:"target"`
-	DMX    DMXHardware `json:"dmx"`
+	FTDI   DMXHardware `json:"ftdi"`
 	Artnet Artnet      `json:"artnet"`
+	Osc    OSCServer   `json:"osc"`
 }
 type OSCServer struct {
 	Ip       string `json:"ip"`
@@ -57,12 +63,9 @@ type OSCServer struct {
 	Channels []uint `json:"channels"`
 }
 type Config struct {
-	Modules map[string]bool `json:"modules"`
-	Output  OutputTargets   `json:"output"`
-	Http    HttpServer      `json:"http"`
-	Tcp     TCPServer       `json:"tcp"`
-	Dmx     DMXServer       `json:"dmx"`
-	Osc     OSCServer       `json:"osc"`
+	Output OutputTargets `json:"output"`
+	Input  InputTargets  `json:"input"`
+	Dmx    DMXServer     `json:"dmx"`
 }
 
 var ConfigData Config
@@ -71,13 +74,23 @@ var ConfigMutex sync.Mutex
 func InitializeConfig() {
 	ConfigMutex.Lock()
 	ConfigData = Config{
-		Modules: map[string]bool{
-			"http": false,
-			"tcp":  false,
+		Input: InputTargets{
+			Modules: []string{},
+			Http: HttpServer{
+				IP:   "127.0.0.1",
+				Port: 8000,
+				AcceptHosts: []string{
+					"http://127.0.0.1:5173",
+				},
+			},
+			Tcp: TCPServer{
+				IP:   "127.0.0.1",
+				Port: 50000,
+			},
 		},
 		Output: OutputTargets{
 			Target: []string{"console"},
-			DMX: DMXHardware{
+			FTDI: DMXHardware{
 				Port: "COM1",
 			},
 			Artnet: Artnet{
@@ -86,33 +99,22 @@ func InitializeConfig() {
 				SubUniverse: 0,
 				Net:         0,
 			},
-		},
-		Http: HttpServer{
-			IP:   "127.0.0.1",
-			Port: 8000,
-			AcceptHosts: []string{
-				"http://127.0.0.1:5173",
+			Osc: OSCServer{
+				Ip:      "127.0.0.1",
+				Port:    8765,
+				Format:  "/yosc:req/set/MIXER:Current/InCh/Fader/On/{}/1",
+				Type:    "int",
+				Inverse: true,
+				Channels: []uint{
+					1, 2, 3, 4,
+				},
 			},
-		},
-		Tcp: TCPServer{
-			IP:   "127.0.0.1",
-			Port: 50000,
 		},
 		Dmx: DMXServer{
 			Groups:       make(map[string]DMXGroup),
 			FadeInterval: 0.7,
 			Delay:        0.0,
 			Fps:          0.0,
-		},
-		Osc: OSCServer{
-			Ip:      "127.0.0.1",
-			Port:    8765,
-			Format:  "/yosc:req/set/MIXER:Current/InCh/Fader/On/{}/1",
-			Type:    "int",
-			Inverse: true,
-			Channels: []uint{
-				1, 2, 3, 4,
-			},
 		},
 	}
 	ConfigMutex.Unlock()

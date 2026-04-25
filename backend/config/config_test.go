@@ -71,7 +71,7 @@ func TestGetSet(t *testing.T) {
 		wg := sync.WaitGroup{}
 		wg.Add(1)
 		go func() {
-			got.Modules["http"] = !got.Modules["http"]
+			got.Input.Modules = append(got.Input.Modules, "http")
 			config.Set(got)
 			wg.Done()
 		}()
