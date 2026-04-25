@@ -11,11 +11,13 @@ tasks:
       - install_dep
       - update_swag
     cmds:
-      - cmd: air --tmp_dir ".tmp" --build.cmd "go build -o ./.tmp/main.exe main.go" --build.entrypoint "./.tmp/main.exe" --build.exclude_dir "docs"
-        platforms: [windows]
+      - cmd: air --tmp_dir ".tmp" --build.cmd "go build -o ./.tmp/main.exe main.go"
+          --build.entrypoint "./.tmp/main.exe" --build.exclude_dir "docs"
+        platforms: [ windows ]
         ignore_error: true
-      - cmd: air --tmp_dir ".tmp" --build.cmd "go build -o ./.tmp/main main.go" --build.entrypoint "./.tmp/main" --build.exclude_dir "docs"
-        platforms: [linux, darwin]
+      - cmd: air --tmp_dir ".tmp" --build.cmd "go build -o ./.tmp/main main.go"
+          --build.entrypoint "./.tmp/main" --build.exclude_dir "docs"
+        platforms: [ linux, darwin ]
         ignore_error: true
   upgrade:
     cmd: go get -u
@@ -24,13 +26,16 @@ tasks:
   test:
     cmds:
       - mkdir -p ./test/html
-      - cmd: gotestsum --junitfile test/report.xml --jsonfile test/result.json -- -cover ./... -coverprofile=test/cover.out -json
+      - cmd: gotestsum --junitfile test/report.xml --jsonfile test/result.json -- -cover
+          ./... -coverprofile=test/cover.out -json
         ignore_error: true
       - go tool cover -html=test/cover.out -o test/html/cover.html
       - gocover-cobertura < test/cover.out > test/coverage.xml
-      - gopogh -in ./test/result.json -out_html ./test/html/testout.html -name="backend" > ./test/result.txt
+      - gopogh -in ./test/result.json -out_html ./test/html/testout.html
+        -name="backend" > ./test/result.txt
   test_watch:
-    cmd: gotestsum --watch --junitfile test/report.xml --jsonfile test/result.json -- -cover ./... -coverprofile=test/cover.out -json
+    cmd: gotestsum --watch --junitfile test/report.xml --jsonfile test/result.json
+      -- -cover ./... -coverprofile=test/cover.out -json
     ignore_error: true
   make_testdir:
     cmd: mkdir static
@@ -52,7 +57,8 @@ tasks:
       - build_linux_any
   build_windows:
     cmds:
-      - GIN_MODE=release GOOS=windows GOARCH=amd64 go build -o ../dist/dmxbox_win_{{.VERSION}}.exe main.go
+      - GIN_MODE=release GOOS=windows GOARCH=amd64 go build -o
+        ../dist/dmxbox_win_{{.VERSION}}.exe main.go
   build_linux:
     cmds:
       - task: build_linux_{{ARCH}}
@@ -62,7 +68,9 @@ tasks:
       - build_linux_amd64
   build_linux_arm64:
     cmds:
-      - GIN_MODE=release GOOS=linux GOARCH=arm64 go build -o ../dist/dmxbox_linux_arm64_{{.VERSION}} main.go
+      - GIN_MODE=release GOOS=linux GOARCH=arm64 go build -o
+        ../dist/dmxbox_linux_arm64_{{.VERSION}} main.go
   build_linux_amd64:
     cmds:
-      - GIN_MODE=release GOOS=linux GOARCH=amd64 go build -o ../dist/dmxbox_linux_amd64_{{.VERSION}} main.go
+      - GIN_MODE=release GOOS=linux GOARCH=amd64 go build -o
+        ../dist/dmxbox_linux_amd64_{{.VERSION}} main.go
