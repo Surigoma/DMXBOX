@@ -17,7 +17,7 @@
     "@base-ui/react": "^1.4.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
-    "@mui/material": "^7.3.10",
+    "@mui/material": "^9.0.0",
     "@tanstack/react-router": "^1.168.24",
     "@tanstack/router-core": "^1.168.16",
     "react": "^19.2.5",
