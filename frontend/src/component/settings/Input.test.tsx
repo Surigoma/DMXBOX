@@ -2,7 +2,7 @@ import { expect, describe, it } from "vitest";
 import { render, type RenderResult } from "vitest-browser-react";
 import { FormProvider, useForm } from "react-hook-form";
 import { user, UserSetup } from "../../test/user_helper";
-import type { THttpServer, TInputTarget, TTCPServer } from "../../types";
+import type { TInputTarget } from "../../types";
 import Inputs from "./Input";
 
 describe("Inputs", async () => {

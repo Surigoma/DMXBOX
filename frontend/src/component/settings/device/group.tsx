@@ -94,6 +94,9 @@ function Group(prop: GroupProp) {
     const [openEdit, setOpenEdit] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
     const group = watch(name) as TDMXGroup;
+    if (group === undefined) {
+        return <></>;
+    }
     return (
         <Card variant="outlined">
             <Grid container direction="column">

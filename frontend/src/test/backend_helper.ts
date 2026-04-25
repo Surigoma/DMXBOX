@@ -13,6 +13,6 @@ export function UseMockServer(...handers: HttpHandler[]) {
         mockServer.resetHandlers();
     });
     afterAll(() => {
-        mockServer.dispose();
+        mockServer.close();
     });
 }
