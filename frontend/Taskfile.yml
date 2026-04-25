@@ -6,6 +6,8 @@ vars:
 tasks:
   dev:
     cmd: yarn run dev --host 0.0.0.0
+  upgrade:
+    cmd: yarn upgrade-interactive
   test:
     cmd: yarn run test:coverage --browser.headless
   test_watch:

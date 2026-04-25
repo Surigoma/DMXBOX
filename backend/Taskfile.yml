@@ -17,6 +17,8 @@ tasks:
       - cmd: air --tmp_dir ".tmp" --build.cmd "go build -o ./.tmp/main main.go" --build.entrypoint "./.tmp/main" --build.exclude_dir "docs"
         platforms: [linux, darwin]
         ignore_error: true
+  upgrade:
+    cmd: go get -u
   update_swag:
     cmd: swag init -g httpServer/httpServer.go
   test:

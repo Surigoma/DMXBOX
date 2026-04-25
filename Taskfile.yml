@@ -22,6 +22,10 @@ tasks:
     deps:
       - frontend:dev
       - backend:dev
+  upgrade:
+    cmds:
+      - task: frontend:upgrade
+      - task: backend:upgrade
   test:
     cmds:
       - task: frontend:test
