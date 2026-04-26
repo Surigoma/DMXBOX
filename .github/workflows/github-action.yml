@@ -36,7 +36,7 @@ jobs:
           cat ./frontend/package.json | jq '.package |= "${{ github.ref_name }}"'
 
       - name: "Frontend: Setup test env"
-        run: playwright install
+        run: yarn playwright install
         working-directory: ./frontend
 
       - name: "ALL: Run test"
