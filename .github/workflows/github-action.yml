@@ -17,6 +17,8 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "25.x"
+      - name: "Frontend: Enable corepack"
+        run: corepack enable
       - name: "Frontend: Install dependencies"
         run: yarn --frozen-lockfile
         working-directory: ./frontend
