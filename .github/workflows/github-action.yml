@@ -36,8 +36,18 @@ jobs:
           cat ./frontend/package.json | jq '.package |= "${{ github.ref_name }}"'
 
       - name: "Frontend: Setup test env"
-        run: yarn playwright install
+        run: |
+          yarn playwright install
         working-directory: ./frontend
+
+      - name: "Backend: Setup test env"
+        run: |
+          go install gotest.tools/gotestsum@latest
+          go get code.google.com/p/go.tools/cmd/cover
+          go get github.com/t-yuki/gocover-cobertura
+          go install github.com/medyagh/gopogh/cmd/gopogh@latest
+          go install github.com/swaggo/swag/cmd/swag@latest
+        working-directory: ./backend
 
       - name: "ALL: Run test"
         run: task test
