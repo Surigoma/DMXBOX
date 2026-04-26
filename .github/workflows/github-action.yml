@@ -33,7 +33,7 @@ jobs:
       - name: "ALL: Write version"
         run: |
           echo ${{ github.ref_name }} > ./backend/.version
-          cat ./frontend/package.json | jq '.package |= "${{ github.ref_name }}"'
+          cat ./frontend/package.json | jq '.package |= "${{ github.ref_name }}"' > ./frontend/package.json
 
       - name: "Frontend: Setup test env"
         run: |
@@ -43,7 +43,6 @@ jobs:
       - name: "Backend: Setup test env"
         run: |
           go install gotest.tools/gotestsum@latest
-          go get code.google.com/p/go.tools/cmd/cover
           go get github.com/t-yuki/gocover-cobertura
           go install github.com/medyagh/gopogh/cmd/gopogh@latest
           go install github.com/swaggo/swag/cmd/swag@latest
