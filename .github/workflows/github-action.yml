@@ -33,7 +33,7 @@ jobs:
       - name: "ALL: Write version"
         run: |
           echo ${{ github.ref_name }} > ./backend/.version
-          cat ./frontend/package.json | jq '.package |= "${{ github.ref_name }}"' > ./frontend/package.json
+          cat ./frontend/package.json | jq '.version |= "${{ github.ref_name }}"' > ./frontend/package.json
 
       - name: "Frontend: Setup test env"
         run: |
