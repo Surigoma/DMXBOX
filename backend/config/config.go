@@ -81,12 +81,13 @@ func InitializeConfig() {
 	}
 	ConfigData = Config{
 		Input: InputTargets{
-			Modules: []string{},
+			Modules: []string{"http"},
 			Http: HttpServer{
 				IP:   "127.0.0.1",
-				Port: 8000,
+				Port: 8080,
 				AcceptHosts: []string{
-					"http://127.0.0.1:5173",
+					"http://localhost:8080",
+					"http://127.0.0.1:8080",
 				},
 			},
 			Tcp: TCPServer{
@@ -120,7 +121,7 @@ func InitializeConfig() {
 			Groups:       make(map[string]DMXGroup),
 			FadeInterval: 0.7,
 			Delay:        0.0,
-			Fps:          0.0,
+			Fps:          30.0,
 		},
 	}
 	ConfigMutex.Unlock()
