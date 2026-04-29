@@ -222,7 +222,7 @@ func TestDMXDevice_Fade(t *testing.T) {
 					t.Error("Failed to match 0 when before interval")
 					return
 				}
-				time.Sleep(time.Duration(tt.optInterval * float32(time.Second)))
+				time.Sleep(time.Duration((tt.optInterval) * float32(time.Second)))
 			}
 			if tt.optDuration < 0 {
 				time.Sleep(time.Duration(tt.duration * float32(time.Second)))
@@ -243,6 +243,7 @@ func TestDMXDevice_Fade(t *testing.T) {
 			}
 			result := target[int(tt.channel-1):int(tt.channel+dev.UseChannel-1)]
 			if !bytes.Equal(result, targetValue) {
+				t.Log(dev, target)
 				t.Errorf("Failed to fade. %v want %v", result, targetValue)
 				return
 			}

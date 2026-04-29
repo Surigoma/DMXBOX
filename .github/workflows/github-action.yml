@@ -43,7 +43,7 @@ jobs:
       - name: "Backend: Setup test env"
         run: |
           go install gotest.tools/gotestsum@latest
-          go get github.com/t-yuki/gocover-cobertura
+          go install github.com/boumenot/gocover-cobertura@latest
           go install github.com/medyagh/gopogh/cmd/gopogh@latest
           go install github.com/swaggo/swag/cmd/swag@latest
           sudo apt-get update && sudo apt-get install -y socat
@@ -52,8 +52,8 @@ jobs:
       - name: "Backend: Create virtual console"
         run: |
           sudo socat -d -d \
-            PTY,link=/dev/ttyVCON0,raw,echo=0,crnl,mode=666,group=dialout \
-            /dev/null > /tmp/socat-vcon.log 2>&1 &
+            pty,raw,echo=0,link=/dev/ttyUSB0,mode=666,group=dialout \
+            pty,raw,echo=0,link=/dev/ttyUSB1,mode=666,group=dialout &
       - name: "ALL: Run test"
         run: task test
 
@@ -70,7 +70,8 @@ jobs:
             backend/test
 
       - name: Generate Release note
-        run: echo -e "Test result\n${{ steps.test_result.outputs.artifact-url }}" > ./RELEASE_NOTE
+        run: echo -e "Test result\n${{ steps.test_result.outputs.artifact-url }}" >
+          ./RELEASE_NOTE
 
       - name: "ALL: Build"
         run: task build_all

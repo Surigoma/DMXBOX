@@ -170,10 +170,8 @@ func TestAPIResp(t *testing.T) {
 		ModuleName: "dummy",
 	}
 	packageModule.ModuleManager.RegisterModule("dmx", &dummyModule)
-	h := sharedLogger.Handler()
-	packageModule.ModuleManager.ModuleInitialize(&h, "test")
+	packageModule.ModuleManager.ModuleInitialize(sharedLogger, "test")
 	packageModule.ModuleManager.ModuleRun()
-	defer packageModule.ModuleManager.Finalize()
 	tests := []struct {
 		name   string
 		path   string

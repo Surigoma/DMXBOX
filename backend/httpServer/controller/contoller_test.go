@@ -86,7 +86,6 @@ func TestAPIResp(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			sharedLogger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
 			packageModule.ModuleManager.Initialize(sharedLogger)
-			h := sharedLogger.Handler()
 			dummyModule := packageModule.PackageModule{
 				MessageHandler: func(msg message.Message) int {
 					t.Log(msg)
@@ -98,8 +97,9 @@ func TestAPIResp(t *testing.T) {
 				ModuleName: "dummy",
 			}
 			packageModule.ModuleManager.RegisterModule("dmx", &dummyModule)
-			packageModule.ModuleManager.ModuleInitialize(&h, "test")
+			packageModule.ModuleManager.ModuleInitialize(sharedLogger, "test")
 			packageModule.ModuleManager.ModuleRun()
+			defer packageModule.ModuleManager.UnregisterAll()
 			defer packageModule.ModuleManager.Finalize()
 			module.Logger = sharedLogger
 			if !httpServer.HttpServer.Initialize(&module, &configData) {

@@ -41,14 +41,20 @@ func (mgr *ModuleManagerType) Finalize() {
 	running = false
 	c := make(chan struct{})
 	go func() {
-		defer close(c)
 		mgr.wg.Wait()
+		defer close(c)
 	}()
 	select {
 	case <-c:
 		break
 	case <-time.After(3 * time.Second):
 		mgr.logger.Error("Failed to wait.", "wg", &mgr.wg)
+	}
+}
+
+func (mgr *ModuleManagerType) UnregisterAll() {
+	for name := range mgr.modules {
+		delete(mgr.modules, name)
 	}
 }
 
@@ -62,10 +68,10 @@ func (mgr *ModuleManagerType) RegisterModule(name string, module *PackageModule)
 	return true
 }
 
-func (mgr *ModuleManagerType) ModuleInitialize(logHandler *slog.Handler, version string) {
+func (mgr *ModuleManagerType) ModuleInitialize(log *slog.Logger, version string) {
 	configData := config.Get()
 	for name, module := range mgr.modules {
-		module.Logger = slog.New(*logHandler).With("module", name)
+		module.Logger = log.With("module", name)
 		module.Wg = &mgr.wg
 		module.Version = version
 		module.Channel = make(chan message.Message, 10)
@@ -144,5 +150,6 @@ func (module *PackageModule) MessageProcess(name string, handler func(msg messag
 		}
 	}
 	module.Stop()
-	module.Logger.Debug("Exit message process.")
+	// This code kills test for TCP server.
+	// module.Logger.Debug("Exit message process.")
 }

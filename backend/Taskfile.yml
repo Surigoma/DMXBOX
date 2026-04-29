@@ -25,6 +25,7 @@ tasks:
     cmd: swag init -g httpServer/httpServer.go
   test:
     cmds:
+      - go clean -testcache
       - mkdir -p ./test/html
       - cmd: gotestsum --junitfile test/report.xml --jsonfile test/result.json -- -cover
           ./... -coverprofile=test/cover.out -json

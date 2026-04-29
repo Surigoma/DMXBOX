@@ -28,17 +28,17 @@ func TestOSCModule(t *testing.T) {
 	t.Run("Can start", func(t *testing.T) {
 		logger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
 		packageModule.ModuleManager.Initialize(logger)
+		defer packageModule.ModuleManager.UnregisterAll()
+		defer packageModule.ModuleManager.Finalize()
 		packageModule.ModuleManager.RegisterModule("osc", &oscserver.OscServer)
-		handler := logger.Handler()
-		packageModule.ModuleManager.ModuleInitialize(&handler, "test")
+		packageModule.ModuleManager.ModuleInitialize(logger, "test")
 		packageModule.ModuleManager.ModuleRun()
-		packageModule.ModuleManager.SendMessage(message.Message{
+		defer packageModule.ModuleManager.SendMessage(message.Message{
 			To: "osc",
 			Arg: message.MessageBody{
 				Action: "stop",
 			},
 		})
-		packageModule.ModuleManager.Finalize()
 	})
 	tests := []struct {
 		name    string

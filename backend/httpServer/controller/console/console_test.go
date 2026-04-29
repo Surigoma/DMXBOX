@@ -18,7 +18,7 @@ func TestConsoleAPIv1(t *testing.T) {
 		t.Error("Failed to get ports", "err", err)
 	}
 	if len(ports) <= 0 {
-		t.Skip("Can get not ports")
+		t.Skip("Can get not ports", "port", ports)
 	}
 	gin.SetMode(gin.TestMode)
 	engine := gin.Default()

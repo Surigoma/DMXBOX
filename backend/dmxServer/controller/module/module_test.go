@@ -56,10 +56,12 @@ func getConsolePorts() []string {
 			DataBits: 8,
 			Parity:   serial.NoParity,
 		})
-		if err == nil {
-			port.Close()
-			canOpenPort = append(canOpenPort, name)
+		if err != nil {
+			slog.Info("Can not open console", "console", name, "err", err)
+			continue
 		}
+		port.Close()
+		canOpenPort = append(canOpenPort, name)
 	}
 	if len(canOpenPort) <= 0 {
 		slog.Error("Not found for can open console.")

@@ -33,8 +33,7 @@ func Initialize(t *testing.T, msgChan *chan message.Message) *packageModule.Pack
 		}
 		packageModule.ModuleManager.RegisterModule("osc", dummyModule)
 	}
-	h := sharedLogger.Handler()
-	packageModule.ModuleManager.ModuleInitialize(&h, "test")
+	packageModule.ModuleManager.ModuleInitialize(sharedLogger, "test")
 	packageModule.ModuleManager.ModuleRun()
 	return dummyModule
 }
@@ -106,6 +105,8 @@ func TestOSCAPIv1(t *testing.T) {
 			msgChan := make(chan message.Message)
 			defer close(msgChan)
 			Initialize(t, &msgChan)
+			defer packageModule.ModuleManager.UnregisterAll()
+			defer packageModule.ModuleManager.Finalize()
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest(tt.method, tt.path, nil)
 			engine.ServeHTTP(w, req)
@@ -154,6 +155,8 @@ func TestOSCAPIv1(t *testing.T) {
 	for _, tt := range testsCantSend {
 		t.Run(tt.name, func(t *testing.T) {
 			Initialize(t, nil)
+			defer packageModule.ModuleManager.UnregisterAll()
+			defer packageModule.ModuleManager.Finalize()
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest(tt.method, tt.path, nil)
 			engine.ServeHTTP(w, req)

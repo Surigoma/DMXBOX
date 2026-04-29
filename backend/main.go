@@ -107,7 +107,7 @@ func main() {
 	log.Info("Start Main process", "version", Version)
 	config.Load(registerLog("config"))
 	registerModule()
-	packageModule.ModuleManager.ModuleInitialize(&logHandler, Version)
+	packageModule.ModuleManager.ModuleInitialize(slog.New(logHandler), Version)
 	go signalProcess()
 	defer packageModule.ModuleManager.Finalize()
 	packageModule.ModuleManager.ModuleRun()
