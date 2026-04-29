@@ -109,7 +109,6 @@ func TestFPSController_Run(t *testing.T) {
 			t.Parallel()
 			var testChannel = make(chan bool)
 			isFirst := true
-			defer close(testChannel)
 			var callback = func() bool {
 				if isFirst {
 					testChannel <- true

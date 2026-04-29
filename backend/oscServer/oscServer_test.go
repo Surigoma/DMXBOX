@@ -97,6 +97,7 @@ func TestOSCModule(t *testing.T) {
 				Logger: logger,
 			}
 			oscserver.Initialize(&module, &configData)
+			oscserver.StartOSC()
 			got := oscserver.HandleMessage(tt.message)
 			assert.Equal(t, got, tt.want)
 		})
