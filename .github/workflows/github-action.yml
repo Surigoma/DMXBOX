@@ -57,6 +57,10 @@ jobs:
       - name: "ALL: Run test"
         run: task test
 
+      - name: "Backend: Create doc"
+        run: task update_swag
+        working-directory: ./backend
+
       - name: "Backend: Close console port"
         run: killall socat
 
