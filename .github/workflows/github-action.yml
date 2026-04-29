@@ -95,8 +95,9 @@ jobs:
 
       - name: Compress bundle
         run: |
-          mkdir -p artifacts
-          zip -r artifacts/build.zip dist/
+          mkdir -p ../artifacts
+          zip -r ../artifacts/build.zip ./*
+        working-directory: ./dist
 
       - name: Upload release Asset
         uses: actions/upload-release-asset@v1.0.1
