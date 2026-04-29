@@ -37,7 +37,7 @@ jobs:
 
       - name: "Frontend: Setup test env"
         run: |
-          yarn playwright install
+          yarn playwright install chromium
         working-directory: ./frontend
 
       - name: "Backend: Setup test env"
@@ -54,15 +54,16 @@ jobs:
           sudo socat -d -d \
             pty,raw,echo=0,link=/dev/ttyUSB0,mode=666,group=dialout \
             pty,raw,echo=0,link=/dev/ttyUSB1,mode=666,group=dialout &
-      - name: "ALL: Run test"
-        run: task test
 
       - name: "Backend: Create doc"
         run: task update_swag
         working-directory: ./backend
 
+      - name: "ALL: Run test"
+        run: task test
+
       - name: "Backend: Close console port"
-        run: killall socat
+        run: sudo killall socat
 
       - name: "Archive code test results"
         id: test_result
