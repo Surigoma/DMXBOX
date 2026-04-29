@@ -144,3 +144,5 @@ export function DefaultConfig(): TConfig {
 }
 
 export const ConsoleAPIResult = z.array(z.string());
+export const Features = z.array(z.string());
+export type TFeatures = z.infer<typeof Features>;

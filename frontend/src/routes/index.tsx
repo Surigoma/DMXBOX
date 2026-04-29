@@ -10,8 +10,13 @@ import {
     Typography,
 } from "@mui/material";
 import ErrorComponent from "../component/Error";
-import { useContext, useState } from "react";
-import { DMXGroupMap, type TDMXGroupMap } from "../types";
+import { useContext, useMemo, useState } from "react";
+import {
+    DMXGroupMap,
+    Features,
+    type TDMXGroupMap,
+    type TFeatures,
+} from "../types";
 import MuteControl from "../component/MuteControl";
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import json from "react-syntax-highlighter/dist/esm/languages/hljs/json";
@@ -24,13 +29,27 @@ export const Route = createFileRoute("/")({
 
 function ControlPage() {
     const config = useContext(FrontConfigContext);
-    const { data, error, isLoading } = useSWR(
+    const {
+        data: DMXData,
+        error: DMXError,
+        isLoading: DMXisLoading,
+    } = useSWR(
         genBackendPath(config, "/api/v1/config/fade"),
         typedFetcher(DMXGroupMap),
     );
+    const {
+        data: FeaturesData,
+        error: FeaturesError,
+        isLoading: FeaturesLoading,
+    } = useSWR(genBackendPath(config, "/api/features"), typedFetcher(Features));
     const [showCutin, setCutin] = useState(false);
-    const dmxInfo = data as TDMXGroupMap;
-    if (error) {
+    const dmxInfo = DMXData as TDMXGroupMap;
+    const features = FeaturesData as TFeatures;
+    const showMute = useMemo(
+        () => features !== undefined && features.includes("osc"),
+        [features],
+    );
+    if (DMXError || FeaturesError) {
         return (
             <ErrorComponent>
                 Connection Error. Please check backend config or frontend{" "}
@@ -41,17 +60,32 @@ function ControlPage() {
                 >
                     config.json
                 </Link>
-                <SyntaxHighlighter
-                    language="json"
-                    style={atomOneDark}
-                    wrapLines
-                >
-                    {JSON.stringify(error, undefined, 4)}
-                </SyntaxHighlighter>
+                {DMXError != undefined ? (
+                    <SyntaxHighlighter
+                        language="json"
+                        style={atomOneDark}
+                        wrapLines
+                    >
+                        {JSON.stringify(DMXError, undefined, 4)}
+                    </SyntaxHighlighter>
+                ) : (
+                    <></>
+                )}
+                {FeaturesError != undefined ? (
+                    <SyntaxHighlighter
+                        language="json"
+                        style={atomOneDark}
+                        wrapLines
+                    >
+                        {JSON.stringify(FeaturesError, undefined, 4)}
+                    </SyntaxHighlighter>
+                ) : (
+                    <></>
+                )}
             </ErrorComponent>
         );
     }
-    if (isLoading) {
+    if (DMXisLoading || FeaturesLoading) {
         return (
             <Grid
                 container
@@ -113,25 +147,27 @@ function ControlPage() {
                     })}
                 </Grid>
             </Grid>
-            <Grid size="grow">
-                <Grid
-                    container
-                    direction="row"
-                    justifyContent="center"
-                    alignItems="center"
-                >
-                    <Grid size="grow">
-                        <Typography variant="h5" margin={2}>
-                            Mute
-                        </Typography>
+            {showMute && (
+                <Grid size="grow">
+                    <Grid
+                        container
+                        direction="row"
+                        justifyContent="center"
+                        alignItems="center"
+                    >
+                        <Grid size="grow">
+                            <Typography variant="h5" margin={2}>
+                                Mute
+                            </Typography>
+                        </Grid>
+                    </Grid>
+                    <Grid container spacing={3} padding={2}>
+                        <Grid size="grow">
+                            <MuteControl />
+                        </Grid>
                     </Grid>
                 </Grid>
-                <Grid container spacing={3} padding={2}>
-                    <Grid size="grow">
-                        <MuteControl />
-                    </Grid>
-                </Grid>
-            </Grid>
+            )}
         </Grid>
     );
 }
