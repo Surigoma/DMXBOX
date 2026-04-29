@@ -46,10 +46,19 @@ jobs:
           go get github.com/t-yuki/gocover-cobertura
           go install github.com/medyagh/gopogh/cmd/gopogh@latest
           go install github.com/swaggo/swag/cmd/swag@latest
+          sudo apt-get update && sudo apt-get install -y socat
         working-directory: ./backend
 
+      - name: "Backend: Create virtual console"
+        run: |
+          sudo socat -d -d \
+            PTY,link=/dev/ttyVCON0,raw,echo=0,crnl,mode=666,group=dialout \
+            /dev/null > /tmp/socat-vcon.log 2>&1 &
       - name: "ALL: Run test"
         run: task test
+
+      - name: "Backend: Close console port"
+        run: killall socat
 
       - name: "Archive code test results"
         id: test_result
