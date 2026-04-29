@@ -52,27 +52,56 @@ Main configuration: `backend/config.json` (auto-generated from defaults).
 Default example:
 ```json
 {
-  "modules": {
-    "http": true,
-    "tcp": true
-  },
-  "output": {
-    "target": ["console"],
-    "dmx": {"port": "COM1"},
-    "artnet": {"addr": "2.255.255.255/8", "universe": 0}
-  },
-  "http": {"ip": "127.0.0.1", "port": 8000},
-  "tcp": {"ip": "127.0.0.1", "port": 50000},
-  "dmx": {
-    "groups": {
-      "group1": {
-        "name": "Group 1",
-        "devices": [{"model": "dimmer", "channel": 1}]
-      }
+    "output": {
+        "target": [
+            "console"
+        ],
+        "ftdi": {
+            "port": "COM11"
+        },
+        "artnet": {
+            "addr": "2.255.255.255/8",
+            "universe": 0,
+            "subuni": 0,
+            "net": 0
+        },
+        "osc": {
+            "ip": "127.0.0.1",
+            "port": 8765,
+            "format": "/yosc:req/set/MIXER:Current/InCh/Fader/On/{}/1",
+            "type": "int",
+            "inverse": true,
+            "channels": [
+                1,
+                2,
+                3,
+                4
+            ]
+        }
     },
-    "fadeInterval": 0.7
-  },
-  "osc": {"ip": "127.0.0.1", "port": 8765, "format": "/yosc:req/set/MIXER:Current/InCh/Fader/On/{}/1"}
+    "input": {
+        "modules": [
+            "http"
+        ],
+        "http": {
+            "ip": "127.0.0.1",
+            "port": 8080,
+            "accepts": [
+                "http://localhost:8080",
+                "http://127.0.0.1:8080"
+            ]
+        },
+        "tcp": {
+            "ip": "127.0.0.1",
+            "port": 50000
+        }
+    },
+    "dmx": {
+        "groups": {},
+        "fadeInterval": 0.7,
+        "delay": 0,
+        "fps": 30
+    }
 }
 ```
 
