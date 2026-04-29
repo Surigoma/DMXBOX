@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	"os"
 	"sync"
+
+	"go.bug.st/serial"
 )
 
 type DMXHardware struct {
@@ -73,6 +75,10 @@ var ConfigMutex sync.Mutex
 
 func InitializeConfig() {
 	ConfigMutex.Lock()
+	defaultSerialPorts := ""
+	if ports, err := serial.GetPortsList(); len(ports) > 0 && err == nil {
+		defaultSerialPorts = ports[0]
+	}
 	ConfigData = Config{
 		Input: InputTargets{
 			Modules: []string{},
@@ -91,7 +97,7 @@ func InitializeConfig() {
 		Output: OutputTargets{
 			Target: []string{"console"},
 			FTDI: DMXHardware{
-				Port: "COM1",
+				Port: defaultSerialPorts,
 			},
 			Artnet: Artnet{
 				Address:     "2.255.255.255/8",
@@ -150,6 +156,11 @@ func Load(logger *slog.Logger) bool {
 
 func LoadWithPath(logger *slog.Logger, path string) bool {
 	InitializeConfig()
+	if _, err := os.Stat(path); err != nil {
+		logger.Info("Config File is not found. Create default value")
+		Save()
+		return true
+	}
 	jsonFile, err := os.Open(path)
 	if err != nil {
 		logger.Error("Failed to load a config file", "error", err)

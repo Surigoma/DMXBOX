@@ -22,11 +22,6 @@ func TestLoadWithPath(t *testing.T) {
 			want: true,
 		},
 		{
-			name: "Not Exist",
-			path: "./test/data/notExist.json",
-			want: false,
-		},
-		{
 			name: "Error format",
 			path: "./test/data/error.json",
 			want: false,
@@ -42,6 +37,17 @@ func TestLoadWithPath(t *testing.T) {
 			}
 		})
 	}
+	t.Run("Generate config file when file is not found", func(t *testing.T) {
+		t.Chdir(t.TempDir())
+		logger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
+		got := config.Load(logger)
+		if !got {
+			t.Errorf("LoadWithPath() = %v, want %v", got, true)
+		}
+		if _, err := os.Stat("./config.json"); err != nil {
+			t.Error("Config file is not generated.", "err", err)
+		}
+	})
 }
 
 func TestLoad(t *testing.T) {
