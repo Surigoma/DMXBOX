@@ -19,7 +19,7 @@
     "@emotion/styled": "^11.14.1",
     "@mui/material": "^7.3.10",
     "@tanstack/react-router": "^1.168.24",
-    "@tanstack/router-core": "^1.168.16",
+    "@tanstack/router-core": "^1.169.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-hook-form": "^7.73.1",
