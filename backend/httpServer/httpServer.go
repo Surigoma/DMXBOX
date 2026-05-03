@@ -68,7 +68,7 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 }
 
 func RegisterEndPoints(config *config.HttpServer, version string) *gin.Engine {
-	route := gin.Default()
+	route := gin.New()
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = config.AcceptHosts
 	corsConfig.AllowCredentials = true
