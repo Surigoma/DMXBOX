@@ -18,5 +18,6 @@ import (
 //	@Success		200		{object}	[]string
 //	@Router			/features [get]
 func GetFeatures(ctx *gin.Context) {
-	ctx.JSON(http.StatusOK, packageModule.ModuleManager.GetModules())
+	manager := packageModule.GetModuleManager()
+	ctx.JSON(http.StatusOK, manager.GetModules())
 }

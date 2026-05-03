@@ -18,8 +18,9 @@ import (
 )
 
 func Initialize(t *testing.T, msgChan *chan message.Message) *packageModule.PackageModule {
+	manager := packageModule.GetModuleManager()
 	sharedLogger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
-	packageModule.ModuleManager.Initialize(sharedLogger)
+	manager.Initialize(sharedLogger)
 	var dummyModule *packageModule.PackageModule
 	if msgChan != nil {
 		dummyModule = &packageModule.PackageModule{
@@ -37,14 +38,15 @@ func Initialize(t *testing.T, msgChan *chan message.Message) *packageModule.Pack
 			},
 			ModuleName: "dmx",
 		}
-		packageModule.ModuleManager.RegisterModule("dmx", dummyModule)
+		manager.RegisterModule("dmx", dummyModule)
 	}
-	packageModule.ModuleManager.ModuleInitialize(sharedLogger, "test")
-	packageModule.ModuleManager.ModuleRun()
+	manager.ModuleInitialize(sharedLogger, "test")
+	manager.ModuleRun()
 	return dummyModule
 }
 
 func TestAPIDMX(t *testing.T) {
+	manager := packageModule.GetModuleManager()
 	gin.SetMode(gin.TestMode)
 	engine := gin.Default()
 	engine.POST("/v1/fade", dmx.FadeV1)
@@ -254,8 +256,8 @@ func TestAPIDMX(t *testing.T) {
 	for _, tt := range noModuleTest {
 		t.Run("No DMX module "+tt.name, func(t *testing.T) {
 			Initialize(t, nil)
-			defer packageModule.ModuleManager.UnregisterAll()
-			defer packageModule.ModuleManager.Finalize()
+			defer manager.UnregisterAll()
+			defer manager.Finalize()
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest(tt.method, tt.path, nil)
 			engine.ServeHTTP(w, req)
@@ -267,9 +269,9 @@ func TestAPIDMX(t *testing.T) {
 		msgChan := make(chan message.Message)
 		defer close(msgChan)
 		Initialize(t, &msgChan)
-		defer packageModule.ModuleManager.UnregisterAll()
-		defer packageModule.ModuleManager.Finalize()
-		defer packageModule.ModuleManager.SendMessage(message.Message{
+		defer manager.UnregisterAll()
+		defer manager.Finalize()
+		defer manager.SendMessage(message.Message{
 			To: "dmx",
 			Arg: message.MessageBody{
 				Action: "stop",
@@ -286,9 +288,9 @@ func TestAPIDMX(t *testing.T) {
 			msgChan := make(chan message.Message)
 			defer close(msgChan)
 			Initialize(t, &msgChan)
-			defer packageModule.ModuleManager.UnregisterAll()
-			defer packageModule.ModuleManager.Finalize()
-			defer packageModule.ModuleManager.SendMessage(message.Message{
+			defer manager.UnregisterAll()
+			defer manager.Finalize()
+			defer manager.SendMessage(message.Message{
 				To: "dmx",
 				Arg: message.MessageBody{
 					Action: "stop",
@@ -330,8 +332,8 @@ func TestAPIDMX(t *testing.T) {
 		dmxserver.DMXServer.Logger = slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
 
 		dmxserver.Initialize(&dmxserver.DMXServer, &configData)
-		defer packageModule.ModuleManager.UnregisterAll()
-		defer packageModule.ModuleManager.Finalize()
+		defer manager.UnregisterAll()
+		defer manager.Finalize()
 		defer dmxserver.CleanupDMXServer()
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("GET", "/v1/config", nil)

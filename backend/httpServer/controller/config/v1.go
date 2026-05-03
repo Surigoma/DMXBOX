@@ -45,6 +45,7 @@ type ConfigResult struct {
 //	@Failure		500		{object}	ConfigResult
 //	@Router			/v1/config/save [post]
 func SetConfigV1(g *gin.Context) {
+	manager := packageModule.GetModuleManager()
 	var newConfig config.Config
 	err := g.ShouldBindJSON(&newConfig)
 	if err != nil {
@@ -64,7 +65,7 @@ func SetConfigV1(g *gin.Context) {
 	}
 
 	go func() {
-		packageModule.ModuleManager.SendMessageAll(message.Message{
+		manager.SendMessageAll(message.Message{
 			To: "",
 			Arg: message.MessageBody{
 				Action: "reload",

@@ -16,6 +16,7 @@ import (
 )
 
 func TestAPIResp(t *testing.T) {
+	manager := packageModule.GetModuleManager()
 	config.InitializeConfig()
 	config.Set(config.Config{
 		Input: config.InputTargets{
@@ -85,7 +86,7 @@ func TestAPIResp(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			sharedLogger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
-			packageModule.ModuleManager.Initialize(sharedLogger)
+			manager.Initialize(sharedLogger)
 			dummyModule := packageModule.PackageModule{
 				MessageHandler: func(msg message.Message) int {
 					t.Log(msg)
@@ -96,11 +97,11 @@ func TestAPIResp(t *testing.T) {
 				Stop:       func() {},
 				ModuleName: "dummy",
 			}
-			packageModule.ModuleManager.RegisterModule("dmx", &dummyModule)
-			packageModule.ModuleManager.ModuleInitialize(sharedLogger, "test")
-			packageModule.ModuleManager.ModuleRun()
-			defer packageModule.ModuleManager.UnregisterAll()
-			defer packageModule.ModuleManager.Finalize()
+			manager.RegisterModule("dmx", &dummyModule)
+			manager.ModuleInitialize(sharedLogger, "test")
+			manager.ModuleRun()
+			defer manager.UnregisterAll()
+			defer manager.Finalize()
 			module.Logger = sharedLogger
 			if !httpServer.HttpServer.Initialize(&module, &configData) {
 				t.Error("Failed to setup http server")

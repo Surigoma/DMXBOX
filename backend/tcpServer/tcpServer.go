@@ -69,6 +69,7 @@ func makeV1Messages(config *config.Config) map[string][]string {
 }
 
 func handleRequest(conn *net.TCPConn) {
+	manager := packageModule.GetModuleManager()
 	logger.Info("Connect", "remote", conn.RemoteAddr())
 	defer conn.Close()
 	buf := make([]byte, 512)
@@ -115,7 +116,7 @@ func handleRequest(conn *net.TCPConn) {
 				}
 				msgArg.Arg["id"] = cmd[1]
 				msgArg.Arg["isIn"] = fmt.Sprintf("%v", isIn)
-				go packageModule.ModuleManager.SendMessage(message.Message{
+				go manager.SendMessage(message.Message{
 					To:  "dmx",
 					Arg: msgArg,
 				})
@@ -124,7 +125,7 @@ func handleRequest(conn *net.TCPConn) {
 				if len(cmd) >= 2 && cmd[1] == "false" {
 					mute = false
 				}
-				go packageModule.ModuleManager.SendMessage(message.Message{
+				go manager.SendMessage(message.Message{
 					To: "osc",
 					Arg: message.MessageBody{
 						Action: "mute",
@@ -135,7 +136,7 @@ func handleRequest(conn *net.TCPConn) {
 				})
 			case "test":
 				logger.Debug("test")
-				go packageModule.ModuleManager.SendMessage(message.Message{
+				go manager.SendMessage(message.Message{
 					To: "test",
 				})
 			}

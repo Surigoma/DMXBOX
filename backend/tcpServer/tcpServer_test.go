@@ -15,6 +15,7 @@ import (
 )
 
 func TestTCPModule(t *testing.T) {
+	manager := packageModule.GetModuleManager()
 	config.Set(config.Config{
 		Input: config.InputTargets{
 			Modules: []string{"tcp"},
@@ -50,12 +51,12 @@ func TestTCPModule(t *testing.T) {
 	})
 	t.Run("Can start", func(t *testing.T) {
 		logger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
-		packageModule.ModuleManager.Initialize(logger)
-		defer packageModule.ModuleManager.Finalize()
-		packageModule.ModuleManager.RegisterModule("tcp", &tcpserver.TcpServer)
-		packageModule.ModuleManager.ModuleInitialize(logger, "test")
-		packageModule.ModuleManager.ModuleRun()
-		defer packageModule.ModuleManager.SendMessage(message.Message{
+		manager.Initialize(logger)
+		defer manager.Finalize()
+		manager.RegisterModule("tcp", &tcpserver.TcpServer)
+		manager.ModuleInitialize(logger, "test")
+		manager.ModuleRun()
+		defer manager.SendMessage(message.Message{
 			To: "tcp",
 			Arg: message.MessageBody{
 				Action: "stop",
@@ -74,13 +75,13 @@ func TestTCPModule(t *testing.T) {
 		}
 		defer ln.Close()
 		logger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
-		packageModule.ModuleManager.Initialize(logger)
-		defer packageModule.ModuleManager.UnregisterAll()
-		defer packageModule.ModuleManager.Finalize()
-		packageModule.ModuleManager.RegisterModule("tcp", &tcpserver.TcpServer)
-		packageModule.ModuleManager.ModuleInitialize(logger, "test")
-		packageModule.ModuleManager.ModuleRun()
-		defer packageModule.ModuleManager.SendMessage(message.Message{
+		manager.Initialize(logger)
+		defer manager.UnregisterAll()
+		defer manager.Finalize()
+		manager.RegisterModule("tcp", &tcpserver.TcpServer)
+		manager.ModuleInitialize(logger, "test")
+		manager.ModuleRun()
+		defer manager.SendMessage(message.Message{
 			To: "tcp",
 			Arg: message.MessageBody{
 				Action: "stop",
@@ -158,6 +159,7 @@ func CreateDummyModule(t *testing.T, msgChan *chan message.Message, moduleName s
 	return dummyModule
 }
 func TestTCPModuleSocket(t *testing.T) {
+	manager := packageModule.GetModuleManager()
 	config.Set(config.Config{
 		Input: config.InputTargets{
 			Modules: []string{"tcp"},
@@ -196,13 +198,13 @@ func TestTCPModuleSocket(t *testing.T) {
 		channel := make(chan message.Message)
 		defer close(channel)
 		logger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
-		packageModule.ModuleManager.Initialize(logger)
-		defer packageModule.ModuleManager.UnregisterAll()
-		defer packageModule.ModuleManager.Finalize()
-		packageModule.ModuleManager.RegisterModule("tcp", &tcpserver.TcpServer)
-		packageModule.ModuleManager.ModuleInitialize(logger, "test")
-		packageModule.ModuleManager.ModuleRun()
-		defer packageModule.ModuleManager.SendMessageAll(message.Message{
+		manager.Initialize(logger)
+		defer manager.UnregisterAll()
+		defer manager.Finalize()
+		manager.RegisterModule("tcp", &tcpserver.TcpServer)
+		manager.ModuleInitialize(logger, "test")
+		manager.ModuleRun()
+		defer manager.SendMessageAll(message.Message{
 			To: "tcp",
 			Arg: message.MessageBody{
 				Action: "stop",
@@ -346,17 +348,17 @@ func TestTCPModuleSocket(t *testing.T) {
 	for _, tt := range testDmx {
 		t.Run(tt.name, func(t *testing.T) {
 			sharedLogger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
-			packageModule.ModuleManager.Initialize(sharedLogger)
-			defer packageModule.ModuleManager.UnregisterAll()
-			defer packageModule.ModuleManager.Finalize()
+			manager.Initialize(sharedLogger)
+			defer manager.UnregisterAll()
+			defer manager.Finalize()
 			msgChan := make(chan message.Message)
 			defer close(msgChan)
 			dummyModule := CreateDummyModule(t, &msgChan, tt.moduleName, sharedLogger)
-			packageModule.ModuleManager.RegisterModule(tt.moduleName, dummyModule)
-			packageModule.ModuleManager.RegisterModule("tcp", &tcpserver.TcpServer)
-			packageModule.ModuleManager.ModuleInitialize(sharedLogger, "test")
-			packageModule.ModuleManager.ModuleRun()
-			defer packageModule.ModuleManager.SendMessageAll(message.Message{
+			manager.RegisterModule(tt.moduleName, dummyModule)
+			manager.RegisterModule("tcp", &tcpserver.TcpServer)
+			manager.ModuleInitialize(sharedLogger, "test")
+			manager.ModuleRun()
+			defer manager.SendMessageAll(message.Message{
 				To: "tcp",
 				Arg: message.MessageBody{
 					Action: "stop",

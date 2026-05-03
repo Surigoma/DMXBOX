@@ -125,6 +125,7 @@ func TestViewStaticFile(t *testing.T) {
 }
 
 func TestAPIResp(t *testing.T) {
+	manager := packageModule.GetModuleManager()
 	config.InitializeConfig()
 	config.Set(config.Config{
 		Input: config.InputTargets{
@@ -158,7 +159,7 @@ func TestAPIResp(t *testing.T) {
 
 	module := packageModule.PackageModule{}
 	sharedLogger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
-	packageModule.ModuleManager.Initialize(sharedLogger)
+	manager.Initialize(sharedLogger)
 	dummyModule := packageModule.PackageModule{
 		MessageHandler: func(msg message.Message) int {
 			t.Log(msg)
@@ -169,9 +170,9 @@ func TestAPIResp(t *testing.T) {
 		Stop:       func() {},
 		ModuleName: "dummy",
 	}
-	packageModule.ModuleManager.RegisterModule("dmx", &dummyModule)
-	packageModule.ModuleManager.ModuleInitialize(sharedLogger, "test")
-	packageModule.ModuleManager.ModuleRun()
+	manager.RegisterModule("dmx", &dummyModule)
+	manager.ModuleInitialize(sharedLogger, "test")
+	manager.ModuleRun()
 	tests := []struct {
 		name   string
 		path   string

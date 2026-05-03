@@ -13,6 +13,7 @@ import (
 )
 
 func TestOSCModule(t *testing.T) {
+	manager := packageModule.GetModuleManager()
 	configData := config.Config{
 		Output: config.OutputTargets{
 			Osc: config.OSCServer{
@@ -27,13 +28,13 @@ func TestOSCModule(t *testing.T) {
 	}
 	t.Run("Can start", func(t *testing.T) {
 		logger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
-		packageModule.ModuleManager.Initialize(logger)
-		defer packageModule.ModuleManager.UnregisterAll()
-		defer packageModule.ModuleManager.Finalize()
-		packageModule.ModuleManager.RegisterModule("osc", &oscserver.OscServer)
-		packageModule.ModuleManager.ModuleInitialize(logger, "test")
-		packageModule.ModuleManager.ModuleRun()
-		defer packageModule.ModuleManager.SendMessage(message.Message{
+		manager.Initialize(logger)
+		defer manager.UnregisterAll()
+		defer manager.Finalize()
+		manager.RegisterModule("osc", &oscserver.OscServer)
+		manager.ModuleInitialize(logger, "test")
+		manager.ModuleRun()
+		defer manager.SendMessage(message.Message{
 			To: "osc",
 			Arg: message.MessageBody{
 				Action: "stop",

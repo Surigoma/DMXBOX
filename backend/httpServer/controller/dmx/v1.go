@@ -33,6 +33,7 @@ type FadeResult struct {
 //	@Failure		500		{object}	FadeResult
 //	@Router			/v1/fade/{group} [post]
 func FadeV1(g *gin.Context) {
+	manager := packageModule.GetModuleManager()
 	group := g.Param("group")
 	if group == "" {
 		g.JSON(http.StatusBadRequest, map[string]any{
@@ -60,7 +61,7 @@ func FadeV1(g *gin.Context) {
 	if intStr := g.Query("duration"); intStr != "" {
 		msg.Arg.Arg["duration"] = intStr
 	}
-	ok := packageModule.ModuleManager.SendMessage(msg)
+	ok := manager.SendMessage(msg)
 	if !ok {
 		g.JSON(http.StatusInternalServerError, FadeResult{
 			Result: "Message send error",

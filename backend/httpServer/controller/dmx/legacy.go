@@ -35,7 +35,8 @@ func createMessageTemplate(g *gin.Context, id string, isIn bool) message.Message
 	return msg
 }
 func sendMessage(g *gin.Context, msg message.Message) {
-	ok := packageModule.ModuleManager.SendMessage(msg)
+	manager := packageModule.GetModuleManager()
+	ok := manager.SendMessage(msg)
 	if !ok {
 		g.JSON(http.StatusInternalServerError, map[string]any{
 			"result": "Message send error",

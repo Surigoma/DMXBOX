@@ -29,32 +29,34 @@ var modules map[string]*packageModule.PackageModule = make(map[string]*packageMo
 var Version string
 
 func registerModule() {
+	manager := packageModule.GetModuleManager()
 	modules["http"] = &httpServer.HttpServer
 	modules["tcp"] = &tcpserver.TcpServer
 
 	for _, name := range config.ConfigData.Input.Modules {
 		if module, ok := modules[name]; ok {
-			packageModule.ModuleManager.RegisterModule(name, module)
+			manager.RegisterModule(name, module)
 		} else {
 			log.Error(fmt.Sprintf("Module %s is not support.\nSupport modules are %v", name, maps.Keys(modules)))
 		}
 	}
-	packageModule.ModuleManager.RegisterModule("dmx", &dmxserver.DMXServer)
+	manager.RegisterModule("dmx", &dmxserver.DMXServer)
 	for _, target := range config.ConfigData.Output.Target {
 		if target == "osc" {
-			packageModule.ModuleManager.RegisterModule("osc", &oscserver.OscServer)
+			manager.RegisterModule("osc", &oscserver.OscServer)
 		}
 	}
 }
 
 func handleMessage(mes message.Message) int {
+	manager := packageModule.GetModuleManager()
 	res := 0
 	log.Debug("Process message", "mes", mes)
 	switch mes.Arg.Action {
 	case "stop":
-		for _, k := range packageModule.ModuleManager.GetModules() {
+		for _, k := range manager.GetModules() {
 			log.Debug("Stopping Module", "target", k)
-			packageModule.ModuleManager.SendMessage(
+			manager.SendMessage(
 				message.Message{
 					To: k,
 					Arg: message.MessageBody{
@@ -101,15 +103,16 @@ func registerLog(module string) *slog.Logger {
 }
 
 func main() {
+	manager := packageModule.GetModuleManager()
 	channel = make(chan message.Message, 10)
-	packageModule.ModuleManager.Initialize(registerLog("manager"))
+	manager.Initialize(registerLog("manager"))
 	log = registerLog("main")
 	log.Info("Start Main process", "version", Version)
 	config.Load(registerLog("config"))
 	registerModule()
-	packageModule.ModuleManager.ModuleInitialize(slog.New(logHandler), Version)
+	manager.ModuleInitialize(slog.New(logHandler), Version)
 	go signalProcess()
-	defer packageModule.ModuleManager.Finalize()
-	packageModule.ModuleManager.ModuleRun()
+	defer manager.Finalize()
+	manager.ModuleRun()
 	mainProcess()
 }

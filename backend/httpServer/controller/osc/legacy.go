@@ -23,6 +23,7 @@ import (
 //	@Failure		400		{object}	OSCResult
 //	@Router			/mute [get]
 func LegacyMute(g *gin.Context) {
+	manager := packageModule.GetModuleManager()
 	arg := map[string]string{}
 	isMuteStr := g.Query("mute")
 	if isMuteStr == "" {
@@ -38,7 +39,7 @@ func LegacyMute(g *gin.Context) {
 			},
 		},
 	}
-	ok := packageModule.ModuleManager.SendMessage(msg)
+	ok := manager.SendMessage(msg)
 	if !ok {
 		g.JSON(http.StatusInternalServerError, map[string]any{
 			"result": "Message send error",

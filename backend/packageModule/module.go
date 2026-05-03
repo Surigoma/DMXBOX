@@ -24,15 +24,25 @@ type ModuleManagerType struct {
 	modules map[string]*PackageModule
 	logger  *slog.Logger
 	wg      sync.WaitGroup
+	lock    sync.Mutex
 }
 
-var ModuleManager ModuleManagerType = ModuleManagerType{}
+var ModuleManager *ModuleManagerType = nil
 var running bool
+var managerOnce = sync.Once{}
+
+func GetModuleManager() *ModuleManagerType {
+	managerOnce.Do(func() {
+		ModuleManager = &ModuleManagerType{}
+	})
+	return ModuleManager
+}
 
 func (mgr *ModuleManagerType) Initialize(log *slog.Logger) bool {
 	mgr.logger = log
 	mgr.modules = make(map[string]*PackageModule)
 	mgr.wg = sync.WaitGroup{}
+	mgr.lock = sync.Mutex{}
 	running = true
 	return true
 }
@@ -53,12 +63,16 @@ func (mgr *ModuleManagerType) Finalize() {
 }
 
 func (mgr *ModuleManagerType) UnregisterAll() {
+	mgr.lock.Lock()
+	defer mgr.lock.Unlock()
 	for name := range mgr.modules {
 		delete(mgr.modules, name)
 	}
 }
 
 func (mgr *ModuleManagerType) RegisterModule(name string, module *PackageModule) bool {
+	mgr.lock.Lock()
+	defer mgr.lock.Unlock()
 	_, e := mgr.modules[name]
 	if e {
 		mgr.logger.Error("Module exists", "name", name, "module", module)
@@ -69,6 +83,8 @@ func (mgr *ModuleManagerType) RegisterModule(name string, module *PackageModule)
 }
 
 func (mgr *ModuleManagerType) ModuleInitialize(log *slog.Logger, version string) {
+	mgr.lock.Lock()
+	defer mgr.lock.Unlock()
 	configData := config.Get()
 	for name, module := range mgr.modules {
 		module.Logger = log.With("module", name)
@@ -82,6 +98,8 @@ func (mgr *ModuleManagerType) ModuleInitialize(log *slog.Logger, version string)
 }
 
 func (mgr *ModuleManagerType) ModuleRun() {
+	mgr.lock.Lock()
+	defer mgr.lock.Unlock()
 	for _, module := range mgr.modules {
 		module.Wg.Add(1)
 		go module.MessageProcess(module.ModuleName, module.MessageHandler)
@@ -90,6 +108,8 @@ func (mgr *ModuleManagerType) ModuleRun() {
 }
 
 func (mgr *ModuleManagerType) SendMessageAll(base message.Message) bool {
+	mgr.lock.Lock()
+	defer mgr.lock.Unlock()
 	for m := range mgr.modules {
 		msg := base
 		msg.To = m
@@ -119,6 +139,8 @@ func (mgr *ModuleManagerType) SendMessage(msg message.Message) bool {
 }
 
 func (mgr *ModuleManagerType) GetModules() []string {
+	mgr.lock.Lock()
+	defer mgr.lock.Unlock()
 	result := make([]string, 0)
 	for k := range mgr.modules {
 		result = append(result, k)
