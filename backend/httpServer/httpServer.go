@@ -154,5 +154,5 @@ func StopHTTP() {
 	if err := server.Shutdown(ctx); err != nil {
 		logger.Error("Failed to stop http server.", "err", err)
 	}
-	logger.Error("Finalize")
+	logger.Info("Finalize")
 }
