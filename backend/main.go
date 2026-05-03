@@ -15,14 +15,13 @@ import (
 	"os"
 	"os/signal"
 	"sync"
+
+	"github.com/SladkyCitron/slogcolor"
 )
 
 var channel chan message.Message
 var wg sync.WaitGroup
 var log *slog.Logger
-var logHandler slog.Handler = slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-	Level: slog.LevelDebug,
-})
 var modules map[string]*packageModule.PackageModule = make(map[string]*packageModule.PackageModule)
 
 //go:embed .version
@@ -98,17 +97,20 @@ func signalProcess() {
 	}
 }
 
-func registerLog(module string) *slog.Logger {
-	return slog.New(logHandler).With("base", module)
+func registerLog(module string, handler slog.Handler) *slog.Logger {
+	return slog.New(handler).With("base", module)
 }
 
 func main() {
+	logOption := *slogcolor.DefaultOptions
+	logOption.Level = slog.LevelDebug
+	logHandler := slogcolor.NewHandler(os.Stdout, &logOption)
 	manager := packageModule.GetModuleManager()
 	channel = make(chan message.Message, 10)
-	manager.Initialize(registerLog("manager"))
-	log = registerLog("main")
+	manager.Initialize(registerLog("manager", logHandler))
+	log = registerLog("main", logHandler)
 	log.Info("Start Main process", "version", Version)
-	config.Load(registerLog("config"))
+	config.Load(registerLog("config", logHandler))
 	registerModule()
 	manager.ModuleInitialize(slog.New(logHandler), Version)
 	go signalProcess()
