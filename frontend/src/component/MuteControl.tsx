@@ -8,7 +8,10 @@ function MuteControl() {
         const path = genBackendPath(config, "/api/v1/mute", {
             isMute,
         });
-        await fetch(path, { method: "POST" });
+        const response = await fetch(path, { method: "POST" });
+        if (!response.ok) {
+            console.error(`Request failed: ${response.status}`)
+        }
     }
     return (
         <Card variant="outlined" data-testid="MuteControl">

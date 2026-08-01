@@ -35,7 +35,10 @@ function FadeControl({
             opts["duration"] = "0";
         }
         const path = genBackendPath(config, "/api/v1/fade/" + name, opts);
-        await fetch(path, { method: "POST" });
+        const response = await fetch(path, { method: "POST" });
+        if (!response.ok) { 
+            console.error(`Request failed:${response.status}`)
+        }
     }
     return (
         <Card variant="outlined" data-testid="FadeControl">
