@@ -28,7 +28,13 @@ function WCLight(prop: WCLightProp) {
     };
 
     function convertDMXtoWCInfo(values: number[]): WCInfo {
-        if ( values == null || values.length < 3) {
+        if (values == null) {
+            return {
+                dimmer: 1,
+                temp: 0.5
+            }
+        }
+        if (values.length < 3) {
             return {
                 dimmer: values[0] != null ? values[0] / 255 : 1,
                 temp: 0.5,
