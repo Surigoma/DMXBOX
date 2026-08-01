@@ -34,6 +34,13 @@ tasks:
     deps:
       - frontend:test_watch
       - backend:test_watch
+  verify:
+    cmds:
+      - task: frontend:lint
+      - task: frontend:test
+      - task: backend:lint
+      - task: backend:test_strict
+      - task: build_all
   ### Make directories
   make_dist:
     cmds:

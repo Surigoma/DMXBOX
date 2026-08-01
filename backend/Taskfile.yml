@@ -11,14 +11,19 @@ tasks:
       - install_dep
       - update_swag
     cmds:
-      - cmd: air --tmp_dir ".tmp" --build.cmd "go build -o ./.tmp/main.exe main.go"
+      - cmd:
+          air --tmp_dir ".tmp" --build.cmd "go build -o ./.tmp/main.exe main.go"
           --build.entrypoint "./.tmp/main.exe" --build.exclude_dir "docs"
-        platforms: [ windows ]
+        platforms: [windows]
         ignore_error: true
       - cmd: air --tmp_dir ".tmp" --build.cmd "go build -o ./.tmp/main main.go"
           --build.entrypoint "./.tmp/main" --build.exclude_dir "docs"
-        platforms: [ linux, darwin ]
+        platforms: [linux, darwin]
         ignore_error: true
+  lint:
+    cmd: go vet ./...
+  test_strict:
+    cmd: go test ./...
   upgrade:
     cmd: go get -u
   update_swag:
@@ -27,7 +32,8 @@ tasks:
     cmds:
       - go clean -testcache
       - mkdir -p ./test/html
-      - cmd: gotestsum --junitfile test/report.xml --jsonfile test/result.json -- -cover
+      - cmd:
+          gotestsum --junitfile test/report.xml --jsonfile test/result.json -- -cover
           ./... -coverprofile=test/cover.out -json
         ignore_error: true
       - go tool cover -html=test/cover.out -o test/html/cover.html
@@ -35,7 +41,8 @@ tasks:
       - gopogh -in ./test/result.json -out_html ./test/html/testout.html
         -name="backend" > ./test/result.txt
   test_watch:
-    cmd: gotestsum --watch --junitfile test/report.xml --jsonfile test/result.json
+    cmd:
+      gotestsum --watch --junitfile test/report.xml --jsonfile test/result.json
       -- -cover ./... -coverprofile=test/cover.out -json
     ignore_error: true
   make_testdir:

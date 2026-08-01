@@ -6,6 +6,8 @@ vars:
 tasks:
   dev:
     cmd: yarn run dev --host 0.0.0.0
+  lint:
+    cmd: yarn lint
   upgrade:
     cmd: yarn upgrade-interactive
   test:
