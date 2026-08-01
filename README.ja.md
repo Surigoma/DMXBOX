@@ -2,176 +2,64 @@
 
 [English](README.md)
 
-DMXBOXはDMX照明制御システムです。Webベースのフロントエンドで設定・制御が可能であり、HTTP/TCP入力、DMXハードウェア/Art-Net出力、デバイスモデル（dimmer, WC Light）、グループ管理をサポートします。
-また、OSCを用いてミキサーなどのミュート処理が行えます。
+DMXBOXは、ブラウザから設定・操作できるDMX照明制御システムです。GoバックエンドがHTTP APIと本番用フロントエンドを配信するため、リリース版は1台のPC上で単一のアプリケーションとして動作します。
+
+HTTP/TCP制御入力、FTDI互換DMXハードウェアとArt-Net出力、グループ単位のフェード、音響ミキサー向けOSCミュート制御に対応しています。
 
 ## 主な機能
 
-- **バックエンド (Go)**:
-  - DMXサーバー（FPS制御、フェード効果）。
-  - DMXハードウェア（FTDI等）、Art-Net出力対応。
-  - HTTP API（設定、コンソール、DMX制御、OSCマッピング）。
-  - TCPサーバー（カスタム入力）。
-  - OSCサーバー（ミキサー制御）。
-  - モジュールアーキテクチャ（configで有効/無効）。
-
-- **フロントエンド (React + TypeScript + Vite)**:
-  - デバイス管理：グループ、モデル（dimmer, WC Light）。
-  - 入出力設定：HTTP, TCP, OSC, Art-Net, DMX。
-  - コントロール：Mute, Fade, Error表示。
-  - レスポンシブUI、テストユーティリティ。
-
-- **設定**: JSONベース（ポート、デバイス、モジュール）。
-- **テスト**: バック/フロントユニットテスト。
-- **ビルド**: Taskfileでクロスプラットフォーム。
-
-## 前提条件
-
-### Task Runner
-- [Task](https://taskfile.dev/)
-
-### Backend
-- [Go 1.21+](https://go.dev/)
-- [swag](https://github.com/swaggo/swag) (APIドキュメント用)
-- [Air](https://github.com/air-verse/air) (ホットリロード、オプション)
-
-### Frontend
-- [Node.js 18+](https://nodejs.org/)
-- [yarn](https://yarnpkg.com/)
+- 設定可能なフレームレートによる512チャンネルDMX出力
+- Fade、Cut、Mute、Unmute操作
+- FTDI互換シリアルDMX、Art-Net、OSC、コンソール出力
+- Dimmerとホワイトカラー照明のデバイスモデル
+- ブラウザベースの設定・操作画面
+- Windows x86-64、Linux x86-64、Linux ARM64向けビルド
+- フロントエンド・バックエンドの自動テスト
 
 ## クイックスタート
 
-1. リポジトリをクローン。
-2. `task dev` で開発開始（バックエンド + フロントエンド ホットリロード）。
-3. `http://localhost:5173` を開く（フロントエンド）。
-4. UIまたは `backend/config.json` で設定。
+リリース版では、実行ファイルと`static/`ディレクトリを同じ場所に置きます。既存の`config.json`がある場合は、それも同じ場所へ配置します。そのディレクトリから実行ファイルを起動し、次のURLを開きます。
 
-## 設定
-
-メイン設定: `backend/config.json`（デフォルトから自動生成）。
-
-デフォルト例:
-```json
-{
-    "output": {
-        "target": [
-            "console"
-        ],
-        "ftdi": {
-            "port": "COM11"
-        },
-        "artnet": {
-            "addr": "2.255.255.255/8",
-            "universe": 0,
-            "subuni": 0,
-            "net": 0
-        },
-        "osc": {
-            "ip": "127.0.0.1",
-            "port": 8765,
-            "format": "/yosc:req/set/MIXER:Current/InCh/Fader/On/{}/1",
-            "type": "int",
-            "inverse": true,
-            "channels": [
-                1,
-                2,
-                3,
-                4
-            ]
-        }
-    },
-    "input": {
-        "modules": [
-            "http"
-        ],
-        "http": {
-            "ip": "127.0.0.1",
-            "port": 8080,
-            "accepts": [
-                "http://localhost:8080",
-                "http://127.0.0.1:8080"
-            ]
-        },
-        "tcp": {
-            "ip": "127.0.0.1",
-            "port": 50000
-        }
-    },
-    "dmx": {
-        "groups": {},
-        "fadeInterval": 0.7,
-        "delay": 0,
-        "fps": 30
-    }
-}
+```text
+http://localhost:8080/gui/
 ```
 
-- `modules` でモジュール有効化。
-- DMXグループ/デバイス定義。
-- HTTP API経由で変更保存。
+`config.json`がない場合はデフォルト設定が生成されます。本番の照明機器へ接続する前に、出力先とシリアルポートの設定を確認してください。
 
-## 開発
+ローカル開発では次を実行します。
 
-- `task dev`: Air (backend) + Vite (frontend)。
-- `task test`: 全テスト実行。
-- `task test_watch`: ウォッチモード。
+```sh
+task dev
+```
 
-## ビルド
+起動後、`http://localhost:5173`を開きます。
 
-クロスプラットフォーム対応（Windows/Linux/macOS）。ただし、テスト済みはWindows/Linuxのみです。
+## ドキュメント
 
-- `task build`: 現在プラットフォーム用ビルド。
-- `task build_all`: 全ターゲット（Win/Linux）ビルド。
-`dist/` に出力。
+- [日本語ドキュメント一覧](docs/ja/README.md)
+- [利用者ガイド](docs/ja/user-guide.md) — 導入、操作、更新、トラブルシューティング
+- [設定リファレンス](docs/ja/configuration.md) — `config.json`の全体構造と記述例
+- [TCPプロトコル仕様](docs/ja/tcp-protocol.md)
+- [照明機材・出力仕様](docs/ja/lighting-specifications.md)
+- [開発者ガイド](docs/ja/developer-guide.md) — アーキテクチャ、開発、テスト、ビルド、API、リリース
+- [English documentation](docs/en/README.md)
 
-`task default` でディレクトリ作成 + ビルド + configコピー。
+バックエンド起動中は、次のURLで対話形式のAPIドキュメントも確認できます。
 
-## API
-
-`http://localhost:8000`
-
-エンドポイント:
-- `/api/v1/config`: 設定 GET/POST。
-- `/api/v1/console`: コンソール出力。
-- `/api/v1/dmx`: DMX制御。
-- `/api/v1/health`: ヘルスチェック。
-- `/api/v1/osc`: OSCマッピング。
-
-APIの詳細については、 `http://localhost:8000/docs/index.html` をご確認ください。
+```text
+http://localhost:8080/docs/index.html
+```
 
 ## スクリーンショット
 
 ### コントロール画面
+
 ![コントロール](images/control.png)
 
 ### 設定画面
+
 ![設定](images/settings.png)
 
-## テスト
-
-- Backend: `cd backend; task test`
-- Frontend: `cd frontend; task test`
-- すべて: `task test`
-
-## アーキテクチャ
-
-- **main.go**: モジュール管理（DMX, HTTP, TCP, OSC）。
-- チャネル経由メッセージング。
-- SIGINTで正常シャットダウン。
-
-## サポートデバイス
-
-- `dimmer`: シンプルな調光制御（単一チャンネル）。
-- `wclight`: WC Light（ホワイトカラー調整照明）。
-  - チャンネル構成: [cool（寒色）, warm（暖色）, flash（未使用: 常に0）]
-
-## トラブルシューティング
-
-- 設定ロード失敗: JSON構文確認（`backend/config.go`のLoad関数）。
-- DMXハードウェア: ポート確認（Windows: COM1等、Linux: /dev/ttyUSB0等）。
-- ポート競合: configのIP/Portを変更。
-
-ログ（JSON形式、slog使用）を確認。
-
 ## ライセンス
-[LICENSE](LICENSE) を参照。
+
+DMXBOXは[MIT License](LICENSE)で提供されます。

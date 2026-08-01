@@ -2,175 +2,64 @@
 
 [日本語](README.ja.md)
 
-DMXBOX is a DMX lighting control system. It features a web-based frontend for configuration and control, supporting HTTP/TCP input, DMX hardware/Art-Net output, device models (dimmer, WC Light), and group management. It also supports mute processing for mixers using OSC.
+DMXBOX is a DMX lighting control system with a browser-based interface. A Go backend serves the HTTP API and production frontend, allowing a release to run as a single application on one computer.
 
-## Main Features
+It supports HTTP and TCP control input, FTDI-compatible DMX hardware and Art-Net output, group-based fades, and OSC mute control for audio mixers.
 
-- **Backend (Go)**:
-  - DMX server (FPS control, fade effects).
-  - DMX hardware (FTDI, etc.), Art-Net output support.
-  - HTTP API (configuration, console, DMX control, OSC mapping).
-  - TCP server (custom input).
-  - OSC server (mixer control).
-  - Modular architecture (enable/disable via config).
+## Features
 
-- **Frontend (React + TypeScript + Vite)**:
-  - Device management: groups, models (dimmer, WC Light).
-  - I/O settings: HTTP, TCP, OSC, Art-Net, DMX.
-  - Controls: Mute, Fade, Error display.
-  - Responsive UI, test utilities.
-
-- **Configuration**: JSON-based (ports, devices, modules).
-- **Testing**: Backend/frontend unit tests.
-- **Build**: Cross-platform with Taskfile.
-
-## Prerequisites
-
-### Task Runner
-- [Task](https://taskfile.dev/)
-
-### Backend
-- [Go 1.21+](https://go.dev/)
-- [swag](https://github.com/swaggo/swag) (for API documentation)
-- [Air](https://github.com/air-verse/air) (hot reload, optional)
-
-### Frontend
-- [Node.js 18+](https://nodejs.org/)
-- [yarn](https://yarnpkg.com/)
+- 512-channel DMX output with configurable frame rate
+- Fade, cut, mute, and unmute controls
+- FTDI-compatible serial DMX, Art-Net, OSC, and console output
+- Dimmer and white-color light device models
+- Browser-based configuration and control
+- Windows x86-64, Linux x86-64, and Linux ARM64 release targets
+- Automated frontend and backend tests
 
 ## Quick Start
 
-1. Clone the repository.
-2. Run `task dev` to start development (backend + frontend hot reload).
-3. Open `http://localhost:5173` (frontend).
-4. Configure via UI or `backend/config.json`.
+For a release, keep the executable and `static/` directory together. If you already have a `config.json`, place it there as well. Run the executable from that directory, then open:
 
-## Configuration
-
-Main configuration: `backend/config.json` (auto-generated from defaults).
-
-Default example:
-```json
-{
-    "output": {
-        "target": [
-            "console"
-        ],
-        "ftdi": {
-            "port": "COM11"
-        },
-        "artnet": {
-            "addr": "2.255.255.255/8",
-            "universe": 0,
-            "subuni": 0,
-            "net": 0
-        },
-        "osc": {
-            "ip": "127.0.0.1",
-            "port": 8765,
-            "format": "/yosc:req/set/MIXER:Current/InCh/Fader/On/{}/1",
-            "type": "int",
-            "inverse": true,
-            "channels": [
-                1,
-                2,
-                3,
-                4
-            ]
-        }
-    },
-    "input": {
-        "modules": [
-            "http"
-        ],
-        "http": {
-            "ip": "127.0.0.1",
-            "port": 8080,
-            "accepts": [
-                "http://localhost:8080",
-                "http://127.0.0.1:8080"
-            ]
-        },
-        "tcp": {
-            "ip": "127.0.0.1",
-            "port": 50000
-        }
-    },
-    "dmx": {
-        "groups": {},
-        "fadeInterval": 0.7,
-        "delay": 0,
-        "fps": 30
-    }
-}
+```text
+http://localhost:8080/gui/
 ```
 
-- Enable modules with `modules`.
-- Define DMX groups/devices.
-- Save changes via HTTP API.
+If `config.json` does not exist, DMXBOX creates a default configuration. Review the output and serial-port settings before connecting production lighting hardware.
 
-## Development
+For local development:
 
-- `task dev`: Air (backend) + Vite (frontend).
-- `task test`: Run all tests.
-- `task test_watch`: Watch mode.
+```sh
+task dev
+```
 
-## Build
+Then open `http://localhost:5173`.
 
-Cross-platform support (Windows/Linux/macOS). Tested on Windows/Linux only.
+## Documentation
 
-- `task build`: Build for current platform.
-- `task build_all`: Build for all targets (Win/Linux).
-Outputs to `dist/`.
+- [English documentation](docs/en/README.md)
+- [User Guide](docs/en/user-guide.md) — installation, operation, updates, and troubleshooting
+- [Configuration Reference](docs/en/configuration.md) — complete `config.json` structure and examples
+- [TCP Protocol](docs/en/tcp-protocol.md)
+- [Lighting and Output Specifications](docs/en/lighting-specifications.md)
+- [Developer Guide](docs/en/developer-guide.md) — architecture, development, testing, building, API, and releases
+- [日本語ドキュメント一覧](docs/ja/README.md)
 
-`task default` creates directories + builds + copies config.
+Interactive API documentation is also available while the backend is running:
 
-## API
-
-`http://localhost:8000`
-
-Endpoints:
-- `/api/v1/config`: Configuration GET/POST.
-- `/api/v1/console`: Console output.
-- `/api/v1/dmx`: DMX control.
-- `/api/v1/health`: Health check.
-- `/api/v1/osc`: OSC mapping.
-
-For API details, see `http://localhost:8000/docs/index.html`.
+```text
+http://localhost:8080/docs/index.html
+```
 
 ## Screenshots
 
-### Control Screen
+### Control
+
 ![Control](images/control.png)
 
-### Configuration Screen
-![Configuration](images/settings.png)
+### Settings
 
-## Testing
-
-- Backend: `cd backend; task test`
-- Frontend: `cd frontend; task test`
-- All: `task test`
-
-## Architecture
-
-- **main.go**: Module management (DMX, HTTP, TCP, OSC).
-- Message passing via channels.
-- Graceful shutdown on SIGINT.
-
-## Supported Devices
-
-- `dimmer`: Simple dimming control (single channel).
-- `wclight`: WC Light (white color adjustment lighting).
-  - Channel configuration: [cool (cool white), warm (warm white), flash (unused: always 0)]
-
-## Troubleshooting
-
-- Configuration load failure: Check JSON syntax (`backend/config.go` Load function).
-- DMX hardware: Check ports (Windows: COM1, etc.; Linux: /dev/ttyUSB0, etc.).
-- Port conflicts: Change IP/Port in config.
-
-Check logs (JSON format, using slog).
+![Settings](images/settings.png)
 
 ## License
-See [LICENSE](LICENSE).
+
+DMXBOX is licensed under the [MIT License](LICENSE).
