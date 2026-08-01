@@ -502,6 +502,11 @@ func TestArtnet_SendDMXData(t *testing.T) {
 				readData <- data[:len]
 			}()
 			sequence = tt.sequence
+			// The receive loop uses a 500 ms deadline. Sending must continue even
+			// when no Art-Net packets have been received during that interval.
+			if tt.name == "All Zero" {
+				time.Sleep(600 * time.Millisecond)
+			}
 			a.SendDMXData(&tt.data)
 			t.Log("Send")
 			var data []byte

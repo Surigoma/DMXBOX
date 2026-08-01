@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -42,7 +43,7 @@ type Artnet struct {
 	sourceUDP  *net.UDPAddr
 	socket     *net.UDPConn
 	logger     *slog.Logger
-	isRunning  bool
+	isRunning  atomic.Bool
 	Running    sync.WaitGroup
 	address    ArtnetAddress
 }
@@ -92,12 +93,18 @@ func (a *Artnet) Initialize(log *slog.Logger, config *config.Config) bool {
 
 func (a *Artnet) listen() {
 	var buffer []byte = make([]byte, 1024)
-	a.Running.Add(1)
-	for a.isRunning {
+	defer a.Running.Done()
+	for a.isRunning.Load() {
 		a.socket.SetDeadline(time.Now().Add(500 * time.Millisecond))
 		n, err := a.socket.Read(buffer)
 		if err != nil {
-			a.isRunning = false
+			if timeout, ok := err.(net.Error); ok && timeout.Timeout() {
+				continue
+			}
+			if a.isRunning.Load() {
+				a.logger.Error("Failed to read socket", "err", err)
+				a.isRunning.Store(false)
+			}
 			break
 		}
 		if !bytes.Equal(buffer[0:7], []byte("Art-Net")) {
@@ -118,7 +125,6 @@ func (a *Artnet) listen() {
 			a.logger.With("dir", "recv").Debug("OpUNKNOWN", "n", n, "data", buffer[:n])
 		}
 	}
-	a.Running.Done()
 }
 
 func (a *Artnet) Start() bool {
@@ -129,13 +135,14 @@ func (a *Artnet) Start() bool {
 		return false
 	}
 	a.logger.Debug("Start")
-	a.isRunning = true
+	a.isRunning.Store(true)
+	a.Running.Add(1)
 	go a.listen()
 	return true
 }
 
 func (a *Artnet) Stop() bool {
-	a.isRunning = false
+	a.isRunning.Store(false)
 	a.Running.Wait()
 	if a.socket != nil {
 		err := a.socket.Close()
@@ -171,7 +178,7 @@ func (a *Artnet) SendDMXData(data *[]byte) {
 		sequence = 1
 	}
 	go func() {
-		if !a.isRunning {
+		if !a.isRunning.Load() {
 			return
 		}
 		_, err := a.socket.WriteToUDP(*rendered, a.targetUDP)
