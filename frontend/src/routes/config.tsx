@@ -45,7 +45,8 @@ function RouteComponent() {
         genBackendPath(config, "/api/v1/config/all"),
         typedFetcher(Config),
     );
-    const [result, setResult] = useState(data as TConfig);
+    const [submittedResult, setSubmittedResult] = useState<TConfig>();
+    const displayResult = submittedResult ?? data;
     const [sendResultShow, setSendResultShow] = useState(false);
     const [sendResult, setSendResult] = useState<postResult>({
         success: false,
@@ -54,14 +55,15 @@ function RouteComponent() {
     const [resultShow, setResultShow] = useState(false);
     const configForm = useForm<TConfig>({});
     useEffect(() => {
-        setResult(data as TConfig);
-        configForm.reset(data as TConfig, {
-            keepDefaultValues: false,
-        });
+        if (data) {
+            configForm.reset(data as TConfig, {
+                keepDefaultValues: false,
+            });
+        }
     }, [data, configForm]);
 
     async function onSubmit(data: TConfig) {
-        setResult(data);
+        setSubmittedResult(data);
         const result = await fetch(
             genBackendPath(config, "/api/v1/config/save"),
             {
@@ -204,7 +206,7 @@ function RouteComponent() {
                             style={atomOneDark}
                             wrapLines
                         >
-                            {JSON.stringify(result, undefined, 4)}
+                            {JSON.stringify(displayResult, undefined, 4)}
                         </SyntaxHighlighter>
                     </DialogContent>
                     <DialogActions>

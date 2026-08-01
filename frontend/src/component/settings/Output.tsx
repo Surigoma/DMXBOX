@@ -39,7 +39,7 @@ function Outputs() {
                     if (!(v instanceof Array)) {
                         return <></>;
                     }
-                    let result: ReactElement[] = [];
+                    const result: ReactElement[] = [];
                     if (v.includes("ftdi")) {
                         result.push(<OutputDMX key="ftdi"></OutputDMX>);
                     }

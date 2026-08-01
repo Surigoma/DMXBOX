@@ -26,31 +26,6 @@ function WCLight(prop: WCLightProp) {
         height: "1em",
         borderRadius: 1,
     };
-    const { setValue, getValues } = useFormContext();
-    const [colorTemp, setColorTemp] = useState(0.0);
-    const [dimmer, setDimmer] = useState(0.0);
-    const colorMix = useMemo(
-        () =>
-            "color-mix(" +
-            [
-                "in srgb",
-                [colorPalette.cool, (1 - colorTemp) * 100 + "%"].join(" "),
-                [colorPalette.warm, colorTemp * 100 + "%"].join(" "),
-            ].join(",") +
-            ")",
-        [colorTemp, colorPalette],
-    );
-    const maxValue = useMemo(() => {
-        const value: WCInfo = {
-            dimmer: dimmer,
-            temp: colorTemp,
-        };
-        const newValue = convertWCInfoToDMX(value);
-        return newValue;
-    }, [dimmer, colorTemp]);
-    useEffect(() => {
-        setValue(prop.name + ".max", maxValue);
-    }, maxValue);
 
     function convertDMXtoWCInfo(values: number[]): WCInfo {
         if ( values == null || values.length < 3) {
@@ -77,12 +52,36 @@ function WCLight(prop: WCLightProp) {
         const cool = Math.round(255 * values.dimmer - warm);
         return [Math.abs(cool), Math.abs(warm), 0];
     }
+
+    const { setValue, getValues } = useFormContext();
+    const initial = convertDMXtoWCInfo(
+        getValues(prop.name + ".max") as number[]
+    )
+    const [colorTemp, setColorTemp] = useState(initial.temp);
+    const [dimmer, setDimmer] = useState(initial.dimmer);
+    const colorMix = useMemo(
+        () =>
+            "color-mix(" +
+            [
+                "in srgb",
+                [colorPalette.cool, (1 - colorTemp) * 100 + "%"].join(" "),
+                [colorPalette.warm, colorTemp * 100 + "%"].join(" "),
+            ].join(",") +
+            ")",
+        [colorTemp, colorPalette],
+    );
+    const maxValue = useMemo(() => {
+        const value: WCInfo = {
+            dimmer: dimmer,
+            temp: colorTemp,
+        };
+        const newValue = convertWCInfoToDMX(value);
+        return newValue;
+    }, [dimmer, colorTemp]);
     useEffect(() => {
-        const values = getValues(prop.name + ".max") as number[];
-        const wcInfo = convertDMXtoWCInfo(values);
-        setDimmer(wcInfo.dimmer);
-        setColorTemp(wcInfo.temp);
-    }, []);
+        setValue(prop.name + ".max", maxValue);
+    }, [maxValue, prop.name, setValue]);
+
     return (
         <Stack spacing={2} data-testid="WCLight">
             <Stack

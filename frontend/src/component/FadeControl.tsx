@@ -27,7 +27,7 @@ function FadeControl({
         return 100 - FadeHeight;
     }, [FadeHeight]);
     async function fade(isIn: boolean, cutIn: boolean = false) {
-        let opts: { [k: string]: string } = {
+        const opts: { [k: string]: string } = {
             isIn: String(isIn),
         };
         if (cutIn) {

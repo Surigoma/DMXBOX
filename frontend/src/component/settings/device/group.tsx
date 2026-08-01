@@ -14,7 +14,7 @@ import {
     ListItem,
     TextField,
 } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import type { TDMXDevice, TDMXGroup, TDMXGroupMap } from "../../../types";
 import { MdDelete, MdEdit } from "react-icons/md";
@@ -35,15 +35,9 @@ interface AddGroupProp {
 
 export function AddEditGroup(prop: AddGroupProp) {
     const { getValues } = useFormContext();
-    const [title, setTitle] = useState("");
-    const [id, setId] = useState("");
-    useEffect(() => {
-        if (!prop.open || prop.name === undefined) {
-            return;
-        }
-        setId(prop.name.split(".").pop() ?? "");
-        setTitle(getValues(prop.name + ".name"));
-    }, [prop, getValues]);
+    const [title, setTitle] = useState(()=>getValues(prop.name + ".name"));
+    const [id, setId] = useState(()=>prop.name?.split(".").pop() ?? "");
+
     return (
         <Dialog
             open={prop.open}

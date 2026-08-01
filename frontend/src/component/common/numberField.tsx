@@ -12,7 +12,7 @@ import { MdKeyboardArrowDown } from "react-icons/md";
 /**
  * This component is a placeholder for FormControl to correctly set the shrink label state on SSR.
  */
-function SSRInitialFilled(_: BaseNumberField.Root.Props) {
+function SSRInitialFilled() {
     return null;
 }
 SSRInitialFilled.muiName = "Input";

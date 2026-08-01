@@ -10,7 +10,7 @@ interface CheckedParam {
 function Checked(param: CheckedParam) {
     const { control } = useFormContext();
 
-    function isChecked(value: any) {
+    function isChecked(value: boolean | Array<string | undefined>) {
         if (typeof value == "boolean") {
             return value;
         } else if (value instanceof Array) {
@@ -18,7 +18,7 @@ function Checked(param: CheckedParam) {
         }
         return false;
     }
-    function onChange(value: any, checked: boolean) {
+    function onChange(value: boolean | Array<string | undefined>, checked: boolean) {
         if (typeof value == "boolean") {
             return checked;
         } else if (value instanceof Array) {

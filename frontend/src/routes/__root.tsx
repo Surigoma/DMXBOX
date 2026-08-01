@@ -35,13 +35,13 @@ export function typedFetcher<T extends z.ZodTypeAny>(type: T) {
 export function genBackendPath(
     config: ConfigBody,
     path: string,
-    params: { [key: string]: any } = {},
+    params: Record<string, string | number | boolean> = {},
 ): string {
-    let result = new URL(
+    const result = new URL(
         "http://" + window.location.hostname + ":" + config.backendPort + path,
     );
-    for (let k in params) {
-        result.searchParams.append(k, params[k]);
+    for (const k in params) {
+        result.searchParams.append(k, String(params[k]));
     }
     return result.toString();
 }
