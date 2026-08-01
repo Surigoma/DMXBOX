@@ -31,7 +31,7 @@ type TCPServer struct {
 }
 type DMXDevice struct {
 	Model    string `json:"model"`
-	Channel  uint8  `json:"channel"`
+	Channel  uint16 `json:"channel"`
 	MaxValue []uint `json:"max"`
 }
 type DMXGroup struct {

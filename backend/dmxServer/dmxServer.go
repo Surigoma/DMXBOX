@@ -142,7 +142,7 @@ func handleMessage(mes message.Message) int {
 	return 0
 }
 
-func MakeDevice(deviceType string, channel uint8, maxValue []uint) *device.DMXDevice {
+func MakeDevice(deviceType string, channel uint16, maxValue []uint) *device.DMXDevice {
 	generator, ok := DeviceTypes[deviceType]
 	if !ok {
 		logger.Warn("Unsupported type", "type", deviceType)

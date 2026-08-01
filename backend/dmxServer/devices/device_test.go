@@ -12,7 +12,7 @@ func TestDMXDevice_Initialize(t *testing.T) {
 	var duration float32 = 0.1
 	tests := []struct {
 		name     string
-		channel  uint8
+		channel  uint16
 		maxValue []byte
 		duration *float32
 		want     bool
@@ -59,7 +59,7 @@ func TestDMXDevice_Initialize(t *testing.T) {
 func TestDMXDevice_Fade(t *testing.T) {
 	tests := []struct {
 		name        string
-		channel     uint8
+		channel     uint16
 		maxValue    []byte
 		duration    float32
 		addTime     float32

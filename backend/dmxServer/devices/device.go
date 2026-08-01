@@ -8,8 +8,8 @@ import (
 
 type DMXDevice struct {
 	Model       string
-	Channel     uint8
-	UseChannel  uint8
+	Channel     uint16
+	UseChannel  uint16
 	Output      *[]byte
 	Before      []byte
 	Target      []byte
@@ -22,7 +22,7 @@ type DMXDevice struct {
 	ModUpdate   func() bool
 }
 
-func (dev *DMXDevice) Initialize(channel uint8, maxValue []byte, target *[]byte, duration *float32) bool {
+func (dev *DMXDevice) Initialize(channel uint16, maxValue []byte, target *[]byte, duration *float32) bool {
 	dev.Channel = channel
 	dev.Output = target
 	dev.Duration = duration

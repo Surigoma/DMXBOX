@@ -287,7 +287,7 @@ func TestGetConfig(t *testing.T) {
 		for di := range 20 {
 			group[key].Devices[di] = config.DMXDevice{
 				Model:    "dimmer",
-				Channel:  uint8(index),
+				Channel:  uint16(index),
 				MaxValue: []uint{255},
 			}
 			index++
