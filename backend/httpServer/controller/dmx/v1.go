@@ -69,6 +69,7 @@ func FadeV1(g *gin.Context) {
 				"arg": msg,
 			},
 		})
+		return
 	}
 	g.JSON(http.StatusOK, FadeResult{
 		Result: "OK",
