@@ -130,7 +130,7 @@ func handleRequest(conn *net.TCPConn) {
 					Arg: message.MessageBody{
 						Action: "mute",
 						Arg: map[string]string{
-							"mute": fmt.Sprintf("%v", mute),
+							"isMute": fmt.Sprintf("%v", mute),
 						},
 					},
 				})

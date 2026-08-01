@@ -311,7 +311,7 @@ func TestTCPModuleSocket(t *testing.T) {
 				Arg: message.MessageBody{
 					Action: "mute",
 					Arg: map[string]string{
-						"mute": "true",
+						"isMute": "true",
 					},
 				},
 			},
@@ -325,7 +325,7 @@ func TestTCPModuleSocket(t *testing.T) {
 				Arg: message.MessageBody{
 					Action: "mute",
 					Arg: map[string]string{
-						"mute": "true",
+						"isMute": "true",
 					},
 				},
 			},
@@ -339,7 +339,7 @@ func TestTCPModuleSocket(t *testing.T) {
 				Arg: message.MessageBody{
 					Action: "mute",
 					Arg: map[string]string{
-						"mute": "false",
+						"isMute": "false",
 					},
 				},
 			},
