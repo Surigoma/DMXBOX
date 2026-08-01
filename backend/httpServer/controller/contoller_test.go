@@ -4,7 +4,6 @@ import (
 	"backend/config"
 	"backend/httpServer"
 	"backend/httpServer/controller"
-	"backend/message"
 	"backend/packageModule"
 	"encoding/json"
 	"log/slog"
@@ -34,6 +33,16 @@ func TestAPIResp(t *testing.T) {
 	configData := config.Get()
 
 	module := packageModule.PackageModule{}
+	sharedLogger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
+	manager.Initialize(sharedLogger)
+	dummyModule := packageModule.PackageModule{ModuleName: "dummy"}
+	manager.RegisterModule("dmx", &dummyModule)
+	defer manager.UnregisterAll()
+	module.Logger = sharedLogger
+	if !httpServer.HttpServer.Initialize(&module, &configData) {
+		t.Fatal("Failed to setup http server")
+	}
+	gin.SetMode(gin.TestMode)
 
 	tests := []struct {
 		name   string
@@ -85,29 +94,6 @@ func TestAPIResp(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			sharedLogger := slog.New(slog.NewJSONHandler(t.Output(), &slog.HandlerOptions{Level: slog.LevelDebug}))
-			manager.Initialize(sharedLogger)
-			dummyModule := packageModule.PackageModule{
-				MessageHandler: func(msg message.Message) int {
-					t.Log(msg)
-					return 0
-				},
-				Initialize: func(module *packageModule.PackageModule, config *config.Config) bool { return true },
-				Run:        func() {},
-				Stop:       func() {},
-				ModuleName: "dummy",
-			}
-			manager.RegisterModule("dmx", &dummyModule)
-			manager.ModuleInitialize(sharedLogger, "test")
-			manager.ModuleRun()
-			defer manager.UnregisterAll()
-			defer manager.Finalize()
-			module.Logger = sharedLogger
-			if !httpServer.HttpServer.Initialize(&module, &configData) {
-				t.Error("Failed to setup http server")
-			}
-			gin.SetMode(gin.TestMode)
-			t.Parallel()
 			engine := httpServer.RegisterEndPoints(&configData.Input.Http, "test")
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest(tt.method, tt.path, nil)

@@ -11,7 +11,6 @@ import (
 	"regexp"
 	"strings"
 	"sync"
-	"time"
 )
 
 var logger *slog.Logger
@@ -20,6 +19,8 @@ var wg *sync.WaitGroup
 var runningWg sync.WaitGroup
 var running bool = false
 var runningMutex sync.Mutex
+var listener *net.TCPListener
+var listenerMutex sync.Mutex
 var v1Msgs map[string][]string
 
 var TcpServer packageModule.PackageModule = packageModule.PackageModule{
@@ -35,12 +36,36 @@ func changeRunning(run bool) {
 	running = run
 	runningMutex.Unlock()
 }
+
+func isRunning() bool {
+	runningMutex.Lock()
+	defer runningMutex.Unlock()
+	return running
+}
+
+func changeListener(ln *net.TCPListener) {
+	listenerMutex.Lock()
+	listener = ln
+	listenerMutex.Unlock()
+}
+
+func closeListener() {
+	listenerMutex.Lock()
+	defer listenerMutex.Unlock()
+	if listener != nil {
+		_ = listener.Close()
+		listener = nil
+	}
+}
+
 func Initialize(module *packageModule.PackageModule, config *config.Config) bool {
 	var err error
 	logger = module.Logger
 	wg = module.Wg
 	runningWg = sync.WaitGroup{}
 	runningMutex = sync.Mutex{}
+	listenerMutex = sync.Mutex{}
+	changeListener(nil)
 	changeRunning(true)
 	v1Msgs = makeV1Messages(config)
 	listenAddr, err = net.ResolveTCPAddr("tcp", fmt.Sprintf("%s:%d", config.Input.Tcp.IP, config.Input.Tcp.Port))
@@ -148,18 +173,14 @@ func handleRequest(conn *net.TCPConn) {
 func tcpThread(ln *net.TCPListener) {
 	defer wg.Done()
 	defer runningWg.Done()
-	defer ln.Close()
-	for running {
-		err := ln.SetDeadline(time.Now().Add(time.Second))
-		if err != nil {
-			logger.Error("Failed to set Dead line.", "error", err)
-			break
-		}
+	defer closeListener()
+	for isRunning() {
 		conn, err := ln.AcceptTCP()
 		if err != nil {
-			if opErr, ok := err.(*net.OpError); !ok {
-				logger.Error("Failed setup connection", "error", opErr)
+			if !isRunning() {
+				break
 			}
+			logger.Error("Failed setup connection", "error", err)
 			continue
 		}
 		go handleRequest(conn)
@@ -186,13 +207,15 @@ func StartTCP() {
 		wg.Done()
 		return
 	}
+	changeListener(ln)
 	runningWg.Add(1)
 	go tcpThread(ln)
 }
 
 func StopTCP() {
-	if running {
+	if isRunning() {
 		changeRunning(false)
+		closeListener()
 		runningWg.Wait()
 	}
 }

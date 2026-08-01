@@ -25,11 +25,13 @@ func Initialize(t *testing.T, msgChan *chan message.Message) *packageModule.Pack
 		dummyModule = &packageModule.PackageModule{
 			MessageHandler: func(msg message.Message) int {
 				*msgChan <- msg
-				return 0
+				return -1
 			},
 			Initialize: func(module *packageModule.PackageModule, config *config.Config) bool { return true },
 			Run:        func() {},
-			Stop:       func() {},
+			Stop: func() {
+				dummyModule.Wg.Done()
+			},
 			ModuleName: "osc",
 		}
 		manager.RegisterModule("osc", dummyModule)

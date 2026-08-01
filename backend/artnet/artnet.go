@@ -143,6 +143,9 @@ func (a *Artnet) Start() bool {
 
 func (a *Artnet) Stop() bool {
 	a.isRunning.Store(false)
+	if a.socket != nil {
+		_ = a.socket.SetReadDeadline(time.Now())
+	}
 	a.Running.Wait()
 	if a.socket != nil {
 		err := a.socket.Close()
