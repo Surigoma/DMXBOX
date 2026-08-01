@@ -1,22 +1,19 @@
 import { expect, describe, it, beforeEach } from "vitest";
 import { render } from "vitest-browser-react";
 import { user, UserSetup } from "../test/user_helper";
-import { http, HttpResponse, type DefaultBodyType } from "msw";
+import { http, HttpResponse } from "msw";
 import { UseMockServer } from "../test/backend_helper";
 import MuteControl from "./MuteControl";
 
 describe("MuteControl", async () => {
     interface postInterface {
         params: { [key: string]: string };
-        body: DefaultBodyType;
     }
     const postData: postInterface = {
         params: {},
-        body: {},
     };
     beforeEach(() => {
         postData.params = {};
-        postData.body = {};
     });
     UseMockServer(
         http.post("*/api/v1/mute", async (r) => {
@@ -26,7 +23,6 @@ describe("MuteControl", async () => {
                 params[k] = v;
             });
             postData.params = params;
-            postData.body = await r.request.json();
             return HttpResponse.json(
                 {},
                 {
