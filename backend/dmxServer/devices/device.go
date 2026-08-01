@@ -7,19 +7,20 @@ import (
 )
 
 type DMXDevice struct {
-	Model       string
-	Channel     uint16
-	UseChannel  uint16
-	Output      *[]byte
-	Before      []byte
-	Target      []byte
-	MaxValue    []byte
-	effectStart time.Time
-	effectEnd   time.Time
-	Duration    *float32
-	once        bool
-	ModFade     func(isIn bool, duration float32, interval float32)
-	ModUpdate   func() bool
+	Model        string
+	Channel      uint16
+	UseChannel   uint16
+	Output       *[]byte
+	Before       []byte
+	Target       []byte
+	MaxValue     []byte
+	effectStart  time.Time
+	effectEnd    time.Time
+	Duration     *float32
+	once         bool
+	effectActive bool
+	ModFade      func(isIn bool, duration float32, interval float32)
+	ModUpdate    func() bool
 }
 
 func (dev *DMXDevice) Initialize(channel uint16, maxValue []byte, target *[]byte, duration *float32) bool {
@@ -57,9 +58,8 @@ func (dev *DMXDevice) Fade(isIn bool, duration float32, interval float32) {
 	}
 	dev.effectStart = time.Now().Add(time.Duration(inter * float32(time.Second)))
 	dev.effectEnd = dev.effectStart.Add(time.Duration(dur * float32(time.Second)))
-	if dur == 0 {
-		dev.once = true
-	}
+	dev.effectActive = true
+	dev.once = dur == 0
 	if dev.ModFade != nil {
 		dev.ModFade(isIn, duration, interval)
 		return
@@ -81,24 +81,31 @@ func (dev *DMXDevice) Update(wg *sync.WaitGroup) bool {
 	if dev.ModUpdate != nil {
 		return dev.ModUpdate()
 	}
+	if !dev.effectActive {
+		return false
+	}
 	now := time.Now()
 	nowD := now.Sub(dev.effectStart)
-	endD := dev.effectEnd.Sub(dev.effectStart)
-	percentRaw := nowD.Seconds() / endD.Seconds()
-	percent := math.Max(0.0, math.Min(1.0, percentRaw))
 	if nowD < 0 {
 		return false
 	}
 	if dev.once {
 		dev.once = false
+		dev.effectActive = false
 		for i := range dev.Target {
 			(*dev.Output)[i+int(dev.Channel)-1] = dev.Target[i]
 		}
 		return true
 	}
-	if percentRaw > 1.1 {
-		return false
+	if !now.Before(dev.effectEnd) {
+		dev.effectActive = false
+		for i := range dev.Target {
+			(*dev.Output)[i+int(dev.Channel)-1] = dev.Target[i]
+		}
+		return true
 	}
+	endD := dev.effectEnd.Sub(dev.effectStart)
+	percent := math.Max(0.0, math.Min(1.0, nowD.Seconds()/endD.Seconds()))
 	for i := range dev.Target {
 		v := (float64(dev.Target[i])-float64(dev.Before[i]))*float64(percent) + float64(dev.Before[i])
 		(*dev.Output)[i+int(dev.Channel)-1] = byte(math.Max(0, math.Min(255, math.Round(v))))

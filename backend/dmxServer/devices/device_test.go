@@ -65,6 +65,7 @@ func TestDMXDevice_Fade(t *testing.T) {
 		addTime     float32
 		optDuration float32
 		optInterval float32
+		updateDelay float32
 		isIn        bool
 		modFade     bool
 	}{
@@ -159,6 +160,16 @@ func TestDMXDevice_Fade(t *testing.T) {
 			isIn:        true,
 		},
 		{
+			name:        "Fade In (Late first update)",
+			channel:     1,
+			maxValue:    []byte{100, 200, 255},
+			duration:    0.01,
+			optDuration: -1,
+			optInterval: -1,
+			updateDelay: 0.1,
+			isIn:        true,
+		},
+		{
 			name:        "Change channel",
 			channel:     10,
 			maxValue:    []byte{100, 200, 255},
@@ -224,7 +235,9 @@ func TestDMXDevice_Fade(t *testing.T) {
 				}
 				time.Sleep(time.Duration((tt.optInterval) * float32(time.Second)))
 			}
-			if tt.optDuration < 0 {
+			if tt.updateDelay > 0 {
+				time.Sleep(time.Duration(tt.updateDelay * float32(time.Second)))
+			} else if tt.optDuration < 0 {
 				time.Sleep(time.Duration(tt.duration * float32(time.Second)))
 			} else {
 				time.Sleep(time.Duration(tt.optDuration * float32(time.Second)))
