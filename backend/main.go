@@ -5,6 +5,7 @@ import (
 	dmxserver "backend/dmxServer"
 	"backend/httpServer"
 	"backend/message"
+	"backend/operationlog"
 	oscserver "backend/oscServer"
 	"backend/packageModule"
 	tcpserver "backend/tcpServer"
@@ -109,6 +110,10 @@ func main() {
 	channel = make(chan message.Message, 10)
 	manager.Initialize(registerLog("manager", logHandler))
 	log = registerLog("main", logHandler)
+	if err := operationlog.Open("operations.jsonl"); err != nil {
+		log.Error("Failed to open operation log", "err", err)
+	}
+	defer operationlog.Close()
 	log.Info("Start Main process", "version", Version)
 	config.Load(registerLog("config", logHandler))
 	registerModule()

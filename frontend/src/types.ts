@@ -146,3 +146,13 @@ export function DefaultConfig(): TConfig {
 export const ConsoleAPIResult = z.array(z.string());
 export const Features = z.array(z.string());
 export type TFeatures = z.infer<typeof Features>;
+
+export const OperationLog = z.array(
+    z.object({
+        time: z.iso.datetime({ offset: true }),
+        source: z.string().optional(),
+        target: z.string(),
+        action: z.string(),
+        args: z.record(z.string(), z.string()),
+    }),
+);

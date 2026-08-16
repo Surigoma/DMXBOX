@@ -94,7 +94,7 @@ func TestAPIResp(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			engine := httpServer.RegisterEndPoints(&configData.Input.Http, "test")
+			engine := httpServer.RegisterEndPoints(&configData.Input.Http, "test", &httpServer.HttpServer)
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest(tt.method, tt.path, nil)
 			engine.ServeHTTP(w, req)

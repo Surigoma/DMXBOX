@@ -1,8 +1,8 @@
 package osc
 
 import (
+	"backend/httpServer/controller"
 	"backend/message"
-	"backend/packageModule"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -23,7 +23,6 @@ import (
 //	@Failure		400		{object}	OSCResult
 //	@Router			/mute [get]
 func LegacyMute(g *gin.Context) {
-	manager := packageModule.GetModuleManager()
 	arg := map[string]string{}
 	isMuteStr := g.Query("mute")
 	if isMuteStr == "" {
@@ -39,7 +38,7 @@ func LegacyMute(g *gin.Context) {
 			},
 		},
 	}
-	ok := manager.SendMessage(msg)
+	ok := controller.SendControl(g, msg)
 	if !ok {
 		g.JSON(http.StatusInternalServerError, map[string]any{
 			"result": "Message send error",

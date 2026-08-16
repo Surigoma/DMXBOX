@@ -3,6 +3,7 @@ package packageModule
 import (
 	"backend/config"
 	"backend/message"
+	"backend/operationlog"
 	"log/slog"
 	"sync"
 	"time"
@@ -121,6 +122,14 @@ func (mgr *ModuleManagerType) SendMessageAll(base message.Message) bool {
 }
 
 func (mgr *ModuleManagerType) SendMessage(msg message.Message) bool {
+	return mgr.sendMessage(msg, "")
+}
+
+func (module *PackageModule) SendMessage(msg message.Message) bool {
+	return GetModuleManager().sendMessage(msg, module.ModuleName)
+}
+
+func (mgr *ModuleManagerType) sendMessage(msg message.Message, source string) bool {
 	module, ok := mgr.modules[msg.To]
 	if !ok {
 		mgr.logger.Warn("Module not found.", "msg", msg)
@@ -129,6 +138,11 @@ func (mgr *ModuleManagerType) SendMessage(msg message.Message) bool {
 	mgr.logger.Debug("Start send", "to", msg.To, "msg", msg)
 	select {
 	case module.Channel <- msg:
+		if msg.Arg.Action == "fade" || msg.Arg.Action == "mute" {
+			if err := operationlog.Record(source, msg.To, msg.Arg.Action, msg.Arg.Arg); err != nil {
+				mgr.logger.Error("Failed to write operation log", "err", err)
+			}
+		}
 		mgr.logger.Debug("Send message", "to", msg.To, "msg", msg)
 		break
 	case <-time.After(time.Duration(1 * time.Second)):

@@ -58,6 +58,9 @@ function RootLayout() {
         "/config": {
             title: "Config",
         },
+        "/operations": {
+            title: "Operation Log",
+        },
         "/version": {
             title: "Version",
         },

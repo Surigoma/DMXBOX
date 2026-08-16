@@ -22,6 +22,7 @@ var runningMutex sync.Mutex
 var listener *net.TCPListener
 var listenerMutex sync.Mutex
 var v1Msgs map[string][]string
+var currentModule *packageModule.PackageModule
 
 var TcpServer packageModule.PackageModule = packageModule.PackageModule{
 	ModuleName:     "tcp",
@@ -60,6 +61,7 @@ func closeListener() {
 
 func Initialize(module *packageModule.PackageModule, config *config.Config) bool {
 	var err error
+	currentModule = module
 	logger = module.Logger
 	wg = module.Wg
 	runningWg = sync.WaitGroup{}
@@ -141,7 +143,7 @@ func handleRequest(conn *net.TCPConn) {
 				}
 				msgArg.Arg["id"] = cmd[1]
 				msgArg.Arg["isIn"] = fmt.Sprintf("%v", isIn)
-				go manager.SendMessage(message.Message{
+				go currentModule.SendMessage(message.Message{
 					To:  "dmx",
 					Arg: msgArg,
 				})
@@ -150,7 +152,7 @@ func handleRequest(conn *net.TCPConn) {
 				if len(cmd) >= 2 && cmd[1] == "false" {
 					mute = false
 				}
-				go manager.SendMessage(message.Message{
+				go currentModule.SendMessage(message.Message{
 					To: "osc",
 					Arg: message.MessageBody{
 						Action: "mute",

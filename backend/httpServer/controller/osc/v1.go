@@ -1,8 +1,8 @@
 package osc
 
 import (
+	"backend/httpServer/controller"
 	"backend/message"
-	"backend/packageModule"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -28,7 +28,6 @@ type OSCResult struct {
 //	@Failure			400		{object}	OSCResult
 //	@Router			/v1/mute [post]
 func SendOSCV1(g *gin.Context) {
-	manager := packageModule.GetModuleManager()
 	arg := map[string]string{}
 	isMuteStr := g.Query("isMute")
 	if isMuteStr == "" {
@@ -44,7 +43,7 @@ func SendOSCV1(g *gin.Context) {
 			},
 		},
 	}
-	ok := manager.SendMessage(msg)
+	ok := controller.SendControl(g, msg)
 	if !ok {
 		g.JSON(http.StatusInternalServerError, map[string]any{
 			"result": "Message send error",

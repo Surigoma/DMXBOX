@@ -111,7 +111,7 @@ func TestViewStaticFile(t *testing.T) {
 				t.Error("Failed to setup http server")
 			}
 			gin.SetMode(gin.TestMode)
-			engine := httpServer.RegisterEndPoints(&config.Input.Http, "test")
+			engine := httpServer.RegisterEndPoints(&config.Input.Http, "test", &httpServer.HttpServer)
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest("GET", tt.path, nil)
 			req.RequestURI = tt.path
@@ -224,7 +224,7 @@ func TestAPIResp(t *testing.T) {
 			}
 			gin.SetMode(gin.TestMode)
 			t.Parallel()
-			engine := httpServer.RegisterEndPoints(&configData.Input.Http, "test")
+			engine := httpServer.RegisterEndPoints(&configData.Input.Http, "test", &httpServer.HttpServer)
 			w := httptest.NewRecorder()
 			args := ""
 			if tt.args != nil {

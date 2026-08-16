@@ -57,7 +57,7 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	gin.SetMode(gin.ReleaseMode)
 	listenAddr = fmt.Sprintf("%s:%d", config.Input.Http.IP, config.Input.Http.Port)
 	logger = module.Logger
-	engine = RegisterEndPoints(&config.Input.Http, module.Version)
+	engine = RegisterEndPoints(&config.Input.Http, module.Version, module)
 	wg = module.Wg
 	server = &http.Server{
 		Addr:    listenAddr,
@@ -67,12 +67,13 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	return true
 }
 
-func RegisterEndPoints(config *config.HttpServer, version string) *gin.Engine {
+func RegisterEndPoints(config *config.HttpServer, version string, module *packageModule.PackageModule) *gin.Engine {
 	route := gin.New()
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = config.AcceptHosts
 	corsConfig.AllowCredentials = true
 	route.Use(cors.New(corsConfig))
+	route.Use(controller.SetControlModule(module))
 	route.Use(sloggin.New(logger))
 	route.Use(gin.Recovery())
 	if info, _ := os.Stat("./static"); info != nil && info.IsDir() {
@@ -102,6 +103,7 @@ func RegisterEndPoints(config *config.HttpServer, version string) *gin.Engine {
 		v1 := api.Group("/v1")
 		{
 			v1.GET("/health", health.HealthV1)
+			v1.GET("/operations", controller.GetOperations)
 			v1.POST("/fade/:group", dmx.FadeV1)
 			v1.POST("/mute", osc.SendOSCV1)
 			cfg := v1.Group("/config/")

@@ -13,6 +13,7 @@ HTTP/TCP制御入力、FTDI互換DMXハードウェアとArt-Net出力、グル�
 - FTDI互換シリアルDMX、Art-Net、OSC、コンソール出力
 - Dimmerとホワイトカラー照明のデバイスモデル
 - ブラウザベースの設定・操作画面
+- Fade/Mute操作の永続ログとブラウザベースの確認画面
 - Windows x86-64、Linux x86-64/ARM64、macOS x86-64/Apple Silicon向けビルド
 - フロントエンド・バックエンドの自動テスト
 

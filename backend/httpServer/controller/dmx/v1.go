@@ -2,8 +2,8 @@ package dmx
 
 import (
 	dmxserver "backend/dmxServer"
+	"backend/httpServer/controller"
 	"backend/message"
-	"backend/packageModule"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -33,7 +33,6 @@ type FadeResult struct {
 //	@Failure		500		{object}	FadeResult
 //	@Router			/v1/fade/{group} [post]
 func FadeV1(g *gin.Context) {
-	manager := packageModule.GetModuleManager()
 	group := g.Param("group")
 	if group == "" {
 		g.JSON(http.StatusBadRequest, map[string]any{
@@ -61,7 +60,7 @@ func FadeV1(g *gin.Context) {
 	if intStr := g.Query("duration"); intStr != "" {
 		msg.Arg.Arg["duration"] = intStr
 	}
-	ok := manager.SendMessage(msg)
+	ok := controller.SendControl(g, msg)
 	if !ok {
 		g.JSON(http.StatusInternalServerError, FadeResult{
 			Result: "Message send error",
