@@ -3,8 +3,10 @@ package module
 import (
 	"backend/config"
 	"backend/dmxServer/controller"
+	"errors"
 	"log/slog"
 	"slices"
+	"syscall"
 	"time"
 
 	"go.bug.st/serial"
@@ -59,7 +61,16 @@ func OutputFTDI(data *[]byte) bool {
 		port, _ = serial.Open(target, &mode)
 		return false
 	}
-	if err := port.Break(time.Duration(1 * time.Millisecond)); err != nil {
+	var err error
+	const maxBreakAttempts = 3
+	for attempt := 0; attempt < maxBreakAttempts; attempt++ {
+		err = port.Break(time.Millisecond)
+		if !errors.Is(err, syscall.EINTR) {
+			break
+		}
+		err = nil
+	}
+	if err != nil {
 		loggerFTDI.Error("Failed write data", "err", err)
 		port.Close()
 		port = nil
