@@ -18,7 +18,8 @@ tasks:
     cmd: yarn vite preview --outDir test/unit --base /
   ### Build frontend
   build:
-    dir: ./frontend
+    dir: .
     cmds:
       - yarn
-      - yarn run build --outDir ../dist/static --emptyOutDir
+      - yarn vite build --outDir ../dist/static --emptyOutDir
+      - yarn tsc -b
