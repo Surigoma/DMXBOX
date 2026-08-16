@@ -58,7 +58,7 @@ tasks:
       - make_static
   ### Build group
   build:
-    desc: "Build package for windows"
+    desc: "Build package for the current platform"
     deps:
       - frontend:build
       - backend:build

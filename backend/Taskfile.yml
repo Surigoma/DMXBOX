@@ -63,6 +63,7 @@ tasks:
     deps:
       - build_windows
       - build_linux_any
+      - build_darwin_any
   build_windows:
     cmds:
       - GIN_MODE=release GOOS=windows GOARCH=amd64 go build -o
@@ -82,3 +83,18 @@ tasks:
     cmds:
       - GIN_MODE=release GOOS=linux GOARCH=amd64 go build -o
         ../dist/dmxbox_linux_amd64_{{.VERSION}} main.go
+  build_darwin:
+    cmds:
+      - task: build_darwin_{{ARCH}}
+  build_darwin_any:
+    deps:
+      - build_darwin_arm64
+      - build_darwin_amd64
+  build_darwin_arm64:
+    cmds:
+      - GIN_MODE=release GOOS=darwin GOARCH=arm64 go build -o
+        ../dist/dmxbox_darwin_arm64_{{.VERSION}} main.go
+  build_darwin_amd64:
+    cmds:
+      - GIN_MODE=release GOOS=darwin GOARCH=amd64 go build -o
+        ../dist/dmxbox_darwin_amd64_{{.VERSION}} main.go

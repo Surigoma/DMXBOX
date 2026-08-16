@@ -140,7 +140,7 @@ task update_swag
 task build
 ```
 
-Windows x86-64、Linux x86-64、Linux ARM64をまとめてビルドします。
+Windows x86-64、Linux x86-64/ARM64、macOS x86-64/Apple Siliconをまとめてビルドします。
 
 ```sh
 task build_all

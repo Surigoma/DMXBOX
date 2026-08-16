@@ -13,7 +13,7 @@ It supports HTTP and TCP control input, FTDI-compatible DMX hardware and Art-Net
 - FTDI-compatible serial DMX, Art-Net, OSC, and console output
 - Dimmer and white-color light device models
 - Browser-based configuration and control
-- Windows x86-64, Linux x86-64, and Linux ARM64 release targets
+- Windows x86-64, Linux x86-64/ARM64, and macOS x86-64/Apple Silicon release targets
 - Automated frontend and backend tests
 
 ## Quick Start

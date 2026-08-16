@@ -140,7 +140,7 @@ Build the current supported platform:
 task build
 ```
 
-Build Windows x86-64, Linux x86-64, and Linux ARM64:
+Build Windows x86-64, Linux x86-64/ARM64, and macOS x86-64/Apple Silicon:
 
 ```sh
 task build_all
