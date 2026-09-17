@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/hypebeast/go-osc/osc"
 )
@@ -88,6 +89,7 @@ func HandleMessage(mes message.Message) int {
 			if err != nil {
 				logger.Error("Drop", "err", err)
 			}
+			time.Sleep(5 * time.Millisecond)
 		}
 	}
 	return 0
