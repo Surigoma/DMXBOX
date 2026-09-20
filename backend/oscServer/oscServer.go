@@ -89,7 +89,7 @@ func HandleMessage(mes message.Message) int {
 			if err != nil {
 				logger.Error("Drop", "err", err)
 			}
-			time.Sleep(5 * time.Millisecond)
+			time.Sleep(50 * time.Millisecond)
 		}
 	}
 	return 0
