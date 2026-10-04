@@ -97,7 +97,7 @@ func TestStopClosesPendingConnections(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer conn.Close()
-	conn.Write([]byte("fadeIn incomplete"))
+	conn.Write([]byte("fadeIn"))
 	StopTCP()
 	moduleWg.Wait()
 	conn.SetReadDeadline(time.Now().Add(time.Second))
