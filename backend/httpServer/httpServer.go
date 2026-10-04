@@ -72,6 +72,7 @@ func RegisterEndPoints(config *config.HttpServer, version string, module *packag
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = config.AcceptHosts
 	corsConfig.AllowCredentials = true
+	corsConfig.AllowHeaders = append(corsConfig.AllowHeaders, "X-DMXBOX-Control")
 	route.Use(cors.New(corsConfig))
 	route.Use(controller.SetControlModule(module))
 	route.Use(sloggin.New(logger))
@@ -104,8 +105,10 @@ func RegisterEndPoints(config *config.HttpServer, version string, module *packag
 		{
 			v1.GET("/health", health.HealthV1)
 			v1.GET("/operations", controller.GetOperations)
-			v1.POST("/fade/:group", dmx.FadeV1)
-			v1.POST("/mute", osc.SendOSCV1)
+			v1.GET("/control-mode", controller.GetControlMode)
+			v1.POST("/control-mode", controller.SetControlMode)
+			v1.POST("/fade/:group", controller.EnforceBrowserOnly, dmx.FadeV1)
+			v1.POST("/mute", controller.EnforceBrowserOnly, osc.SendOSCV1)
 			cfg := v1.Group("/config/")
 			{
 				cfg.GET("/fade", dmx.GetFadeConfigV1)
@@ -116,11 +119,11 @@ func RegisterEndPoints(config *config.HttpServer, version string, module *packag
 		}
 		old := api.Group("/")
 		{
-			old.GET("/fadeIn", dmx.FadeInLegacy)
-			old.GET("/fadeOut", dmx.FadeOutLegacy)
-			old.GET("/fadeAddIn", dmx.AddFadeInLegacy)
-			old.GET("/fadeAddOut", dmx.AddFadeOutLegacy)
-			old.GET("/mute", osc.LegacyMute)
+			old.GET("/fadeIn", controller.EnforceBrowserOnly, dmx.FadeInLegacy)
+			old.GET("/fadeOut", controller.EnforceBrowserOnly, dmx.FadeOutLegacy)
+			old.GET("/fadeAddIn", controller.EnforceBrowserOnly, dmx.AddFadeInLegacy)
+			old.GET("/fadeAddOut", controller.EnforceBrowserOnly, dmx.AddFadeOutLegacy)
+			old.GET("/mute", controller.EnforceBrowserOnly, osc.LegacyMute)
 			cfg := old.Group("/config")
 			{
 				cfg.POST("/save", configAPI.LegacySave)

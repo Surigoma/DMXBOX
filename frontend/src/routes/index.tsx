@@ -3,6 +3,7 @@ import { FrontConfigContext, genBackendPath, typedFetcher } from "./__root";
 import useSWR from "swr";
 import FadeControl from "../component/FadeControl";
 import {
+    Alert,
     FormControlLabel,
     FormGroup,
     Grid,
@@ -14,6 +15,7 @@ import { useContext, useMemo, useState } from "react";
 import {
     DMXGroupMap,
     Features,
+    ControlMode,
     type TDMXGroupMap,
     type TFeatures,
 } from "../types";
@@ -42,14 +44,55 @@ function ControlPage() {
         error: FeaturesError,
         isLoading: FeaturesLoading,
     } = useSWR(genBackendPath(config, "/api/features"), typedFetcher(Features));
+    const {
+        data: ControlModeData,
+        error: ControlModeError,
+        isLoading: ControlModeLoading,
+        mutate: mutateControlMode,
+    } = useSWR(
+        genBackendPath(config, "/api/v1/control-mode"),
+        typedFetcher(ControlMode),
+    );
     const [showCutin, setCutin] = useState(false);
+    const [controlModeUpdating, setControlModeUpdating] = useState(false);
+    const [controlModeUpdateError, setControlModeUpdateError] = useState<string>();
     const dmxInfo = DMXData as TDMXGroupMap;
     const features = FeaturesData as TFeatures;
     const showMute = useMemo(
         () => features !== undefined && features.includes("osc"),
         [features],
     );
-    if (DMXError || FeaturesError) {
+    const loadError = DMXError ?? FeaturesError ?? ControlModeError;
+    async function setBrowserOnly(browserOnly: boolean) {
+        setControlModeUpdating(true);
+        setControlModeUpdateError(undefined);
+        try {
+            const response = await fetch(
+                genBackendPath(config, "/api/v1/control-mode"),
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-DMXBOX-Control": "web-ui",
+                    },
+                    body: JSON.stringify({ browserOnly }),
+                },
+            );
+            if (!response.ok) {
+                throw new Error(`Request failed: ${response.status}`);
+            }
+            await mutateControlMode(ControlMode.parse(await response.json()), {
+                revalidate: false,
+            });
+        } catch (error) {
+            setControlModeUpdateError(
+                `Failed to change control mode. ${error instanceof Error ? error.message : "Please try again."}`,
+            );
+        } finally {
+            setControlModeUpdating(false);
+        }
+    }
+    if (loadError) {
         return (
             <ErrorComponent>
                 Connection Error. Please check backend config or frontend{" "}
@@ -60,32 +103,17 @@ function ControlPage() {
                 >
                     config.json
                 </Link>
-                {DMXError != undefined ? (
-                    <SyntaxHighlighter
-                        language="json"
-                        style={atomOneDark}
-                        wrapLines
-                    >
-                        {JSON.stringify(DMXError, undefined, 4)}
-                    </SyntaxHighlighter>
-                ) : (
-                    <></>
-                )}
-                {FeaturesError != undefined ? (
-                    <SyntaxHighlighter
-                        language="json"
-                        style={atomOneDark}
-                        wrapLines
-                    >
-                        {JSON.stringify(FeaturesError, undefined, 4)}
-                    </SyntaxHighlighter>
-                ) : (
-                    <></>
-                )}
+                <SyntaxHighlighter
+                    language="json"
+                    style={atomOneDark}
+                    wrapLines
+                >
+                    {JSON.stringify(loadError, undefined, 4)}
+                </SyntaxHighlighter>
             </ErrorComponent>
         );
     }
-    if (DMXisLoading || FeaturesLoading) {
+    if (DMXisLoading || FeaturesLoading || ControlModeLoading) {
         return (
             <Grid
                 container
@@ -99,6 +127,11 @@ function ControlPage() {
     }
     return (
         <Grid container direction="column">
+            {controlModeUpdateError && (
+                <Alert severity="error" onClose={() => setControlModeUpdateError(undefined)}>
+                    {controlModeUpdateError}
+                </Alert>
+            )}
             <Grid size="grow">
                 <Grid
                     container
@@ -116,7 +149,19 @@ function ControlPage() {
                         justifyContent="center"
                         alignContent="center"
                     >
-                        <FormGroup>
+                        <FormGroup row>
+                            <FormControlLabel
+                                label="Browser only"
+                                control={
+                                    <Switch
+                                        onChange={(e) => {
+                                            void setBrowserOnly(e.target.checked);
+                                        }}
+                                        checked={ControlModeData?.browserOnly ?? false}
+                                        disabled={controlModeUpdating}
+                                    />
+                                }
+                            />
                             <FormControlLabel
                                 label="CUT"
                                 control={

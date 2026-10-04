@@ -18,6 +18,7 @@ describe("FadeControl", async () => {
     });
     UseMockServer(
         http.post("*/api/v1/fade/*", async (r) => {
+            expect(r.request.headers.get("X-DMXBOX-Control")).toBe("web-ui");
             const url = new URL(r.request.url);
             const params: { [key: string]: string } = {};
             url.searchParams.forEach((v, k) => {

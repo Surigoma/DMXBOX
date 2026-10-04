@@ -6,6 +6,7 @@ import (
 	"backend/operationlog"
 	"log/slog"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -22,10 +23,11 @@ type PackageModule struct {
 }
 
 type ModuleManagerType struct {
-	modules map[string]*PackageModule
-	logger  *slog.Logger
-	wg      sync.WaitGroup
-	lock    sync.Mutex
+	modules     map[string]*PackageModule
+	logger      *slog.Logger
+	wg          sync.WaitGroup
+	lock        sync.Mutex
+	browserOnly atomic.Bool
 }
 
 var ModuleManager *ModuleManagerType = nil
@@ -44,6 +46,7 @@ func (mgr *ModuleManagerType) Initialize(log *slog.Logger) bool {
 	mgr.modules = make(map[string]*PackageModule)
 	mgr.wg = sync.WaitGroup{}
 	mgr.lock = sync.Mutex{}
+	mgr.browserOnly.Store(false)
 	running = true
 	return true
 }
@@ -130,6 +133,10 @@ func (module *PackageModule) SendMessage(msg message.Message) bool {
 }
 
 func (mgr *ModuleManagerType) sendMessage(msg message.Message, source string) bool {
+	if mgr.browserOnly.Load() && source != "http" && (msg.Arg.Action == "fade" || msg.Arg.Action == "mute") {
+		mgr.logger.Warn("Control blocked by browser-only mode", "source", source, "action", msg.Arg.Action)
+		return false
+	}
 	module, ok := mgr.modules[msg.To]
 	if !ok {
 		mgr.logger.Warn("Module not found.", "msg", msg)
@@ -150,6 +157,14 @@ func (mgr *ModuleManagerType) sendMessage(msg message.Message, source string) bo
 		return false
 	}
 	return true
+}
+
+func (mgr *ModuleManagerType) SetBrowserOnly(enabled bool) {
+	mgr.browserOnly.Store(enabled)
+}
+
+func (mgr *ModuleManagerType) BrowserOnly() bool {
+	return mgr.browserOnly.Load()
 }
 
 func (mgr *ModuleManagerType) GetModules() []string {

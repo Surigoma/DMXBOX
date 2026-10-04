@@ -8,7 +8,10 @@ function MuteControl() {
         const path = genBackendPath(config, "/api/v1/mute", {
             isMute,
         });
-        const response = await fetch(path, { method: "POST" });
+        const response = await fetch(path, {
+            method: "POST",
+            headers: { "X-DMXBOX-Control": "web-ui" },
+        });
         if (!response.ok) {
             console.error(`Request failed: ${response.status}`)
         }

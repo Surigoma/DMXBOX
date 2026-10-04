@@ -147,6 +147,10 @@ export const ConsoleAPIResult = z.array(z.string());
 export const Features = z.array(z.string());
 export type TFeatures = z.infer<typeof Features>;
 
+export const ControlMode = z.object({
+    browserOnly: z.boolean(),
+});
+
 export const OperationLog = z.array(
     z.object({
         time: z.iso.datetime({ offset: true }),
