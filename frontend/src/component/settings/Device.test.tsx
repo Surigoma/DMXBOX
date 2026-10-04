@@ -56,6 +56,40 @@ describe("Devices", async () => {
         const devices = getByTestId("Devices");
         await expect.element(devices).toBeVisible();
     });
+    it("Updates groups and devices immediately without a parent watch", async () => {
+        const { getByRole, getByTestId, getByText, getByLabelText } =
+            await CreateTestComponent({ dmx: {} });
+        await user.click(getByRole("button", { name: "Add Group" }));
+        await user.fill(getByRole("textbox", { name: "Title" }), "First");
+        await user.fill(getByRole("textbox", { name: "ID" }), "first");
+        await user.click(getByRole("button", { name: "Add", exact: true }));
+        await expect.element(getByText("First (first)")).toBeVisible();
+        await expect.element(getByText("No Groups")).not.toBeInTheDocument();
+
+        await user.click(getByTestId("DeviceAddButton"));
+        await expect.element(getByTestId("DMXDevice")).toBeVisible();
+        await user.fill(getByLabelText("Start Channel"), "12");
+        await user.click(getByTestId("DeviceAddButton"));
+        await expect.poll(() => document.querySelectorAll('[data-testid="DMXDevice"]').length).toBe(2);
+        await user.click(getByTestId("DeviceDeleteButton").first());
+        await user.click(getByRole("button", { name: "Confirm" }));
+        await expect.poll(() => document.querySelectorAll('[data-testid="DMXDevice"]').length).toBe(1);
+        await expect.element(getByLabelText("Start Channel")).toHaveValue("1");
+
+        await user.click(getByTestId("GroupEditButton"));
+        await user.fill(getByRole("textbox", { name: "ID" }), "renamed");
+        await user.click(getByRole("button", { name: "Edit", exact: true }));
+        await expect.element(getByText("First (renamed)")).toBeVisible();
+        await expect.element(getByTestId("DMXDevice")).toBeVisible();
+        await user.click(getByTestId("DeviceDeleteButton"));
+        await user.click(getByRole("button", { name: "Confirm" }));
+        await expect.element(getByTestId("DMXDevice")).not.toBeInTheDocument();
+        await user.click(getByTestId("GroupDeleteButton"));
+        await user.click(getByRole("button", { name: "Confirm" }));
+        await expect.element(getByText("No Groups")).toBeVisible();
+        await user.click(getByText("SUBMIT"));
+        expect(result.dmx.groups).toEqual({});
+    }, 15000);
     describe("Components", async () => {
         describe("Update FPS", async () => {
             it("Show Update FPS", async () => {

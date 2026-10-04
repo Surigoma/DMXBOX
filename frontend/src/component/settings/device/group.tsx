@@ -15,7 +15,7 @@ import {
     TextField,
 } from "@mui/material";
 import { useMemo, useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import type { TDMXDevice, TDMXGroup, TDMXGroupMap } from "../../../types";
 import { MdDelete, MdEdit } from "react-icons/md";
 import Device from "./device";
@@ -35,7 +35,7 @@ interface AddGroupProp {
 
 export function AddEditGroup(prop: AddGroupProp) {
     const { getValues } = useFormContext();
-    const [title, setTitle] = useState(()=>getValues(prop.name + ".name"));
+    const [title, setTitle] = useState(()=>getValues(prop.name + ".name") ?? "");
     const [id, setId] = useState(()=>prop.name?.split(".").pop() ?? "");
 
     return (
@@ -82,12 +82,12 @@ export function AddEditGroup(prop: AddGroupProp) {
 }
 
 function Group(prop: GroupProp) {
-    const { getValues, setValue, watch } = useFormContext();
+    const { control, getValues, setValue } = useFormContext();
     const parent = "dmx.groups";
     const name = useMemo(() => parent + "." + prop.name, [prop]);
     const [openEdit, setOpenEdit] = useState(false);
     const [openDelete, setOpenDelete] = useState(false);
-    const group = watch(name) as TDMXGroup;
+    const group = useWatch({ control, name }) as TDMXGroup;
     if (group === undefined) {
         return <></>;
     }
@@ -144,12 +144,11 @@ function Group(prop: GroupProp) {
                     onClick={() => {
                         const path = name + ".devices";
                         const body = getValues(path) as TDMXDevice[];
-                        body.push({
+                        setValue(path, [...body, {
                             model: "dimmer",
                             channel: 1,
                             max: [255],
-                        });
-                        setValue(path, body);
+                        }]);
                     }}
                     data-testid="DeviceAddButton"
                 >
@@ -166,10 +165,9 @@ function Group(prop: GroupProp) {
                     }
                     const oldId = prop.name;
                     const newId = r.id;
-                    const body = getValues(parent) as TDMXGroupMap;
-                    body[oldId].name = r.title;
+                    const body = { ...getValues(parent) } as TDMXGroupMap;
+                    body[newId] = { ...body[oldId], name: r.title };
                     if (oldId !== r.id) {
-                        body[newId] = body[oldId];
                         delete body[oldId];
                     }
                     setValue(parent, body);
@@ -195,7 +193,7 @@ function Group(prop: GroupProp) {
                     <Button
                         color="error"
                         onClick={() => {
-                            const body = getValues(parent);
+                            const body = { ...getValues(parent) };
                             delete body[prop.name];
                             setValue(parent, body);
                             setOpenDelete(false);

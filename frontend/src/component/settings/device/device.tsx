@@ -15,7 +15,7 @@ import {
     Typography,
 } from "@mui/material";
 import { useMemo, useState } from "react";
-import { Controller, useFormContext } from "react-hook-form";
+import { Controller, useFormContext, useWatch } from "react-hook-form";
 import Dimmer from "./model/dimmer";
 import NumberField from "../../common/numberField";
 import WCLight from "./model/wclight";
@@ -39,13 +39,13 @@ function ModelSelector(model: string, name: string) {
 }
 
 function Device(prop: DeviceProp) {
-    const { control, getValues, setValue, watch } = useFormContext();
+    const { control, getValues, setValue } = useFormContext();
     const [openDelete, setOpenDelete] = useState(false);
     const name = useMemo(
         () => prop.base + ".devices[" + prop.index + "]",
         [prop],
     );
-    const model = watch(name + ".model");
+    const model = useWatch({ control, name: name + ".model" });
 
     return (
         <Card style={{ padding: "5px" }} data-testid="DMXDevice">
@@ -125,9 +125,10 @@ function Device(prop: DeviceProp) {
                         color="error"
                         onClick={() => {
                             const body = getValues(prop.base) as TDMXGroup;
-                            body.devices.splice(prop.index, 1);
-                            setValue(prop.base, body);
-                            console.log(body);
+                            setValue(prop.base, {
+                                ...body,
+                                devices: body.devices.filter((_, i) => i !== prop.index),
+                            });
                             setOpenDelete(false);
                         }}
                     >

@@ -6,17 +6,17 @@ import {
     Typography,
 } from "@mui/material";
 import Group, { AddEditGroup } from "./device/group";
-import { Controller, useFormContext } from "react-hook-form";
+import { Controller, useFormContext, useWatch } from "react-hook-form";
 import type { TDMXGroupMap } from "../../types";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import NumberField from "../common/numberField";
 
 function Devices() {
-    const { control, getValues, setValue, watch } = useFormContext();
+    const { control, getValues, setValue } = useFormContext();
     const [openAdd, setOpenAdd] = useState(false);
     const parent = "dmx.groups";
-    const groups = watch(parent) as TDMXGroupMap;
-    const groupKeys = useMemo(() => Object.keys(groups ?? {}), [groups]);
+    const groups = useWatch({ control, name: parent }) as TDMXGroupMap;
+    const groupKeys = Object.keys(groups ?? {});
     return (
         <Grid container spacing={2} direction="column" data-testid="Devices">
             <Grid>
@@ -103,11 +103,10 @@ function Devices() {
                         return;
                     }
                     const body = getValues(parent) as TDMXGroupMap;
-                    body[r.id] = {
-                        devices: [],
-                        name: r.title,
-                    };
-                    setValue(parent, body);
+                    setValue(parent, {
+                        ...body,
+                        [r.id]: { devices: [], name: r.title },
+                    });
                     setOpenAdd(false);
                 }}
             />
