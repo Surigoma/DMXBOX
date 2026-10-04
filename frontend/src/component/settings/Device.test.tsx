@@ -4,6 +4,15 @@ import { FormProvider, useForm } from "react-hook-form";
 import { user, UserSetup } from "../../test/user_helper";
 import type { TDMXGroupMap } from "../../types";
 import Devices from "./Device";
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+// These tests verify form updates, so visual effects do not need to delay input.
+const testTheme = createTheme({
+    components: {
+        MuiDialog: { defaultProps: { transitionDuration: 0 } },
+        MuiButtonBase: { defaultProps: { disableRipple: true } },
+    },
+});
 
 describe("Devices", async () => {
     UserSetup();
@@ -32,12 +41,14 @@ describe("Devices", async () => {
             defaultValues: f.value ?? defaultValue,
         });
         return (
-            <FormProvider {...configForm}>
-                <form onSubmit={configForm.handleSubmit((v) => f.callback(v))}>
-                    <Devices />
-                    <input type="submit" value="SUBMIT" />
-                </form>
-            </FormProvider>
+            <ThemeProvider theme={testTheme}>
+                <FormProvider {...configForm}>
+                    <form onSubmit={configForm.handleSubmit((v) => f.callback(v))}>
+                        <Devices />
+                        <input type="submit" value="SUBMIT" />
+                    </form>
+                </FormProvider>
+            </ThemeProvider>
         );
     }
     function CreateTestComponent(value?: testForm): Promise<RenderResult> {
@@ -56,40 +67,58 @@ describe("Devices", async () => {
         const devices = getByTestId("Devices");
         await expect.element(devices).toBeVisible();
     });
-    it("Updates groups and devices immediately without a parent watch", async () => {
-        const { getByRole, getByTestId, getByText, getByLabelText } =
-            await CreateTestComponent({ dmx: {} });
-        await user.click(getByRole("button", { name: "Add Group" }));
-        await user.fill(getByRole("textbox", { name: "Title" }), "First");
-        await user.fill(getByRole("textbox", { name: "ID" }), "first");
-        await user.click(getByRole("button", { name: "Add", exact: true }));
-        await expect.element(getByText("First (first)")).toBeVisible();
-        await expect.element(getByText("No Groups")).not.toBeInTheDocument();
-
+    const populatedGroup: testForm = {
+        dmx: { groups: { first: { name: "First", devices: [
+            { model: "dimmer", channel: 12, max: [255] },
+        ] } } },
+    };
+    it("Adds devices immediately without a parent watch", async () => {
+        const { getByTestId } = await CreateTestComponent({
+            dmx: { groups: { first: { name: "First", devices: [] } } },
+        });
         await user.click(getByTestId("DeviceAddButton"));
         await expect.element(getByTestId("DMXDevice")).toBeVisible();
-        await user.fill(getByLabelText("Start Channel"), "12");
-        await user.click(getByTestId("DeviceAddButton"));
-        await expect.poll(() => document.querySelectorAll('[data-testid="DMXDevice"]').length).toBe(2);
+    });
+    it("Removes the first device and preserves the remaining values", async () => {
+        const { getByTestId, getByRole, getByLabelText } = await CreateTestComponent({
+            dmx: { groups: { first: { name: "First", devices: [
+                { model: "dimmer", channel: 12, max: [255] },
+                { model: "dimmer", channel: 24, max: [128] },
+            ] } } },
+        });
         await user.click(getByTestId("DeviceDeleteButton").first());
         await user.click(getByRole("button", { name: "Confirm" }));
-        await expect.poll(() => document.querySelectorAll('[data-testid="DMXDevice"]').length).toBe(1);
-        await expect.element(getByLabelText("Start Channel")).toHaveValue("1");
-
+        await expect.poll(() => getByTestId("DMXDevice").elements().length).toBe(1);
+        await expect.element(getByLabelText("Start Channel")).toHaveValue("24");
+        await user.click(getByRole("button", { name: "SUBMIT" }));
+        expect(result.dmx.groups?.first.devices).toEqual([
+            { model: "dimmer", channel: 24, max: [128] },
+        ]);
+    });
+    it("Renames groups immediately without a parent watch", async () => {
+        const { getByTestId, getByRole, getByText } = await CreateTestComponent(populatedGroup);
         await user.click(getByTestId("GroupEditButton"));
         await user.fill(getByRole("textbox", { name: "ID" }), "renamed");
         await user.click(getByRole("button", { name: "Edit", exact: true }));
         await expect.element(getByText("First (renamed)")).toBeVisible();
         await expect.element(getByTestId("DMXDevice")).toBeVisible();
+        await user.click(getByText("SUBMIT"));
+        expect(result.dmx.groups).toEqual({ renamed: populatedGroup.dmx.groups?.first });
+    });
+    it("Removes the last device immediately without a parent watch", async () => {
+        const { getByTestId, getByRole } = await CreateTestComponent(populatedGroup);
         await user.click(getByTestId("DeviceDeleteButton"));
         await user.click(getByRole("button", { name: "Confirm" }));
         await expect.element(getByTestId("DMXDevice")).not.toBeInTheDocument();
+    });
+    it("Removes groups immediately without a parent watch", async () => {
+        const { getByTestId, getByRole, getByText } = await CreateTestComponent(populatedGroup);
         await user.click(getByTestId("GroupDeleteButton"));
         await user.click(getByRole("button", { name: "Confirm" }));
         await expect.element(getByText("No Groups")).toBeVisible();
         await user.click(getByText("SUBMIT"));
         expect(result.dmx.groups).toEqual({});
-    }, 15000);
+    });
     describe("Components", async () => {
         describe("Update FPS", async () => {
             it("Show Update FPS", async () => {
@@ -208,12 +237,15 @@ describe("Devices", async () => {
                         getByTestId("OpGroupId").getByRole("textbox");
                     const saveButton = getByRole("button", { name: "Add" });
                     const submit = getByText("SUBMIT");
-                    await user.click(groupTitle);
                     await user.fill(groupTitle, "TEST_NAME");
-                    await user.click(groupId);
                     await user.fill(groupId, "TEST_ID");
                     await user.click(saveButton);
+                    await expect.element(getByText("TEST_NAME (TEST_ID)")).toBeVisible();
+                    await expect.element(getByTestId("GroupEditDialog")).not.toBeInTheDocument();
                     await user.click(submit);
+                    await expect.poll(() => result.dmx.groups).toEqual({
+                        TEST_ID: { name: "TEST_NAME", devices: [] },
+                    });
                 });
 
                 it("Can cancel", async () => {
