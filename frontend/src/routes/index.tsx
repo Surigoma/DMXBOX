@@ -88,6 +88,8 @@ function ControlPage() {
             setControlModeUpdateError(
                 `Failed to change control mode. ${error instanceof Error ? error.message : "Please try again."}`,
             );
+            // The server may have applied the change before its response was lost.
+            await mutateControlMode().catch(() => undefined);
         } finally {
             setControlModeUpdating(false);
         }

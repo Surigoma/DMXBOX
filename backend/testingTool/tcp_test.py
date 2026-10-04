@@ -8,7 +8,7 @@ if len(sys.argv) > 1:
 else:
     msg = input("cmd>")
 client.connect(("127.0.0.1", 50000))
-client.send(msg.encode("utf-8"))
+client.sendall((msg + "\r\n").encode("utf-8"))
 resp = client.recv(512)
 print(resp)
 client.close()

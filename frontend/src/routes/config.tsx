@@ -48,6 +48,7 @@ function RouteComponent() {
     const [submittedResult, setSubmittedResult] = useState<TConfig>();
     const displayResult = submittedResult ?? data;
     const [sendResultShow, setSendResultShow] = useState(false);
+    const [restartMessage, setRestartMessage] = useState<string>();
     const [sendResult, setSendResult] = useState<postResult>({
         success: false,
         message: <>Not ready</>,
@@ -72,6 +73,8 @@ function RouteComponent() {
             },
         );
         if (result.ok) {
+            const saved = await result.json();
+            if (saved.restartRequired) setRestartMessage(saved.message);
             setSendResult({
                 success: true,
                 message: <>Success</>,
@@ -107,6 +110,7 @@ function RouteComponent() {
 
     return (
         <>
+            {restartMessage && <Alert severity="warning">{restartMessage}</Alert>}
             <Snackbar
                 open={sendResultShow}
                 onClose={() => setSendResultShow(false)}

@@ -24,6 +24,9 @@ type DMXDevice struct {
 }
 
 func (dev *DMXDevice) Initialize(channel uint16, maxValue []byte, target *[]byte, duration *float32) bool {
+	if target == nil || duration == nil || channel == 0 || dev.UseChannel == 0 || int(channel)+int(dev.UseChannel)-1 > len(*target) || len(maxValue) < int(dev.UseChannel) {
+		return false
+	}
 	dev.Channel = channel
 	dev.Output = target
 	dev.Duration = duration

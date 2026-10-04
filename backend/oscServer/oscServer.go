@@ -40,7 +40,11 @@ func (f *OSCFormatter) Render(mute bool) ([]string, any) {
 	if mute != f.Inverse {
 		index = 1
 	}
-	return result, dataMap[f.Type][index]
+	values, ok := dataMap[f.Type]
+	if !ok {
+		return nil, nil
+	}
+	return result, values[index]
 }
 
 var formatter OSCFormatter
@@ -54,6 +58,9 @@ var OscServer packageModule.PackageModule = packageModule.PackageModule{
 }
 
 func Initialize(module *packageModule.PackageModule, config *config.Config) bool {
+	if config.Output.Osc.Type != "int" && config.Output.Osc.Type != "float" {
+		return false
+	}
 	logger = module.Logger
 	wg = module.Wg
 	ip = config.Output.Osc.Ip
@@ -65,6 +72,7 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 		Inverse:  config.Output.Osc.Inverse,
 		Channels: config.Output.Osc.Channels,
 	}
+	client = osc.NewClient(ip, port)
 	return true
 }
 
@@ -96,5 +104,4 @@ func HandleMessage(mes message.Message) int {
 }
 
 func StartOSC() {
-	client = osc.NewClient(ip, port)
 }

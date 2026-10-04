@@ -4,6 +4,8 @@
 
 DMXBOX reads `config.json` from the backend working directory. In a source checkout, the development file is `backend/config.json`. Saving from the browser replaces the complete configuration and reloads backend modules.
 
+Adding or removing an input module, or enabling or disabling OSC output, requires restarting DMXBOX after saving. The settings page displays this requirement; all settings in that update take effect after the restart.
+
 Back up a working configuration before editing it manually.
 
 ## Complete Example

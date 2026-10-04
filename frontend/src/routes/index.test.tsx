@@ -9,7 +9,7 @@ import { user, UserSetup } from "../test/user_helper";
 
 describe("Control mode", () => {
     UserSetup();
-    let failure: "http" | "network" | "json" | undefined;
+    let failure: "http" | "network" | "json" | "lost-response" | undefined;
     let marker: string | null;
     let browserOnly: boolean;
     beforeEach(() => {
@@ -28,6 +28,7 @@ describe("Control mode", () => {
             if (failure === "network") return HttpResponse.error();
             if (failure === "json") return HttpResponse.json({});
             browserOnly = (await request.json() as { browserOnly: boolean }).browserOnly;
+            if (failure === "lost-response") return HttpResponse.error();
             return HttpResponse.json({ browserOnly });
         }),
     );
@@ -68,4 +69,14 @@ describe("Control mode", () => {
             await expect.element(getByRole("alert")).not.toBeInTheDocument();
         });
     }
+    it("Reads back the applied mode when the POST response is lost", async () => {
+        const { getByRole } = await createPage();
+        const toggle = getByRole("switch", { name: "Browser only" });
+        await expect.element(toggle).toBeEnabled();
+        failure = "lost-response";
+        await user.click(toggle);
+        await expect.element(getByRole("alert")).toBeVisible();
+        await expect.element(toggle).toBeEnabled();
+        await expect.element(toggle).toBeChecked();
+    });
 });

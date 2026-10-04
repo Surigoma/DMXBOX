@@ -5,6 +5,7 @@ import (
 	"backend/message"
 	"backend/packageModule"
 	"net/http"
+	"slices"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,8 +27,9 @@ func GetConfigV1(g *gin.Context) {
 }
 
 type ConfigResult struct {
-	Result  bool   `json:"result"`
-	Message string `json:"message"`
+	Result          bool   `json:"result"`
+	Message         string `json:"message"`
+	RestartRequired bool   `json:"restartRequired,omitempty"`
 }
 
 // Set all config
@@ -55,12 +57,34 @@ func SetConfigV1(g *gin.Context) {
 		})
 		return
 	}
-	config.Set(newConfig)
-	if ok, err := config.Save(); !ok {
+	if err := newConfig.Validate(); err != nil {
+		g.JSON(http.StatusBadRequest, ConfigResult{Message: err.Error()})
+		return
+	}
+	oldConfig := config.Get()
+	oldInputs, newInputs := slices.Clone(oldConfig.Input.Modules), slices.Clone(newConfig.Input.Modules)
+	slices.Sort(oldInputs)
+	slices.Sort(newInputs)
+	restartRequired := !slices.Equal(oldInputs, newInputs) || slices.Contains(oldConfig.Output.Target, "osc") != slices.Contains(newConfig.Output.Target, "osc")
+	if active := manager.GetModules(); len(active) > 0 {
+		desired := append(slices.Clone(newInputs), "dmx")
+		if slices.Contains(newConfig.Output.Target, "osc") {
+			desired = append(desired, "osc")
+		}
+		slices.Sort(active)
+		slices.Sort(desired)
+		restartRequired = !slices.Equal(active, desired)
+	}
+	if err := config.SaveAndSet(newConfig); err != nil {
 		g.JSON(http.StatusInternalServerError, ConfigResult{
 			Result:  false,
 			Message: err.Error(),
 		})
+		return
+	}
+
+	if restartRequired {
+		g.JSON(http.StatusOK, ConfigResult{Result: true, RestartRequired: true, Message: "Saved. Restart DMXBOX to apply the module changes and other settings in this update."})
 		return
 	}
 

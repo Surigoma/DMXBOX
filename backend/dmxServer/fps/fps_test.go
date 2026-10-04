@@ -36,6 +36,8 @@ func TestNewFPS(t *testing.T) {
 			finalize: nil,
 			isNil:    false,
 		},
+		{name: "zero FPS", fps: 0, callback: func() bool { return true }, isNil: true},
+		{name: "negative FPS", fps: -1, callback: func() bool { return true }, isNil: true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

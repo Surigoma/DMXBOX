@@ -28,11 +28,13 @@ Enable it with:
 | Default address | `127.0.0.1:50000` |
 | Direction | Client sends commands; server sends acknowledgements |
 | Command separators | CRLF (`\r\n`), LF (`\n`), or CR (`\r`) |
-| Read buffer | 512 bytes |
+| Maximum command length | 4095 bytes excluding the separator; commands longer than 512 bytes are buffered |
 | Acknowledgement | ASCII `ack\r\n` |
 | Connection lifetime | The server accepts more than one read on a connection; one-command-per-connection is supported and recommended |
 
 Commands and identifiers are expected to use ASCII-compatible text. The implementation does not perform an explicit character-encoding conversion.
+
+Terminate each command with CRLF, LF, or CR. Commands are buffered until a separator arrives, regardless of socket read boundaries. Without a separator, the final command is processed when the client closes its sending side.
 
 ## Command Grammar
 
@@ -117,7 +119,7 @@ Aliases are expanded only when a complete single-token command is received.
 
 ## Responses
 
-After processing each line fragment, the server writes:
+After processing each non-empty command, the server writes:
 
 ```text
 ack\r\n
@@ -147,9 +149,9 @@ with socket.create_connection(("127.0.0.1", 50000), timeout=2) as client:
 
 ## Known Constraints
 
-- TCP does not preserve application message boundaries. The current implementation parses each socket read independently rather than buffering until a complete line. Keep commands short, send one command at a time, and wait for `ack\r\n` before sending the next command.
-- A single command must fit within the 512-byte read buffer.
-- Empty and unknown commands may still receive `ack\r\n`.
+- Clients that send without a separator and then wait for an acknowledgement must append a line ending.
+- Commands exceeding the maximum length close the connection.
+- Unknown commands may still receive `ack\r\n`. Empty lines are ignored.
 - Whitespace is significant: use one ASCII space between the command, group, and options.
 - Configuration reload recreates the TCP listener and can close or interrupt active connections.
 - The protocol currently has no authentication or encryption. Bind it to `127.0.0.1` unless it is protected by a trusted network and host firewall.

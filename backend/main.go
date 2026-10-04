@@ -115,7 +115,10 @@ func main() {
 	}
 	defer operationlog.Close()
 	log.Info("Start Main process", "version", Version)
-	config.Load(registerLog("config", logHandler))
+	if !config.Load(registerLog("config", logHandler)) {
+		log.Error("Cannot start with an invalid configuration")
+		return
+	}
 	registerModule()
 	manager.ModuleInitialize(slog.New(logHandler), Version)
 	go signalProcess()

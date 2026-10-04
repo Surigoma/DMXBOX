@@ -145,11 +145,12 @@ func HandleMessage(mes message.Message) int {
 }
 
 func StartHTTP() {
-	err := server.ListenAndServe()
-	if err != nil && err != http.ErrServerClosed {
-		logger.Error("Failed to setup error", "error", err)
-		return
-	}
+	currentServer, currentLogger := server, logger
+	go func() {
+		if err := currentServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			currentLogger.Error("Failed to setup error", "error", err)
+		}
+	}()
 }
 
 func StopHTTP() {

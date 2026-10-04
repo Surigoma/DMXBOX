@@ -140,7 +140,8 @@ func Set(data Config) {
 }
 
 func Save() (bool, error) {
-	jsonData, err := json.MarshalIndent(&ConfigData, "", "    ")
+	data := Get()
+	jsonData, err := json.MarshalIndent(&data, "", "    ")
 	if err != nil {
 		return false, err
 	}
@@ -149,6 +150,36 @@ func Save() (bool, error) {
 		return false, err
 	}
 	return true, nil
+}
+
+// SaveAndSet leaves the running configuration unchanged if persistence fails.
+func SaveAndSet(data Config) error {
+	if err := data.Validate(); err != nil {
+		return err
+	}
+	ConfigMutex.Lock()
+	defer ConfigMutex.Unlock()
+	jsonData, err := json.MarshalIndent(&data, "", "    ")
+	if err != nil {
+		return err
+	}
+	file, err := os.CreateTemp(".", ".config-*.json")
+	if err != nil {
+		return err
+	}
+	defer os.Remove(file.Name())
+	if _, err = file.Write(jsonData); err != nil {
+		file.Close()
+		return err
+	}
+	if err = file.Close(); err != nil {
+		return err
+	}
+	if err = os.Rename(file.Name(), "./config.json"); err != nil {
+		return err
+	}
+	ConfigData = data
+	return nil
 }
 
 func Load(logger *slog.Logger) bool {
@@ -173,11 +204,17 @@ func LoadWithPath(logger *slog.Logger, path string) bool {
 		logger.Error("Failed to read a json file", "error", err)
 		return false
 	}
-	err = json.Unmarshal(jsonData, &ConfigData)
+	loaded := Get()
+	err = json.Unmarshal(jsonData, &loaded)
 	if err != nil {
 		logger.Error("JSON format error", "err", err)
 		return false
 	}
-	logger.Info("Decoded", "config", ConfigData)
+	if err = loaded.Validate(); err != nil {
+		logger.Error("Invalid configuration", "err", err)
+		return false
+	}
+	Set(loaded)
+	logger.Info("Decoded", "config", loaded)
 	return true
 }

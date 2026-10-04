@@ -4,11 +4,11 @@ import (
 	"backend/config"
 	"backend/message"
 	"backend/packageModule"
+	"bufio"
+	"errors"
 	"fmt"
-	"io"
 	"log/slog"
 	"net"
-	"regexp"
 	"strings"
 	"sync"
 )
@@ -23,6 +23,9 @@ var listener *net.TCPListener
 var listenerMutex sync.Mutex
 var v1Msgs map[string][]string
 var currentModule *packageModule.PackageModule
+var connections = make(map[*net.TCPConn]struct{})
+var connectionsMutex sync.Mutex
+var connectionWg sync.WaitGroup
 
 var TcpServer packageModule.PackageModule = packageModule.PackageModule{
 	ModuleName:     "tcp",
@@ -99,78 +102,102 @@ func handleRequest(conn *net.TCPConn) {
 	manager := packageModule.GetModuleManager()
 	logger.Info("Connect", "remote", conn.RemoteAddr())
 	defer conn.Close()
-	buf := make([]byte, 512)
-	for {
-		l, err := conn.Read(buf)
-		if err != nil {
-			if err != io.EOF {
-				logger.Warn("Invalid close", "error", err)
-			}
-			break
+	scanner := bufio.NewScanner(conn)
+	scanner.Buffer(make([]byte, 512), 4098)
+	scanner.Split(splitCommand)
+	for scanner.Scan() {
+		cmd := strings.Fields(scanner.Text())
+		if len(cmd) == 0 {
+			continue
 		}
-		msgs := regexp.MustCompile("\r\n|\n|\r").Split(string(buf[:l]), -1)
-		for _, msg := range msgs {
-			cmd := strings.Split(msg, " ")
-			if v1Msgs != nil && len(cmd) == 1 {
-				for key, newCmd := range v1Msgs {
-					if cmd[0] == key {
-						cmd = newCmd
-						break
-					}
+		if v1Msgs != nil && len(cmd) == 1 {
+			for key, newCmd := range v1Msgs {
+				if cmd[0] == key {
+					cmd = newCmd
+					break
 				}
 			}
-			logger.Debug("TCP message", "cmd", cmd)
-			switch cmd[0] {
-			case "fadeIn", "fadeOut":
-				isIn := cmd[0] == "fadeIn"
-				msgArg := message.MessageBody{
-					Action: "fade",
-					Arg:    map[string]string{},
-				}
-				if len(cmd) <= 1 {
-					continue
-				}
-				if len(cmd) >= 3 {
-					args := strings.Split(cmd[2], ",")
-					for _, v := range args {
-						if !strings.Contains(v, ":") {
-							continue
-						}
-						arg := strings.Split(v, ":")
-						logger.Debug("test", "arg", arg)
-						msgArg.Arg[arg[0]] = arg[1]
+		}
+		logger.Debug("TCP message", "cmd", cmd)
+		switch cmd[0] {
+		case "fadeIn", "fadeOut":
+			isIn := cmd[0] == "fadeIn"
+			msgArg := message.MessageBody{
+				Action: "fade",
+				Arg:    map[string]string{},
+			}
+			if len(cmd) <= 1 {
+				continue
+			}
+			if len(cmd) >= 3 {
+				args := strings.Split(cmd[2], ",")
+				for _, v := range args {
+					if !strings.Contains(v, ":") {
+						continue
 					}
+					arg := strings.Split(v, ":")
+					logger.Debug("test", "arg", arg)
+					msgArg.Arg[arg[0]] = arg[1]
 				}
-				msgArg.Arg["id"] = cmd[1]
-				msgArg.Arg["isIn"] = fmt.Sprintf("%v", isIn)
-				go currentModule.SendMessage(message.Message{
-					To:  "dmx",
-					Arg: msgArg,
-				})
-			case "mute":
-				mute := true
-				if len(cmd) >= 2 && cmd[1] == "false" {
-					mute = false
-				}
-				go currentModule.SendMessage(message.Message{
-					To: "osc",
-					Arg: message.MessageBody{
-						Action: "mute",
-						Arg: map[string]string{
-							"isMute": fmt.Sprintf("%v", mute),
-						},
+			}
+			msgArg.Arg["id"] = cmd[1]
+			msgArg.Arg["isIn"] = fmt.Sprintf("%v", isIn)
+			currentModule.SendMessage(message.Message{
+				To:  "dmx",
+				Arg: msgArg,
+			})
+		case "mute":
+			mute := true
+			if len(cmd) >= 2 && cmd[1] == "false" {
+				mute = false
+			}
+			currentModule.SendMessage(message.Message{
+				To: "osc",
+				Arg: message.MessageBody{
+					Action: "mute",
+					Arg: map[string]string{
+						"isMute": fmt.Sprintf("%v", mute),
 					},
-				})
-			case "test":
-				logger.Debug("test")
-				go manager.SendMessage(message.Message{
-					To: "test",
-				})
-			}
-			conn.Write([]byte("ack\r\n"))
+				},
+			})
+		case "test":
+			logger.Debug("test")
+			manager.SendMessage(message.Message{
+				To: "test",
+			})
 		}
+		conn.Write([]byte("ack\r\n"))
+	}
+	if err := scanner.Err(); err != nil {
+		logger.Warn("Invalid TCP command", "error", err)
 	}
 	logger.Info("Disconnect", "remote", conn.RemoteAddr())
+}
+
+// CRLF is one separator even if CR and LF arrive in different reads.
+func splitCommand(data []byte, atEOF bool) (int, []byte, error) {
+	for i, b := range data {
+		if i > 4095 {
+			return 0, nil, errors.New("TCP command exceeds 4095 bytes")
+		}
+		if b == '\n' {
+			return i + 1, data[:i], nil
+		}
+		if b == '\r' {
+			advance := i + 1
+			if advance < len(data) && data[advance] == '\n' {
+				advance++
+			}
+			return advance, data[:i], nil
+		}
+	}
+	if atEOF && len(data) > 0 {
+		if len(data) > 4095 {
+			return 0, nil, errors.New("TCP command exceeds 4095 bytes")
+		}
+		return len(data), data, nil
+	}
+	return 0, nil, nil
 }
 func tcpThread(ln *net.TCPListener) {
 	defer wg.Done()
@@ -185,7 +212,15 @@ func tcpThread(ln *net.TCPListener) {
 			logger.Error("Failed setup connection", "error", err)
 			continue
 		}
-		go handleRequest(conn)
+		connectionsMutex.Lock()
+		connections[conn] = struct{}{}
+		connectionWg.Add(1)
+		connectionsMutex.Unlock()
+		go func() {
+			defer connectionWg.Done()
+			defer func() { connectionsMutex.Lock(); delete(connections, conn); connectionsMutex.Unlock() }()
+			handleRequest(conn)
+		}()
 	}
 	logger.Info("Close TCP Server")
 }
@@ -219,5 +254,11 @@ func StopTCP() {
 		changeRunning(false)
 		closeListener()
 		runningWg.Wait()
+		connectionsMutex.Lock()
+		for conn := range connections {
+			conn.Close()
+		}
+		connectionsMutex.Unlock()
+		connectionWg.Wait()
 	}
 }

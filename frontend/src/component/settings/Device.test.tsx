@@ -105,6 +105,31 @@ describe("Devices", async () => {
         await user.click(getByText("SUBMIT"));
         expect(result.dmx.groups).toEqual({ renamed: populatedGroup.dmx.groups?.first });
     });
+    it("Rejects a duplicate ID when renaming without losing either group", async () => {
+        const groups = { first: { name: "First", devices: [] }, second: { name: "Second", devices: [] } };
+        const { getByTestId, getByRole, getByText } = await CreateTestComponent({ dmx: { groups } });
+        await user.click(getByTestId("GroupEditButton").first());
+        await user.fill(getByRole("textbox", { name: "ID" }), "second");
+        await expect.element(getByRole("button", { name: "Edit", exact: true })).toBeDisabled();
+        await expect.element(getByText("This ID is already in use.")).toBeVisible();
+        await user.click(getByRole("button", { name: "Cancel" }));
+        await user.click(getByText("SUBMIT"));
+        expect(result.dmx.groups).toEqual(groups);
+    });
+    it("Removes the first WCLight without rewriting the remaining device", async () => {
+        const remaining = { model: "wclight" as const, channel: 24, max: [32, 128, 7] };
+        const { getByTestId, getByRole, getByText } = await CreateTestComponent({
+            dmx: { groups: { first: { name: "First", devices: [
+                { model: "wclight", channel: 12, max: [255, 0, 0] }, remaining,
+            ] } } },
+        });
+        await user.click(getByTestId("DeviceDeleteButton").first());
+        await user.click(getByRole("button", { name: "Confirm" }));
+        await expect.poll(() => getByTestId("DMXDevice").elements().length).toBe(1);
+        await expect.element(getByRole("slider", { name: "Temp" })).toHaveValue("0.8");
+        await user.click(getByText("SUBMIT"));
+        expect(result.dmx.groups?.first.devices).toEqual([remaining]);
+    });
     it("Removes the last device immediately without a parent watch", async () => {
         const { getByTestId, getByRole } = await CreateTestComponent(populatedGroup);
         await user.click(getByTestId("DeviceDeleteButton"));

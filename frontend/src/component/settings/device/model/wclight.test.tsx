@@ -54,6 +54,13 @@ describe("WCLight option", async () => {
         );
     }
     describe("Dimmer", async () => {
+        for (const max of [[255, 0, 0], [0, 255, 0], [255, 255, 0], [32, 128, 7]]) {
+            it(`Preserves existing values on opening: ${max}`, async () => {
+                const { getByText } = await CreateTestComponent({ test: { max } });
+                await user.click(getByText("SUBMIT"));
+                expect(result.test.max).toEqual(max);
+            });
+        }
         it("Can change value using mouse", async () => {
             const { getByTestId, getByRole } = await CreateTestComponent();
             const dimmer = getByTestId("OpDimmer");
@@ -143,7 +150,7 @@ describe("WCLight option", async () => {
                     dimmer: 1,
                     temp: 0.5,
                 },
-                want: [127, 128, 0],
+                want: [255, 255, 0],
             },
             {
                 name: "Dim: half, Temp: cool",
@@ -211,7 +218,7 @@ describe("WCLight option", async () => {
 
         await user.click(submit);
 
-        await expect(result.test.max).toEqual([64, 64, 0]);
+        await expect(result.test.max).toEqual([128, 128, 0]);
     });
 
     it("Can convert data when min length", async () => {
@@ -239,7 +246,7 @@ describe("WCLight option", async () => {
 
         await user.click(submit);
 
-        await expect(result.test.max).toEqual([64, 64, 0]);
+        await expect(result.test.max).toEqual([128, 128, 0]);
     });
     it("Can convert data when undefined", async () => {
         const { getByTestId, getByRole, getByText } = await CreateTestComponent(
@@ -266,6 +273,6 @@ describe("WCLight option", async () => {
 
         await user.click(submit);
 
-        await expect(result.test.max).toEqual([64, 64, 0]);
+        await expect(result.test.max).toEqual([128, 128, 0]);
     });
 });

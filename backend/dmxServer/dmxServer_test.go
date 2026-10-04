@@ -398,9 +398,9 @@ func TestRender(t *testing.T) {
 				return
 			}
 			defer dmxserver.Finalize()
-			got := false
+			resultChan := make(chan bool, 1)
 			go func() {
-				got = dmxserver.Render()
+				resultChan <- dmxserver.Render()
 			}()
 			select {
 			case <-testChan:
@@ -410,6 +410,7 @@ func TestRender(t *testing.T) {
 				return
 			}
 
+			got := <-resultChan
 			if got != tt.want {
 				t.Errorf("Render() = %v, want %v", got, tt.want)
 			}
@@ -450,7 +451,7 @@ func TestMessage(t *testing.T) {
 		defer close(waitCh)
 		go func() {
 			for range 15 {
-				if dmxserver.FpsController.Running {
+				if dmxserver.FpsController.Running.Load() {
 					waitCh <- true
 					return
 				}
@@ -585,7 +586,7 @@ func TestMessage(t *testing.T) {
 			defer close(waitCh)
 			go func() {
 				for range 15 {
-					if dmxserver.FpsController.Running {
+					if dmxserver.FpsController.Running.Load() {
 						waitCh <- true
 						return
 					}

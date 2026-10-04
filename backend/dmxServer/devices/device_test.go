@@ -38,6 +38,8 @@ func TestDMXDevice_Initialize(t *testing.T) {
 			duration: &duration,
 			want:     false,
 		},
+		{name: "zero channel", channel: 0, maxValue: []byte{255, 255, 0}, duration: &duration, want: false},
+		{name: "channels exceed buffer", channel: 511, maxValue: []byte{255, 255, 0}, duration: &duration, want: false},
 	}
 	target := make([]byte, 512)
 	for _, tt := range tests {

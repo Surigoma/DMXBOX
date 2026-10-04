@@ -10,6 +10,7 @@ import (
 	"backend/message"
 	"backend/packageModule"
 	"log/slog"
+	"math"
 	"strconv"
 	"sync"
 )
@@ -32,6 +33,9 @@ var renderers map[string]*controller.Controller = make(map[string]*controller.Co
 var rendered []byte = make([]byte, 512)
 var FpsController *fps.FPSController
 var counter int = 0
+
+// Fade, rendering and output all share the same DMX buffer.
+var stateMutex sync.Mutex
 
 type Group struct {
 	Name    string
@@ -57,7 +61,11 @@ var DMXServer packageModule.PackageModule = packageModule.PackageModule{
 }
 
 func Initialize(module *packageModule.PackageModule, config *config.Config) bool {
-	CleanupDMXServer()
+	stateMutex.Lock()
+	defer stateMutex.Unlock()
+	cleanupDMXServer()
+	FpsController = nil
+	runningWg = nil
 	logger = module.Logger
 	renderWg = sync.WaitGroup{}
 	wg = module.Wg
@@ -69,7 +77,7 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 		if controller == "osc" {
 			continue
 		}
-		if !AddController(controller, config) {
+		if !addController(controller, config) {
 			logger.Error("Failed to setup dmx server: unknown controller", "controller", controller)
 			return false
 		}
@@ -84,7 +92,7 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 			Devices: make([]*device.DMXDevice, len(groupDevices.Devices)),
 		}
 		for i, device := range groupDevices.Devices {
-			groups[name].Devices[i] = MakeDevice(device.Model, device.Channel, device.MaxValue)
+			groups[name].Devices[i] = makeDevice(device.Model, device.Channel, device.MaxValue)
 			if groups[name].Devices[i] == nil {
 				logger.Error("Failed to setup dmx server: failed to create device", "group", name, "device", device.Model, "index", i)
 				return false
@@ -94,6 +102,11 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	return true
 }
 func CleanupDMXServer() {
+	stateMutex.Lock()
+	defer stateMutex.Unlock()
+	cleanupDMXServer()
+}
+func cleanupDMXServer() {
 	for k := range groups {
 		delete(groups, k)
 	}
@@ -103,6 +116,8 @@ func CleanupDMXServer() {
 }
 
 func handleMessage(mes message.Message) int {
+	stateMutex.Lock()
+	defer stateMutex.Unlock()
 	switch mes.Arg.Action {
 	case "reload":
 		return 1
@@ -119,13 +134,13 @@ func handleMessage(mes message.Message) int {
 		interval := float32(-1)
 		if argStr, ok := mes.Arg.Arg["duration"]; ok {
 			conv, err := strconv.ParseFloat(argStr, 32)
-			if err == nil {
+			if err == nil && !math.IsNaN(conv) && !math.IsInf(conv, 0) {
 				duration = float32(conv)
 			}
 		}
 		if argStr, ok := mes.Arg.Arg["interval"]; ok {
 			conv, err := strconv.ParseFloat(argStr, 32)
-			if err == nil {
+			if err == nil && !math.IsNaN(conv) && !math.IsInf(conv, 0) {
 				interval = float32(conv)
 			}
 		}
@@ -143,6 +158,11 @@ func handleMessage(mes message.Message) int {
 }
 
 func MakeDevice(deviceType string, channel uint16, maxValue []uint) *device.DMXDevice {
+	stateMutex.Lock()
+	defer stateMutex.Unlock()
+	return makeDevice(deviceType, channel, maxValue)
+}
+func makeDevice(deviceType string, channel uint16, maxValue []uint) *device.DMXDevice {
 	generator, ok := DeviceTypes[deviceType]
 	if !ok {
 		logger.Warn("Unsupported type", "type", deviceType)
@@ -151,6 +171,9 @@ func MakeDevice(deviceType string, channel uint16, maxValue []uint) *device.DMXD
 	dev := generator()
 	castMaxValue := make([]uint8, len(maxValue))
 	for i, v := range maxValue {
+		if v > 255 {
+			return nil
+		}
 		castMaxValue[i] = uint8(v)
 	}
 	if !dev.Initialize(channel, castMaxValue, &rendered, &param.Duration) {
@@ -162,6 +185,11 @@ func MakeDevice(deviceType string, channel uint16, maxValue []uint) *device.DMXD
 }
 
 func AddController(model string, config *config.Config) bool {
+	stateMutex.Lock()
+	defer stateMutex.Unlock()
+	return addController(model, config)
+}
+func addController(model string, config *config.Config) bool {
 	generator, ok := RenderTypes[model]
 	if !ok {
 		logger.Warn("Unsupported render model", "model", model)
@@ -180,6 +208,8 @@ func AddController(model string, config *config.Config) bool {
 }
 
 func GetConfig() map[string]config.DMXGroup {
+	stateMutex.Lock()
+	defer stateMutex.Unlock()
 	result := make(map[string]config.DMXGroup, 0)
 	for k, v := range groups {
 		result[k] = config.DMXGroup{
@@ -199,6 +229,11 @@ func GetConfig() map[string]config.DMXGroup {
 }
 
 func Render() bool {
+	stateMutex.Lock()
+	defer stateMutex.Unlock()
+	return render()
+}
+func render() bool {
 	result := false
 	for _, deviceGroup := range groups {
 		for _, device := range deviceGroup.Devices {
@@ -211,10 +246,12 @@ func Render() bool {
 }
 
 func DMXThread() bool {
+	stateMutex.Lock()
+	defer stateMutex.Unlock()
 	if counter == 0 {
 		logger.Debug("fps", "fps", FpsController.GetFPS())
 	}
-	if Render() || counter%10 == 0 {
+	if render() || counter%10 == 0 {
 		for _, r := range renderers {
 			r.Output(&rendered)
 		}
@@ -224,12 +261,14 @@ func DMXThread() bool {
 }
 
 func Finalize() {
+	stateMutex.Lock()
+	defer stateMutex.Unlock()
 	logger.Debug("Finalize dmx service")
 	for k, r := range renderers {
 		logger.Debug("Finalize", "k", k)
 		r.Finalize()
 	}
-	CleanupDMXServer()
+	cleanupDMXServer()
 	wg.Done()
 	if runningWg != nil {
 		runningWg.Done()
@@ -237,9 +276,12 @@ func Finalize() {
 }
 
 func StartDMX() {
+	stateMutex.Lock()
+	defer stateMutex.Unlock()
 	FpsController = fps.NewFPS(param.Fps, DMXThread, Finalize)
 	if FpsController == nil {
 		logger.Error("Failed to setup FPS controller.")
+		wg.Done()
 		return
 	}
 	runningWg = &sync.WaitGroup{}
@@ -248,8 +290,13 @@ func StartDMX() {
 }
 
 func StopDMX() {
-	FpsController.Stop()
-	if runningWg != nil {
-		runningWg.Wait()
+	stateMutex.Lock()
+	controller, activeWg := FpsController, runningWg
+	stateMutex.Unlock()
+	if controller != nil {
+		controller.Stop()
+	}
+	if activeWg != nil {
+		activeWg.Wait()
 	}
 }

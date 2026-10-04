@@ -7,7 +7,7 @@ import {
     type Theme,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import { MdLightbulb, MdLightbulbOutline } from "react-icons/md";
 
 interface WCLightProp {
@@ -44,27 +44,28 @@ function WCLight(prop: WCLightProp) {
         const cool = target[0];
         const warm = target[1];
         const dimmer = Math.max(...target) / 255;
-        const temp = cool / (cool + warm);
+        const temp = warm / (cool + warm);
         return {
             dimmer: dimmer,
-            temp: !isNaN(temp) ? temp : 0,
+            temp: !isNaN(temp) ? temp : 0.5,
         };
     }
     function convertWCInfoToDMX(values: WCInfo): number[] {
-        const warm = Math.min(
-            Math.max(Math.round(values.dimmer * values.temp * 255.0), 0),
-            255,
-        );
-        const cool = Math.round(255 * values.dimmer - warm);
-        return [Math.abs(cool), Math.abs(warm), 0];
+        const scale = 255 * values.dimmer / Math.max(values.temp, 1 - values.temp);
+        return [Math.round(scale * (1 - values.temp)), Math.round(scale * values.temp), 0];
     }
 
-    const { setValue, getValues } = useFormContext();
-    const initial = convertDMXtoWCInfo(
-        getValues(prop.name + ".max") as number[]
-    )
-    const [colorTemp, setColorTemp] = useState(initial.temp);
-    const [dimmer, setDimmer] = useState(initial.dimmer);
+    const { setValue, control } = useFormContext();
+    const values = useWatch({ control, name: prop.name + ".max" }) as number[];
+    const signature = prop.name + JSON.stringify(values);
+    const [edited, setEdited] = useState<{ signature: string; info: WCInfo }>();
+    const info = edited?.signature === signature ? edited.info : convertDMXtoWCInfo(values);
+    const { dimmer, temp: colorTemp } = info;
+    function changeInfo(next: WCInfo) {
+        const max = convertWCInfoToDMX(next);
+        setEdited({ signature: prop.name + JSON.stringify(max), info: next });
+        setValue(prop.name + ".max", max, { shouldDirty: true });
+    }
     const colorMix = useMemo(
         () =>
             "color-mix(" +
@@ -76,17 +77,12 @@ function WCLight(prop: WCLightProp) {
             ")",
         [colorTemp, colorPalette],
     );
-    const maxValue = useMemo(() => {
-        const value: WCInfo = {
-            dimmer: dimmer,
-            temp: colorTemp,
-        };
-        const newValue = convertWCInfoToDMX(value);
-        return newValue;
-    }, [dimmer, colorTemp]);
     useEffect(() => {
-        setValue(prop.name + ".max", maxValue);
-    }, [maxValue, prop.name, setValue]);
+        if (!values || values.length < 3) {
+            const level = values?.[0] ?? 255;
+            setValue(prop.name + ".max", [level, level, 0]);
+        }
+    }, [values, prop.name, setValue]);
 
     return (
         <Stack spacing={2} data-testid="WCLight">
@@ -104,7 +100,7 @@ function WCLight(prop: WCLightProp) {
                     step={0.01}
                     value={dimmer}
                     onChange={(_, v) => {
-                        setDimmer(v);
+                        changeInfo({ dimmer: v as number, temp: colorTemp });
                     }}
                 />
                 <MdLightbulbOutline />
@@ -136,7 +132,7 @@ function WCLight(prop: WCLightProp) {
                     step={0.01}
                     value={colorTemp}
                     onChange={(_, v) => {
-                        setColorTemp(v);
+                        changeInfo({ dimmer, temp: v as number });
                     }}
                 />
                 <Box

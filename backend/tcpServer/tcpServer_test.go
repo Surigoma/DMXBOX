@@ -225,7 +225,7 @@ func TestTCPModuleSocket(t *testing.T) {
 			return
 		}
 
-		ln.Write([]byte("test"))
+		ln.Write([]byte("test\r\n"))
 		result := make([]byte, 16)
 		length, _ := ln.Read(result)
 		t.Log(result[:length])
@@ -378,7 +378,7 @@ func TestTCPModuleSocket(t *testing.T) {
 				return
 			}
 
-			ln.Write([]byte(tt.action))
+			ln.Write([]byte(tt.action + "\r\n"))
 			result := make([]byte, 16)
 			length, _ := ln.Read(result)
 			defer ln.Close()

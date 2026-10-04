@@ -34,9 +34,16 @@ interface AddGroupProp {
 }
 
 export function AddEditGroup(prop: AddGroupProp) {
-    const { getValues } = useFormContext();
+    const { getValues, control } = useFormContext();
+    const groups = useWatch({ control, name: "dmx.groups" }) as TDMXGroupMap | undefined;
     const [title, setTitle] = useState(()=>getValues(prop.name + ".name") ?? "");
     const [id, setId] = useState(()=>prop.name?.split(".").pop() ?? "");
+    const originalId = prop.name?.split(".").pop();
+    const idError = !id.trim() || /[.\[\]]/.test(id) || ["__proto__", "constructor", "prototype"].includes(id)
+        ? "Enter an ID without dots or brackets."
+        : id !== originalId && Object.hasOwn(groups ?? {}, id)
+          ? "This ID is already in use."
+          : undefined;
 
     return (
         <Dialog
@@ -65,6 +72,8 @@ export function AddEditGroup(prop: AddGroupProp) {
                             onChange={(e) => setId(e.target.value)}
                             label="ID"
                             data-testid="OpGroupId"
+                            error={Boolean(idError)}
+                            helperText={idError}
                         />
                     </FormControl>
                 </FormGroup>
@@ -73,7 +82,7 @@ export function AddEditGroup(prop: AddGroupProp) {
                 <Button onClick={() => prop.onClose(undefined, true)}>
                     Cancel
                 </Button>
-                <Button onClick={() => prop.onClose({ title, id }, false)}>
+                <Button disabled={Boolean(idError)} onClick={() => prop.onClose({ title, id }, false)}>
                     {prop.name !== undefined ? "Edit" : "Add"}
                 </Button>
             </DialogActions>

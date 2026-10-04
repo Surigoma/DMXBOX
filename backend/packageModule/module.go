@@ -26,12 +26,13 @@ type ModuleManagerType struct {
 	modules     map[string]*PackageModule
 	logger      *slog.Logger
 	wg          sync.WaitGroup
+	messageWg   sync.WaitGroup
 	lock        sync.Mutex
 	browserOnly atomic.Bool
 }
 
 var ModuleManager *ModuleManagerType = nil
-var running bool
+var running atomic.Bool
 var managerOnce = sync.Once{}
 
 func GetModuleManager() *ModuleManagerType {
@@ -45,17 +46,19 @@ func (mgr *ModuleManagerType) Initialize(log *slog.Logger) bool {
 	mgr.logger = log
 	mgr.modules = make(map[string]*PackageModule)
 	mgr.wg = sync.WaitGroup{}
+	mgr.messageWg = sync.WaitGroup{}
 	mgr.lock = sync.Mutex{}
 	mgr.browserOnly.Store(false)
-	running = true
+	running.Store(true)
 	return true
 }
 
 func (mgr *ModuleManagerType) Finalize() {
-	running = false
+	running.Store(false)
 	c := make(chan struct{})
 	go func() {
 		mgr.wg.Wait()
+		mgr.messageWg.Wait()
 		defer close(c)
 	}()
 	select {
@@ -97,6 +100,7 @@ func (mgr *ModuleManagerType) ModuleInitialize(log *slog.Logger, version string)
 		module.Channel = make(chan message.Message, 10)
 		if !module.Initialize(module, &configData) {
 			mgr.logger.Error("Failed to initialize", "module", name)
+			delete(mgr.modules, name)
 		}
 	}
 }
@@ -106,15 +110,17 @@ func (mgr *ModuleManagerType) ModuleRun() {
 	defer mgr.lock.Unlock()
 	for _, module := range mgr.modules {
 		module.Wg.Add(1)
-		go module.MessageProcess(module.ModuleName, module.MessageHandler)
-		go module.Run()
+		module.Run()
+		mgr.messageWg.Add(1)
+		go func() {
+			defer mgr.messageWg.Done()
+			module.MessageProcess(module.ModuleName, module.MessageHandler)
+		}()
 	}
 }
 
 func (mgr *ModuleManagerType) SendMessageAll(base message.Message) bool {
-	mgr.lock.Lock()
-	defer mgr.lock.Unlock()
-	for m := range mgr.modules {
+	for _, m := range mgr.GetModules() {
 		msg := base
 		msg.To = m
 		if !mgr.SendMessage(msg) {
@@ -137,7 +143,9 @@ func (mgr *ModuleManagerType) sendMessage(msg message.Message, source string) bo
 		mgr.logger.Warn("Control blocked by browser-only mode", "source", source, "action", msg.Arg.Action)
 		return false
 	}
+	mgr.lock.Lock()
 	module, ok := mgr.modules[msg.To]
+	mgr.lock.Unlock()
 	if !ok {
 		mgr.logger.Warn("Module not found.", "msg", msg)
 		return false
@@ -179,7 +187,7 @@ func (mgr *ModuleManagerType) GetModules() []string {
 
 func (module *PackageModule) MessageProcess(name string, handler func(msg message.Message) int) {
 	module.Logger.Debug("Enter message process.")
-	for running {
+	for running.Load() {
 		msg := <-module.Channel
 		module.Logger.Debug("Catch message", "mes", msg)
 		if msg.To == module.ModuleName {
@@ -192,9 +200,10 @@ func (module *PackageModule) MessageProcess(name string, handler func(msg messag
 				configData := config.Get()
 				if !module.Initialize(module, &configData) {
 					module.Logger.Error("Failed to initialize")
+					return
 				}
 				module.Wg.Add(1)
-				go module.Run()
+				module.Run()
 			}
 		} else {
 			module.Logger.Error("To is mismatch!", "msg", msg)

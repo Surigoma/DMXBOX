@@ -4,7 +4,7 @@ import {
     Outlet,
     useNavigate,
 } from "@tanstack/react-router";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import IconButton from "@mui/material/IconButton";
@@ -19,8 +19,7 @@ import Button from "@mui/material/Button";
 import Grid from "@mui/material/Grid";
 import z from "zod";
 
-const Config = new Configuration();
-export const FrontConfigContext = createContext(Config.body);
+export const FrontConfigContext = createContext<ConfigBody>({ backendPort: 8080 });
 
 export function typedFetcher<T extends z.ZodTypeAny>(type: T) {
     return (url: string) => {
@@ -51,6 +50,13 @@ interface PathInfo {
 }
 
 function RootLayout() {
+    const [frontConfig, setFrontConfig] = useState<Configuration>();
+    useEffect(() => {
+        let active = true;
+        const loaded = new Configuration();
+        void loaded.ready.then(() => { if (active) setFrontConfig(loaded); });
+        return () => { active = false; };
+    }, []);
     const PageInformation: { [path: string]: PathInfo } = {
         "/": {
             title: "Control",
@@ -163,9 +169,9 @@ function RootLayout() {
                     </Toolbar>
                 </Container>
             </AppBar>
-            <FrontConfigContext value={Config.body}>
+            <FrontConfigContext value={frontConfig?.body ?? { backendPort: 8080 }}>
                 <Grid padding={1}>
-                    <Outlet />
+                    {!frontConfig ? "Loading configuration..." : frontConfig.isError ? "Failed to load config.json." : <Outlet />}
                 </Grid>
             </FrontConfigContext>
         </div>

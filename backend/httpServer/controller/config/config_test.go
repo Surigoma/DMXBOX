@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,38 @@ func TestConfigAPIv1(t *testing.T) {
 	engine.GET("/v1/get", config.GetConfigV1)
 	engine.POST("/v1/save", config.SetConfigV1)
 	engine.POST("/legacy/save", config.LegacySave)
+	t.Run("Invalid values do not overwrite saved or running settings", func(t *testing.T) {
+		baseConfig.InitializeConfig()
+		before := baseConfig.Get()
+		baseConfig.Save()
+		beforeFile, _ := os.ReadFile("config.json")
+		invalid := before
+		invalid.Dmx.Fps = 0
+		payload, _ := json.Marshal(invalid)
+		w := httptest.NewRecorder()
+		req := httptest.NewRequest("POST", "/v1/save", bytes.NewReader(payload))
+		engine.ServeHTTP(w, req)
+		if w.Code != 400 {
+			t.Fatal(w.Code, w.Body.String())
+		}
+		afterFile, _ := os.ReadFile("config.json")
+		if !bytes.Equal(beforeFile, afterFile) || !reflect.DeepEqual(before, baseConfig.Get()) {
+			t.Fatal("invalid settings replaced valid configuration")
+		}
+	})
+	t.Run("Module changes are saved with an explicit restart requirement", func(t *testing.T) {
+		baseConfig.InitializeConfig()
+		changed := baseConfig.Get()
+		changed.Input.Modules = []string{"http", "tcp"}
+		payload, _ := json.Marshal(changed)
+		w := httptest.NewRecorder()
+		engine.ServeHTTP(w, httptest.NewRequest("POST", "/v1/save", bytes.NewReader(payload)))
+		var result config.ConfigResult
+		json.Unmarshal(w.Body.Bytes(), &result)
+		if w.Code != 200 || !result.RestartRequired || result.Message == "" {
+			t.Fatal(w.Code, w.Body.String())
+		}
+	})
 	t.Run("Can get current config", func(t *testing.T) {
 		baseConfig.InitializeConfig()
 		base := baseConfig.Get()
