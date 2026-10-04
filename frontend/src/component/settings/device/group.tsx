@@ -119,6 +119,7 @@ function Group(prop: GroupProp) {
                             sx={{ marginRight: "8px" }}
                             onClick={() => setOpenDelete(true)}
                             data-testid="GroupDeleteButton"
+                            aria-label={`Delete group ${group.name}`}
                         >
                             <MdDelete />
                         </IconButton>
@@ -126,6 +127,7 @@ function Group(prop: GroupProp) {
                     <Grid size="auto">
                         <IconButton
                             data-testid="GroupEditButton"
+                            aria-label={`Edit group ${group.name}`}
                             sx={{ marginRight: "8px" }}
                             onClick={() => setOpenEdit(true)}
                         >
@@ -143,7 +145,7 @@ function Group(prop: GroupProp) {
                         <Grid
                             key={v.model + "_" + i}
                             size="auto"
-                            minWidth="400px"
+                            sx={{ minWidth: 0, width: { xs: "100%", md: 400 }, maxWidth: "100%" }}
                         >
                             <Device base={name} index={i} />
                         </Grid>
@@ -157,7 +159,7 @@ function Group(prop: GroupProp) {
                             model: "dimmer",
                             channel: 1,
                             max: [255],
-                        }]);
+                        }], { shouldDirty: true });
                     }}
                     data-testid="DeviceAddButton"
                 >
@@ -179,7 +181,7 @@ function Group(prop: GroupProp) {
                     if (oldId !== r.id) {
                         delete body[oldId];
                     }
-                    setValue(parent, body);
+                    setValue(parent, body, { shouldDirty: true });
                     setOpenEdit(false);
                 }}
             />
@@ -204,7 +206,7 @@ function Group(prop: GroupProp) {
                         onClick={() => {
                             const body = { ...getValues(parent) };
                             delete body[prop.name];
-                            setValue(parent, body);
+                            setValue(parent, body, { shouldDirty: true });
                             setOpenDelete(false);
                         }}
                     >

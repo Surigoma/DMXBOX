@@ -119,9 +119,10 @@ function RootLayout() {
                                     return (
                                         <MenuItem
                                             key={k}
-                                            onClick={() =>
-                                                navigate(linkOptions({ to: k }))
-                                            }
+                                            onClick={() => {
+                                                handleCloseNavMenu();
+                                                void navigate(linkOptions({ to: k }));
+                                            }}
                                         >
                                             {PageInformation[k].title}
                                         </MenuItem>

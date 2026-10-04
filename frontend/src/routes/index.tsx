@@ -3,7 +3,6 @@ import { FrontConfigContext, genBackendPath, typedFetcher } from "./__root";
 import useSWR from "swr";
 import FadeControl from "../component/FadeControl";
 import {
-    Alert,
     FormControlLabel,
     FormGroup,
     Grid,
@@ -15,12 +14,12 @@ import { useContext, useMemo, useState } from "react";
 import {
     DMXGroupMap,
     Features,
-    ControlMode,
-    FadeStateMap,
     type TDMXGroupMap,
     type TFeatures,
 } from "../types";
 import MuteControl from "../component/MuteControl";
+import ControlModeStatus from "../component/ControlModeStatus";
+import { ControlStateProvider, useControlState } from "../contexts/controlState";
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import json from "react-syntax-highlighter/dist/esm/languages/hljs/json";
 import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
@@ -31,16 +30,12 @@ export const Route = createFileRoute("/")({
 });
 
 function ControlPage() {
+    return <ControlStateProvider><ControlPanel /></ControlStateProvider>;
+}
+
+function ControlPanel() {
     const config = useContext(FrontConfigContext);
-    const { data: fadeStates, error: fadeStateError, mutate: refreshFadeStates } = useSWR(
-        genBackendPath(config, "/api/v1/fade-state"),
-        async (url: string) => {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`Fade state request failed: ${response.status}`);
-            return FadeStateMap.parse(await response.json());
-        },
-        { refreshInterval: 250, dedupingInterval: 0 },
-    );
+    const controlState = useControlState();
     const {
         data: DMXData,
         error: DMXError,
@@ -54,56 +49,14 @@ function ControlPage() {
         error: FeaturesError,
         isLoading: FeaturesLoading,
     } = useSWR(genBackendPath(config, "/api/features"), typedFetcher(Features));
-    const {
-        data: ControlModeData,
-        error: ControlModeError,
-        isLoading: ControlModeLoading,
-        mutate: mutateControlMode,
-    } = useSWR(
-        genBackendPath(config, "/api/v1/control-mode"),
-        typedFetcher(ControlMode),
-    );
     const [showCutin, setCutin] = useState(false);
-    const [controlModeUpdating, setControlModeUpdating] = useState(false);
-    const [controlModeUpdateError, setControlModeUpdateError] = useState<string>();
     const dmxInfo = DMXData as TDMXGroupMap;
     const features = FeaturesData as TFeatures;
     const showMute = useMemo(
         () => features !== undefined && features.includes("osc"),
         [features],
     );
-    const loadError = DMXError ?? FeaturesError ?? ControlModeError;
-    async function setBrowserOnly(browserOnly: boolean) {
-        setControlModeUpdating(true);
-        setControlModeUpdateError(undefined);
-        try {
-            const response = await fetch(
-                genBackendPath(config, "/api/v1/control-mode"),
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-DMXBOX-Control": "web-ui",
-                    },
-                    body: JSON.stringify({ browserOnly }),
-                },
-            );
-            if (!response.ok) {
-                throw new Error(`Request failed: ${response.status}`);
-            }
-            await mutateControlMode(ControlMode.parse(await response.json()), {
-                revalidate: false,
-            });
-        } catch (error) {
-            setControlModeUpdateError(
-                `Failed to change control mode. ${error instanceof Error ? error.message : "Please try again."}`,
-            );
-            // The server may have applied the change before its response was lost.
-            await mutateControlMode().catch(() => undefined);
-        } finally {
-            setControlModeUpdating(false);
-        }
-    }
+    const loadError = DMXError ?? FeaturesError;
     if (loadError) {
         return (
             <ErrorComponent>
@@ -125,7 +78,7 @@ function ControlPage() {
             </ErrorComponent>
         );
     }
-    if (DMXisLoading || FeaturesLoading || ControlModeLoading) {
+    if (DMXisLoading || FeaturesLoading) {
         return (
             <Grid
                 container
@@ -139,11 +92,6 @@ function ControlPage() {
     }
     return (
         <Grid container direction="column">
-            {controlModeUpdateError && (
-                <Alert severity="error" onClose={() => setControlModeUpdateError(undefined)}>
-                    {controlModeUpdateError}
-                </Alert>
-            )}
             <Grid size="grow">
                 <Grid
                     container
@@ -156,24 +104,13 @@ function ControlPage() {
                             Control
                         </Typography>
                     </Grid>
+                    <Grid size="auto" sx={{ mx: 2 }}><ControlModeStatus /></Grid>
                     <Grid
                         size="auto"
                         justifyContent="center"
                         alignContent="center"
                     >
                         <FormGroup row>
-                            <FormControlLabel
-                                label="Browser only"
-                                control={
-                                    <Switch
-                                        onChange={(e) => {
-                                            void setBrowserOnly(e.target.checked);
-                                        }}
-                                        checked={ControlModeData?.browserOnly ?? false}
-                                        disabled={controlModeUpdating}
-                                    />
-                                }
-                            />
                             <FormControlLabel
                                 label="CUT"
                                 control={
@@ -197,8 +134,7 @@ function ControlPage() {
                                         name={k}
                                         data={dmxInfo[k]}
                                         showCutin={showCutin}
-                                        state={fadeStateError ? undefined : fadeStates?.[k]}
-                                        onFade={() => { void refreshFadeStates().catch(() => undefined); }}
+                                        state={controlState?.fade[k]}
                                     ></FadeControl>
                                 </Grid>
                             );

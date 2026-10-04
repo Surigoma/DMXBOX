@@ -14,8 +14,10 @@ describe("FadeControl", async () => {
     const postData: postInterface = {
         params: {},
     };
+    let failure: "http" | "network" | undefined;
     beforeEach(() => {
         postData.params = {};
+        failure = undefined;
     });
     UseMockServer(
         http.post("*/api/v1/fade/*", async (r) => {
@@ -26,10 +28,11 @@ describe("FadeControl", async () => {
                 params[k] = v;
             });
             postData.params = params;
+            if (failure === "network") return HttpResponse.error();
             return HttpResponse.json(
                 {},
                 {
-                    status: 200,
+                    status: failure === "http" ? 503 : 200,
                 },
             );
         }),
@@ -150,6 +153,19 @@ describe("FadeControl", async () => {
         });
     });
     describe("User Action", () => {
+        for (const kind of ["http", "network"] as const) {
+            it(`Shows ${kind} failure and retries the same Cut command`, async () => {
+                const { getByRole } = await CreateTestComponent(undefined, true);
+                failure = kind;
+                await user.click(getByRole("button", { name: "Cut Out" }));
+                await expect.element(getByRole("alert")).toHaveTextContent("Failed to send Cut Out for test.");
+                await expect.element(getByRole("button", { name: "Cut Out" })).toBeEnabled();
+                failure = undefined;
+                await user.click(getByRole("button", { name: "Retry" }));
+                await expect.element(getByRole("alert")).not.toBeInTheDocument();
+                expect(postData.params).toEqual({ isIn: "false", interval: "0", duration: "0" });
+            });
+        }
         it("Fade In", async () => {
             const { getByRole } = await CreateTestComponent();
             await user.click(getByRole("button", { name: "Fade In" }));

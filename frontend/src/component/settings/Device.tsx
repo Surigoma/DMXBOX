@@ -106,7 +106,7 @@ function Devices() {
                     setValue(parent, {
                         ...body,
                         [r.id]: { devices: [], name: r.title },
-                    });
+                    }, { shouldDirty: true });
                     setOpenAdd(false);
                 }}
             />

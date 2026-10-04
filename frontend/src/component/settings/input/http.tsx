@@ -103,6 +103,7 @@ function InputHTTP() {
                                                                 (v2) =>
                                                                     v2 !== v,
                                                             ),
+                                                            { shouldDirty: true },
                                                         );
                                                     }}
                                                 >

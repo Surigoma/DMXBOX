@@ -9,11 +9,13 @@ import (
 	"backend/httpServer/controller/dmx"
 	"backend/httpServer/controller/health"
 	"backend/httpServer/controller/osc"
+	"backend/httpServer/controller/state"
 	"backend/message"
 	"backend/packageModule"
 	"context"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
 	"path"
@@ -34,6 +36,7 @@ var logger *slog.Logger
 var engine *gin.Engine
 var server *http.Server
 var listenAddr string
+var cancelConnections context.CancelFunc
 
 var HttpServer packageModule.PackageModule = packageModule.PackageModule{
 	ModuleName:     "http",
@@ -59,9 +62,12 @@ func Initialize(module *packageModule.PackageModule, config *config.Config) bool
 	logger = module.Logger
 	engine = RegisterEndPoints(&config.Input.Http, module.Version, module)
 	wg = module.Wg
+	connectionContext, cancel := context.WithCancel(context.Background())
+	cancelConnections = cancel
 	server = &http.Server{
-		Addr:    listenAddr,
-		Handler: engine,
+		Addr:        listenAddr,
+		Handler:     engine,
+		BaseContext: func(net.Listener) context.Context { return connectionContext },
 	}
 	logger.Info("Hello http server", "addr", "http://"+listenAddr)
 	return true
@@ -111,6 +117,7 @@ func RegisterEndPoints(config *config.HttpServer, version string, module *packag
 			v1.GET("/fade-state", dmx.GetFadeStatesV1)
 			v1.POST("/mute", controller.EnforceBrowserOnly, osc.SendOSCV1)
 			v1.GET("/mute-state", osc.GetMuteStateV1)
+			v1.GET("/control-state/stream", state.Stream)
 			cfg := v1.Group("/config/")
 			{
 				cfg.GET("/fade", dmx.GetFadeConfigV1)
@@ -157,6 +164,9 @@ func StartHTTP() {
 
 func StopHTTP() {
 	defer wg.Done()
+	if cancelConnections != nil {
+		cancelConnections()
+	}
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	if err := server.Shutdown(ctx); err != nil {

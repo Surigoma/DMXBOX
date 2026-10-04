@@ -1,10 +1,12 @@
-import { expect, describe, it, beforeEach } from "vitest";
+import { expect, describe, it, beforeEach, vi, afterEach } from "vitest";
 import { render } from "vitest-browser-react";
 import { user, UserSetup } from "../test/user_helper";
 import { http, HttpResponse } from "msw";
 import { UseMockServer } from "../test/backend_helper";
 import MuteControl from "./MuteControl";
 import { page } from "vitest/browser";
+import { ControlStateProvider } from "../contexts/controlState";
+import { useStateStreamMock } from "../test/stateStream";
 
 describe("MuteControl", async () => {
     interface postInterface {
@@ -22,8 +24,13 @@ describe("MuteControl", async () => {
         stateStatus = 200;
         postStatus = 200;
     });
+    const stream = useStateStreamMock(() => {
+        if (stateStatus !== 200) throw new Error("Disconnected");
+        return { fade: {}, mute: { isMute } };
+    });
+    afterEach(() => vi.useRealTimers());
     UseMockServer(
-        http.get("*/api/v1/mute-state", () => HttpResponse.json({ isMute }, { status: stateStatus })),
+        http.get("*/api/v1/control-state/stream", ({ request }) => stream(request)),
         http.post("*/api/v1/mute", async (r) => {
             expect(r.request.headers.get("X-DMXBOX-Control")).toBe("web-ui");
             const url = new URL(r.request.url);
@@ -43,7 +50,7 @@ describe("MuteControl", async () => {
     );
     UserSetup();
     function CreateTestComponent() {
-        return render(<MuteControl />);
+        return render(<ControlStateProvider><MuteControl /></ControlStateProvider>);
     }
     it("Shown", async () => {
         const { getByTestId } = await CreateTestComponent();
@@ -69,11 +76,14 @@ describe("MuteControl", async () => {
             isMute = true;
             const { getByRole } = await CreateTestComponent();
             await expect.element(getByRole("status")).toHaveTextContent("Muted");
+            vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
             stateStatus = 503;
             await expect.element(getByRole("status")).toHaveTextContent("State unavailable");
             await expect.element(getByRole("button", { name: "Mute", exact: true })).toBeEnabled();
             isMute = false;
             stateStatus = 200;
+            await vi.advanceTimersByTimeAsync(3000);
+            vi.useRealTimers();
             await expect.element(getByRole("status")).toHaveTextContent("Unmuted");
         });
         it("Preserves the known state when a command is rejected", async () => {
@@ -89,7 +99,7 @@ describe("MuteControl", async () => {
             await page.viewport(360, 500);
             try {
                 isMute = true;
-                const { getByRole, getByTestId } = await render(<div style={{ width: 320 }}><MuteControl /></div>);
+                const { getByRole, getByTestId } = await render(<ControlStateProvider><div style={{ width: 320 }}><MuteControl /></div></ControlStateProvider>);
                 await expect.element(getByRole("status")).toHaveTextContent("Muted");
                 expect(getByRole("status").element().getBoundingClientRect().bottom).toBeLessThan(getByRole("button", { name: "Mute", exact: true }).element().getBoundingClientRect().top);
                 await getByTestId("MuteControl").screenshot();

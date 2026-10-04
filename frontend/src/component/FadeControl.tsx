@@ -1,7 +1,7 @@
-import { Button, Box, Card, CardContent, Stack, Typography } from "@mui/material";
+import { Alert, Button, Box, Card, CardContent, Stack, Typography } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import { FrontConfigContext, genBackendPath } from "../routes/__root";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import type { TDMXGroup, TFadeState } from "../types";
 
 function FadeControl({ name, data, showCutin, state, onFade }: {
@@ -12,6 +12,8 @@ function FadeControl({ name, data, showCutin, state, onFade }: {
     onFade?: () => void;
 }) {
     const config = useContext(FrontConfigContext);
+    const [failedCommand, setFailedCommand] = useState<{ isIn: boolean; cutIn: boolean }>();
+    const [sending, setSending] = useState(false);
     const level = state ? Math.round(state.level * 100) : undefined;
     const status = !state ? "State unavailable"
         : state.state === "waiting" ? "Waiting"
@@ -19,26 +21,36 @@ function FadeControl({ name, data, showCutin, state, onFade }: {
         : "Idle";
 
     async function fade(isIn: boolean, cutIn: boolean = false) {
+        setSending(true);
         const opts: { [k: string]: string } = { isIn: String(isIn) };
         if (cutIn) {
             opts["interval"] = "0";
             opts["duration"] = "0";
         }
         const path = genBackendPath(config, "/api/v1/fade/" + name, opts);
-        const response = await fetch(path, {
-            method: "POST",
-            headers: { "X-DMXBOX-Control": "web-ui" },
-        });
-        if (!response.ok) {
-            console.error(`Request failed:${response.status}`);
-        } else {
+        try {
+            const response = await fetch(path, {
+                method: "POST",
+                headers: { "X-DMXBOX-Control": "web-ui" },
+            });
+            if (!response.ok) throw new Error(`Request failed: ${response.status}`);
+            setFailedCommand(undefined);
             onFade?.();
+        } catch {
+            setFailedCommand({ isIn, cutIn });
+        } finally {
+            setSending(false);
         }
     }
 
     return (
         <Card variant="outlined" data-testid="FadeControl">
             <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
+                {failedCommand && (
+                    <Alert severity="error" action={<Button disabled={sending} onClick={() => fade(failedCommand.isIn, failedCommand.cutIn)}>Retry</Button>}>
+                        Failed to send {failedCommand.cutIn ? "Cut" : "Fade"} {failedCommand.isIn ? "In" : "Out"} for {data.name}. Check the output state before retrying.
+                    </Alert>
+                )}
                 <Stack alignItems="center" sx={{ px: 2, py: 1, minHeight: 64, justifyContent: "center" }}>
                     <Typography variant="h5" component="div" sx={{ textAlign: "center", overflowWrap: "anywhere", maxWidth: "100%" }}>
                         {data.name}

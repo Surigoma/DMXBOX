@@ -64,6 +64,7 @@ function Device(prop: DeviceProp) {
                         <IconButton
                             onClick={() => setOpenDelete(true)}
                             data-testid="DeviceDeleteButton"
+                            aria-label={`Delete device ${prop.index + 1}`}
                         >
                             <MdDelete />
                         </IconButton>
@@ -128,7 +129,7 @@ function Device(prop: DeviceProp) {
                             setValue(prop.base, {
                                 ...body,
                                 devices: body.devices.filter((_, i) => i !== prop.index),
-                            });
+                            }, { shouldDirty: true });
                             setOpenDelete(false);
                         }}
                     >

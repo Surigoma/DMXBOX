@@ -1,22 +1,12 @@
 import { Button, Card, CardContent, Stack, Typography } from "@mui/material";
 import { FrontConfigContext, genBackendPath } from "../routes/__root";
 import { useContext, useState } from "react";
-import useSWR from "swr";
-import { MuteState } from "../types";
+import { useControlState } from "../contexts/controlState";
 
 function MuteControl() {
     const config = useContext(FrontConfigContext);
     const [commandError, setCommandError] = useState(false);
-    const { data, error, mutate } = useSWR(
-        genBackendPath(config, "/api/v1/mute-state"),
-        async (url: string) => {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`Mute state request failed: ${response.status}`);
-            return MuteState.parse(await response.json());
-        },
-        { refreshInterval: 250, dedupingInterval: 0, errorRetryInterval: 250 },
-    );
-    const isMute = error ? undefined : data?.isMute;
+    const isMute = useControlState()?.mute.isMute;
     async function mute(isMute: boolean) {
         try {
             const response = await fetch(genBackendPath(config, "/api/v1/mute", { isMute }), {
@@ -29,7 +19,6 @@ function MuteControl() {
             setCommandError(true);
             console.error(error);
         }
-        await mutate().catch(() => undefined);
     }
     return (
         <Card variant="outlined" data-testid="MuteControl">

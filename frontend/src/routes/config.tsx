@@ -1,7 +1,7 @@
 import { Light as SyntaxHighlighter } from "react-syntax-highlighter";
 import json from "react-syntax-highlighter/dist/esm/languages/hljs/json";
 import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useBlocker } from "@tanstack/react-router";
 import useSWR from "swr";
 import { FrontConfigContext, genBackendPath, typedFetcher } from "./__root";
 import { useContext, useEffect, useState, type ReactElement } from "react";
@@ -20,6 +20,7 @@ import {
     DialogTitle,
     FormControl,
     Snackbar,
+    Stack,
     Typography,
 } from "@mui/material";
 import { useForm, FormProvider } from "react-hook-form";
@@ -27,6 +28,8 @@ import { MdExpandMore } from "react-icons/md";
 import Devices from "../component/settings/Device";
 import Inputs from "../component/settings/Input";
 import Outputs from "../component/settings/Output";
+import ControlModeSettings from "../component/settings/ControlMode";
+import ControlModeStatus from "../component/ControlModeStatus";
 
 SyntaxHighlighter.registerLanguage("json", json);
 
@@ -55,8 +58,17 @@ function RouteComponent() {
     });
     const [resultShow, setResultShow] = useState(false);
     const configForm = useForm<TConfig>({});
+    const { isDirty, isSubmitting } = configForm.formState;
+    const blocker = useBlocker({
+        shouldBlockFn: () => isDirty || isSubmitting,
+        enableBeforeUnload: isDirty || isSubmitting,
+        withResolver: true,
+    });
     useEffect(() => {
-        if (data) {
+        if (blocker.status === "blocked" && !isDirty && !isSubmitting) blocker.proceed();
+    }, [blocker, isDirty, isSubmitting]);
+    useEffect(() => {
+        if (data && !configForm.formState.isDirty && !configForm.formState.isSubmitting) {
             configForm.reset(data as TConfig, {
                 keepDefaultValues: false,
             });
@@ -65,29 +77,27 @@ function RouteComponent() {
 
     async function onSubmit(data: TConfig) {
         setSubmittedResult(data);
-        const result = await fetch(
-            genBackendPath(config, "/api/v1/config/save"),
-            {
+        try {
+            const result = await fetch(genBackendPath(config, "/api/v1/config/save"), {
                 method: "POST",
                 body: JSON.stringify(data),
-            },
-        );
-        if (result.ok) {
+            });
+            if (!result.ok) throw new Error(`Request failed: ${result.status}`);
             const saved = await result.json();
-            if (saved.restartRequired) setRestartMessage(saved.message);
+            setRestartMessage(saved.restartRequired ? saved.message : undefined);
+            configForm.reset(data);
             setSendResult({
                 success: true,
                 message: <>Success</>,
             });
-        } else {
-            console.log(result.statusText);
+        } catch (error) {
             setSendResult({
                 success: false,
                 message: (
                     <>
                         Failed to send configuration.
                         <br />
-                        <pre>{result.statusText}</pre>
+                        <pre>{error instanceof Error ? error.message : "Please try again."}</pre>
                     </>
                 ),
             });
@@ -130,8 +140,10 @@ function RouteComponent() {
                     component="form"
                     onSubmit={configForm.handleSubmit(onSubmit)}
                 >
+                    <Box component="fieldset" disabled={isSubmitting} sx={{ border: 0, p: 0, m: 0, minWidth: 0, pointerEvents: isSubmitting ? "none" : "auto" }}>
                     <Grid container margin={2} gap={3} direction="column">
                         <Typography variant="h5">Configuration</Typography>
+                        {isDirty && <Alert severity="info">Unsaved changes. Press Update to save.</Alert>}
                         <Grid size="grow">
                             <Accordion defaultExpanded={false} key="input">
                                 <AccordionSummary expandIcon={<MdExpandMore />}>
@@ -189,13 +201,15 @@ function RouteComponent() {
                                         variant="outlined"
                                         size="large"
                                         color="primary"
+                                        disabled={isSubmitting}
                                     >
-                                        Update
+                                        {isSubmitting ? "Saving..." : "Update"}
                                     </Button>
                                 </FormControl>
                             </Grid>
                         </Grid>
                     </Grid>
+                    </Box>
                 </Box>
                 <Dialog
                     open={resultShow}
@@ -220,6 +234,29 @@ function RouteComponent() {
                     </DialogActions>
                 </Dialog>
             </FormProvider>
+            <Box sx={{ m: 2 }}>
+                <Accordion defaultExpanded={false} data-testid="ControlModeSettings">
+                    <AccordionSummary expandIcon={<MdExpandMore />}>
+                        <Stack direction={{ xs: "column", sm: "row" }} alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
+                            <Typography component="span" variant="h5">Control mode</Typography>
+                            <ControlModeStatus />
+                        </Stack>
+                    </AccordionSummary>
+                    <AccordionDetails>
+                        <ControlModeSettings />
+                    </AccordionDetails>
+                </Accordion>
+            </Box>
+            <Dialog open={blocker.status === "blocked"} onClose={() => blocker.reset?.()} aria-labelledby="unsaved-settings-title">
+                <DialogTitle id="unsaved-settings-title">Leave configuration?</DialogTitle>
+                <DialogContent>
+                    {isSubmitting ? "Configuration is still being saved. Wait for the result before leaving." : "Your unsaved changes will be discarded."}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => blocker.reset?.()}>Stay</Button>
+                    <Button color="error" disabled={isSubmitting} onClick={() => blocker.proceed?.()}>Discard and leave</Button>
+                </DialogActions>
+            </Dialog>
         </>
     );
 }
