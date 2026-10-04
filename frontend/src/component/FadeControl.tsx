@@ -1,35 +1,25 @@
-import {
-    Button,
-    Card,
-    CardContent,
-    Grid,
-    Stack,
-    Typography,
-} from "@mui/material";
+import { Button, Box, Card, CardContent, Stack, Typography } from "@mui/material";
+import { alpha } from "@mui/material/styles";
 import { FrontConfigContext, genBackendPath } from "../routes/__root";
-import { useContext, useMemo } from "react";
-import type { TDMXGroup } from "../types";
+import { useContext } from "react";
+import type { TDMXGroup, TFadeState } from "../types";
 
-function FadeControl({
-    name,
-    data,
-    showCutin,
-}: {
+function FadeControl({ name, data, showCutin, state, onFade }: {
     name: string;
     data: TDMXGroup;
     showCutin: boolean;
+    state?: TFadeState;
+    onFade?: () => void;
 }) {
     const config = useContext(FrontConfigContext);
-    const FadeHeight = useMemo<number>(() => {
-        return showCutin ? 70 : 100;
-    }, [showCutin]);
-    const CutHeight = useMemo<number>(() => {
-        return 100 - FadeHeight;
-    }, [FadeHeight]);
+    const level = state ? Math.round(state.level * 100) : undefined;
+    const status = !state ? "State unavailable"
+        : state.state === "waiting" ? "Waiting"
+        : state.state === "fading" ? (state.isIn ? "Fading in" : "Fading out")
+        : "Idle";
+
     async function fade(isIn: boolean, cutIn: boolean = false) {
-        const opts: { [k: string]: string } = {
-            isIn: String(isIn),
-        };
+        const opts: { [k: string]: string } = { isIn: String(isIn) };
         if (cutIn) {
             opts["interval"] = "0";
             opts["duration"] = "0";
@@ -39,115 +29,61 @@ function FadeControl({
             method: "POST",
             headers: { "X-DMXBOX-Control": "web-ui" },
         });
-        if (!response.ok) { 
-            console.error(`Request failed:${response.status}`)
+        if (!response.ok) {
+            console.error(`Request failed:${response.status}`);
+        } else {
+            onFade?.();
         }
     }
+
     return (
         <Card variant="outlined" data-testid="FadeControl">
-            <CardContent
-                style={{
-                    margin: 0,
-                    padding: 0,
-                    position: "relative",
-                    height: "150px",
-                }}
-            >
-                <div
-                    style={{
-                        display: "block",
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        width: "100%",
-                        height: "100%",
-                    }}
-                >
-                    <div
-                        style={{
-                            display: "flex",
-                            width: "100%",
-                            height: "100%",
-                            alignItems: "center",
-                            justifyContent: "center",
+            <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
+                <Stack alignItems="center" sx={{ px: 2, py: 1, minHeight: 64, justifyContent: "center" }}>
+                    <Typography variant="h5" component="div" sx={{ textAlign: "center", overflowWrap: "anywhere", maxWidth: "100%" }}>
+                        {data.name}
+                    </Typography>
+                    <Typography variant="caption">
+                        {status}{level === undefined ? "" : ` · Output ${level}%`}
+                    </Typography>
+                </Stack>
+                <Box sx={{ position: "relative", overflow: "hidden" }}>
+                    <Box
+                        role="progressbar"
+                        aria-label={`${data.name} output level`}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={level}
+                        aria-valuetext={level === undefined ? "State unavailable" : `${status}, Output ${level}%`}
+                        sx={{
+                            position: "absolute",
+                            inset: 0,
+                            width: `${level ?? 0}%`,
+                            backgroundColor: (theme) => alpha(theme.palette.primary.main, 0.2),
+                            transition: "width 250ms linear",
+                            pointerEvents: "none",
+                            "@media (prefers-reduced-motion: reduce)": { transition: "none" },
                         }}
-                    >
-                        <Typography variant="h5" component="div">
-                            {data.name}
-                        </Typography>
-                    </div>
-                </div>
-                <Grid
-                    container
-                    direction="column"
-                    alignItems="stretch"
-                    justifyContent="center"
-                    wrap="nowrap"
-                    width="100%"
-                    height="100%"
-                    zIndex={10}
-                >
-                    <Grid size={12} height={FadeHeight + "%"}>
-                        <Stack direction="row" spacing={0} height="100%">
-                            <Button
-                                style={{ width: "100%", height: "100%" }}
-                                color="primary"
-                                size="large"
-                                variant="outlined"
-                                onClick={async () => {
-                                    await fade(true);
-                                }}
-                            >
-                                Fade In
-                            </Button>
-                            <Button
-                                style={{ width: "100%", height: "100%" }}
-                                color="secondary"
-                                size="large"
-                                variant="outlined"
-                                onClick={async () => {
-                                    await fade(false);
-                                }}
-                            >
-                                Fade Out
-                            </Button>
-                        </Stack>
-                    </Grid>
-                    {showCutin ? (
-                        <Grid
-                            size="grow"
-                            height={CutHeight + "%"}
-                            sx={{ minHeight: 0 }}
-                        >
-                            <Stack direction="row" spacing={0} height="100%">
-                                <Button
-                                    style={{ width: "100%", height: "100%" }}
-                                    color="primary"
-                                    size="large"
-                                    variant="text"
-                                    onClick={async () => {
-                                        await fade(true, true);
-                                    }}
-                                >
-                                    Cut In
-                                </Button>
-                                <Button
-                                    style={{ width: "100%", height: "100%" }}
-                                    color="secondary"
-                                    size="large"
-                                    variant="text"
-                                    onClick={async () => {
-                                        await fade(false, true);
-                                    }}
-                                >
-                                    Cut Out
-                                </Button>
-                            </Stack>
-                        </Grid>
-                    ) : (
-                        <></>
-                    )}
-                </Grid>
+                    />
+                    <Stack direction="row" spacing={0} sx={{ position: "relative", height: showCutin ? 80 : 104 }}>
+                        <Button sx={{ width: "50%", borderRadius: 0 }} color="primary" size="large" variant="outlined" onClick={() => fade(true)}>
+                            Fade In
+                        </Button>
+                        <Button sx={{ width: "50%", borderRadius: 0 }} color="secondary" size="large" variant="outlined" onClick={() => fade(false)}>
+                            Fade Out
+                        </Button>
+                    </Stack>
+                </Box>
+                {showCutin && (
+                    <Stack direction="row" spacing={0} height={44}>
+                        <Button sx={{ width: "50%" }} color="primary" size="large" variant="text" onClick={() => fade(true, true)}>
+                            Cut In
+                        </Button>
+                        <Button sx={{ width: "50%" }} color="secondary" size="large" variant="text" onClick={() => fade(false, true)}>
+                            Cut Out
+                        </Button>
+                    </Stack>
+                )}
             </CardContent>
         </Card>
     );

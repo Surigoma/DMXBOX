@@ -6,21 +6,29 @@ import { Route } from "./index";
 import { Suspense } from "react";
 import { UseMockServer } from "../test/backend_helper";
 import { user, UserSetup } from "../test/user_helper";
+import type { TDMXGroupMap, TFadeState } from "../types";
 
 describe("Control mode", () => {
     UserSetup();
     let failure: "http" | "network" | "json" | "lost-response" | undefined;
     let marker: string | null;
     let browserOnly: boolean;
+    let groups: TDMXGroupMap;
+    let fadeStates: Record<string, TFadeState>;
+    let fadeStateFailure: boolean;
     beforeEach(() => {
         failure = undefined;
         marker = null;
         browserOnly = false;
+        groups = {};
+        fadeStates = {};
+        fadeStateFailure = false;
     });
     UseMockServer(
         http.get("*/config.json", () => HttpResponse.json({ backendPort: 8080 })),
-        http.get("*/api/v1/config/fade", () => HttpResponse.json({})),
+        http.get("*/api/v1/config/fade", () => HttpResponse.json(groups)),
         http.get("*/api/features", () => HttpResponse.json([])),
+        http.get("*/api/v1/fade-state", () => fadeStateFailure ? HttpResponse.json({}, { status: 503 }) : HttpResponse.json(fadeStates)),
         http.get("*/api/v1/control-mode", () => HttpResponse.json({ browserOnly })),
         http.post("*/api/v1/control-mode", async ({ request }) => {
             marker = request.headers.get("X-DMXBOX-Control");
@@ -78,5 +86,23 @@ describe("Control mode", () => {
         await expect.element(getByRole("alert")).toBeVisible();
         await expect.element(toggle).toBeEnabled();
         await expect.element(toggle).toBeChecked();
+    });
+    it("Polls output changes made by another client", async () => {
+        groups = { stage: { name: "Stage", devices: [{ model: "dimmer", channel: 1, max: [255] }] } };
+        fadeStates = { stage: { level: 0, state: "idle", isIn: false } };
+        const { getByRole, getByText } = await createPage();
+        await expect.element(getByText("Idle · Output 0%")).toBeVisible();
+        fadeStates = { stage: { level: 0.7, state: "fading", isIn: false } };
+        await expect.element(getByRole("progressbar", { name: "Stage output level" })).toHaveAttribute("aria-valuenow", "70");
+        await expect.element(getByText("Fading out · Output 70%")).toBeVisible();
+        expect(marker).toBeNull();
+    });
+    it("Keeps control buttons available when status retrieval fails", async () => {
+        groups = { stage: { name: "Stage", devices: [] } };
+        fadeStateFailure = true;
+        const { getByRole, getByText } = await createPage();
+        await expect.element(getByText("State unavailable")).toBeVisible();
+        await expect.element(getByRole("button", { name: "Fade In" })).toBeEnabled();
+        await expect.element(getByRole("progressbar")).not.toHaveAttribute("aria-valuenow");
     });
 });

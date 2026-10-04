@@ -16,6 +16,7 @@ import {
     DMXGroupMap,
     Features,
     ControlMode,
+    FadeStateMap,
     type TDMXGroupMap,
     type TFeatures,
 } from "../types";
@@ -31,6 +32,15 @@ export const Route = createFileRoute("/")({
 
 function ControlPage() {
     const config = useContext(FrontConfigContext);
+    const { data: fadeStates, error: fadeStateError, mutate: refreshFadeStates } = useSWR(
+        genBackendPath(config, "/api/v1/fade-state"),
+        async (url: string) => {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`Fade state request failed: ${response.status}`);
+            return FadeStateMap.parse(await response.json());
+        },
+        { refreshInterval: 250, dedupingInterval: 0 },
+    );
     const {
         data: DMXData,
         error: DMXError,
@@ -187,6 +197,8 @@ function ControlPage() {
                                         name={k}
                                         data={dmxInfo[k]}
                                         showCutin={showCutin}
+                                        state={fadeStateError ? undefined : fadeStates?.[k]}
+                                        onFade={() => { void refreshFadeStates().catch(() => undefined); }}
                                     ></FadeControl>
                                 </Grid>
                             );

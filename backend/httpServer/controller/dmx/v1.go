@@ -90,3 +90,14 @@ func GetFadeConfigV1(g *gin.Context) {
 	config := dmxserver.GetConfig()
 	g.JSON(http.StatusOK, config)
 }
+
+// GetFadeStatesV1 returns current software output levels and fade activity.
+//
+// @Summary Get DMX fade states
+// @Tags DMX,v1
+// @Produce json
+// @Success 200 {object} map[string]dmxserver.FadeState
+// @Router /v1/fade-state [get]
+func GetFadeStatesV1(g *gin.Context) {
+	g.JSON(http.StatusOK, dmxserver.GetFadeStates())
+}

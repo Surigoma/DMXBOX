@@ -55,6 +55,13 @@ export const DMXGroupMap = z.record(
     DMXGroup.describe("DMX Group Info"),
 );
 export type TDMXGroupMap = z.infer<typeof DMXGroupMap>;
+export const FadeState = z.object({
+    level: z.number().min(0).max(1),
+    state: z.enum(["idle", "waiting", "fading"]),
+    isIn: z.boolean(),
+});
+export type TFadeState = z.infer<typeof FadeState>;
+export const FadeStateMap = z.record(z.string(), FadeState);
 export const DMXServer = z.object({
     groups: DMXGroupMap,
     fadeInterval: z.number().min(0).describe("Time of between start and end"),

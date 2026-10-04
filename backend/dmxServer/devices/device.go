@@ -19,6 +19,7 @@ type DMXDevice struct {
 	Duration     *float32
 	once         bool
 	effectActive bool
+	fadeIn       bool
 	ModFade      func(isIn bool, duration float32, interval float32)
 	ModUpdate    func() bool
 }
@@ -35,6 +36,8 @@ func (dev *DMXDevice) Initialize(channel uint16, maxValue []byte, target *[]byte
 	dev.Target = make([]byte, dev.UseChannel)
 	dev.effectStart = time.Now()
 	dev.effectEnd = time.Now()
+	dev.effectActive = false
+	dev.fadeIn = false
 	if len(dev.MaxValue) > len(maxValue) {
 		return false
 	}
@@ -62,6 +65,7 @@ func (dev *DMXDevice) Fade(isIn bool, duration float32, interval float32) {
 	dev.effectStart = time.Now().Add(time.Duration(inter * float32(time.Second)))
 	dev.effectEnd = dev.effectStart.Add(time.Duration(dur * float32(time.Second)))
 	dev.effectActive = true
+	dev.fadeIn = isIn
 	dev.once = dur == 0
 	if dev.ModFade != nil {
 		dev.ModFade(isIn, duration, interval)
@@ -77,6 +81,11 @@ func (dev *DMXDevice) Fade(isIn bool, duration float32, interval float32) {
 			dev.Target[i] = 0
 		}
 	}
+}
+
+// FadeStatus is read while the DMX server holds its state mutex.
+func (dev *DMXDevice) FadeStatus(now time.Time) (active, waiting, isIn bool) {
+	return dev.effectActive, dev.effectActive && now.Before(dev.effectStart), dev.fadeIn
 }
 
 func (dev *DMXDevice) Update(wg *sync.WaitGroup) bool {

@@ -48,6 +48,7 @@ func TestConcurrentFadeRender(t *testing.T) {
 					dmxserver.Render()
 				case 2:
 					dmxserver.GetConfig()
+					dmxserver.GetFadeStates()
 				}
 			}
 		}()

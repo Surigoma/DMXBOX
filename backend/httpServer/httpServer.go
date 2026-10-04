@@ -108,6 +108,7 @@ func RegisterEndPoints(config *config.HttpServer, version string, module *packag
 			v1.GET("/control-mode", controller.GetControlMode)
 			v1.POST("/control-mode", controller.SetControlMode)
 			v1.POST("/fade/:group", controller.EnforceBrowserOnly, dmx.FadeV1)
+			v1.GET("/fade-state", dmx.GetFadeStatesV1)
 			v1.POST("/mute", controller.EnforceBrowserOnly, osc.SendOSCV1)
 			cfg := v1.Group("/config/")
 			{
