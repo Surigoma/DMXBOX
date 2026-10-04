@@ -3,6 +3,7 @@ package osc
 import (
 	"backend/httpServer/controller"
 	"backend/message"
+	oscserver "backend/oscServer"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -11,6 +12,17 @@ import (
 type OSCResult struct {
 	Result string         `json:"result"`
 	Error  map[string]any `json:"err,omitempty"`
+}
+
+// GetMuteStateV1 returns the last completely sent OSC mute command.
+//
+// @Summary Get the last sent OSC mute state
+// @Tags OSC,v1
+// @Produce json
+// @Success 200 {object} oscserver.MuteState
+// @Router /v1/mute-state [get]
+func GetMuteStateV1(g *gin.Context) {
+	g.JSON(http.StatusOK, oscserver.GetMuteState())
 }
 
 // Mute control

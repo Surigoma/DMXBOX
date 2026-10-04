@@ -158,6 +158,10 @@ export const ControlMode = z.object({
     browserOnly: z.boolean(),
 });
 
+export const MuteState = z.object({
+    isMute: z.boolean().nullable(),
+});
+
 export const OperationLog = z.array(
     z.object({
         time: z.iso.datetime({ offset: true }),

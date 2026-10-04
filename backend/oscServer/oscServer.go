@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/hypebeast/go-osc/osc"
@@ -19,6 +20,22 @@ var wg *sync.WaitGroup
 var ip string
 var port int
 var sendType string
+
+// Zero means no complete mute command has been sent since initialization.
+var muteState atomic.Int32
+
+type MuteState struct {
+	IsMute *bool `json:"isMute"`
+}
+
+func GetMuteState() MuteState {
+	state := muteState.Load()
+	if state == 0 {
+		return MuteState{}
+	}
+	isMute := state == 1
+	return MuteState{IsMute: &isMute}
+}
 
 type OSCFormatter struct {
 	Base     string
@@ -58,6 +75,7 @@ var OscServer packageModule.PackageModule = packageModule.PackageModule{
 }
 
 func Initialize(module *packageModule.PackageModule, config *config.Config) bool {
+	muteState.Store(0)
 	if config.Output.Osc.Type != "int" && config.Output.Osc.Type != "float" {
 		return false
 	}
@@ -88,6 +106,8 @@ func HandleMessage(mes message.Message) int {
 			isMute = v == "true"
 		}
 		addresses, value := formatter.Render(isMute)
+		muteState.Store(0)
+		sent := len(addresses) > 0
 		for _, addr := range addresses {
 			p := osc.NewMessage(addr)
 			p.Append(value)
@@ -95,9 +115,17 @@ func HandleMessage(mes message.Message) int {
 			logger.Debug("send", "p", p, "b", d)
 			err := client.Send(p)
 			if err != nil {
+				sent = false
 				logger.Error("Drop", "err", err)
 			}
 			time.Sleep(50 * time.Millisecond)
+		}
+		if sent {
+			if isMute {
+				muteState.Store(1)
+			} else {
+				muteState.Store(2)
+			}
 		}
 	}
 	return 0

@@ -38,6 +38,8 @@ The control screen displays configured DMX groups. Each group provides Fade In a
 
 One background gauge spans both Fade buttons and shows the group's current DMX output level relative to its configured maximum. It grows during Fade In and shrinks during Fade Out. The group name, waiting/fading/idle status and output percentage appear above the buttons, including changes made through TCP or another browser. The percentage indicates output level, not fade completion. Updates arrive approximately every 250 milliseconds and reflect the backend's software DMX output, rather than physical fixture feedback. If status retrieval fails, the screen shows `State unavailable` while keeping the control buttons usable.
 
+Above Mute/Unmute, `Muted` or `Unmuted` indicates the last completely sent OSC command, and the corresponding button is highlighted. Changes made through TCP or another browser also appear here. This is not feedback from the receiving device. Before the first command, while sending, after a send error or when status retrieval fails, the screen shows `State unavailable`. Both controls remain usable when the state is unknown.
+
 ### Settings
 
 The settings screen edits:
