@@ -141,7 +141,12 @@ function RouteComponent() {
                     onSubmit={configForm.handleSubmit(onSubmit)}
                 >
                     <Box component="fieldset" disabled={isSubmitting} sx={{ border: 0, p: 0, m: 0, minWidth: 0, pointerEvents: isSubmitting ? "none" : "auto" }}>
-                    <Grid container margin={2} gap={3} direction="column">
+                    <Grid
+                        container
+                        sx={{ flexDirection: "column",
+                            margin: 2,
+                            gap: 3
+                        }}>
                         <Typography variant="h5">Configuration</Typography>
                         {isDirty && <Alert severity="info">Unsaved changes. Press Update to save.</Alert>}
                         <Grid size="grow">
@@ -178,10 +183,11 @@ function RouteComponent() {
                         </Grid>
                         <Grid
                             container
-                            gap={3}
                             direction="row"
-                            justifyContent="right"
-                        >
+                            sx={{
+                                gap: 3,
+                                justifyContent: "right"
+                            }}>
                             <Grid>
                                 <FormControl fullWidth>
                                     <Button
@@ -237,7 +243,9 @@ function RouteComponent() {
             <Box sx={{ m: 2 }}>
                 <Accordion defaultExpanded={false} data-testid="ControlModeSettings">
                     <AccordionSummary expandIcon={<MdExpandMore />}>
-                        <Stack direction={{ xs: "column", sm: "row" }} alignItems={{ xs: "flex-start", sm: "center" }} spacing={1}>
+                        <Stack direction={{ xs: "column", sm: "row" }} spacing={1} sx={{
+                            alignItems: { xs: "flex-start", sm: "center" }
+                        }}>
                             <Typography component="span" variant="h5">Control mode</Typography>
                             <ControlModeStatus />
                         </Stack>

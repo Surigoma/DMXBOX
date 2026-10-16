@@ -27,7 +27,9 @@ function OperationsPage() {
     );
     return (
         <>
-            <Typography variant="h5" margin={2}>Operation Log</Typography>
+            <Typography variant="h5" sx={{
+                margin: 2
+            }}>Operation Log</Typography>
             <TableContainer component={Paper}>
                 <Table size="small">
                     <TableHead>
@@ -52,8 +54,12 @@ function OperationsPage() {
                     </TableBody>
                 </Table>
             </TableContainer>
-            {isLoading && <Typography margin={2}>Loading...</Typography>}
-            {error && <Typography margin={2}>Failed to load operation log. {JSON.stringify(error)} </Typography>}
+            {isLoading && <Typography sx={{
+                margin: 2
+            }}>Loading...</Typography>}
+            {error && <Typography sx={{
+                margin: 2
+            }}>Failed to load operation log. {JSON.stringify(error)} </Typography>}
         </>
     );
 }

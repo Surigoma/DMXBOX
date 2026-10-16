@@ -59,7 +59,9 @@ function OutputOSC() {
                         {...register("output.osc.format")}
                     />
                 </FormControl>
-                <Grid container spacing={2} alignItems="center">
+                <Grid container spacing={2} sx={{
+                    alignItems: "center"
+                }}>
                     <Grid size="grow">
                         <FormControl fullWidth margin="normal">
                             <InputLabel id="osc-type">
