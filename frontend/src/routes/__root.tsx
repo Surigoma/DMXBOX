@@ -171,7 +171,9 @@ function RootLayout() {
                 </Container>
             </AppBar>
             <FrontConfigContext value={frontConfig?.body ?? { backendPort: 8080 }}>
-                <Grid padding={1}>
+                <Grid sx={{
+                    padding: 1
+                }}>
                     {!frontConfig ? "Loading configuration..." : frontConfig.isError ? "Failed to load config.json." : <Outlet />}
                 </Grid>
             </FrontConfigContext>

@@ -23,14 +23,14 @@ function MuteControl() {
     return (
         <Card variant="outlined" data-testid="MuteControl">
             <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
-                <Stack alignItems="center" justifyContent="center" sx={{ py: 1, minHeight: 64 }}>
+                <Stack sx={{ alignItems: "center", justifyContent: "center", py: 1, minHeight: 64 }}>
                     <Typography role="status" color={isMute === true ? "error" : isMute === false ? "success" : "text.secondary"}>
                         {isMute === true ? "Muted" : isMute === false ? "Unmuted" : "State unavailable"}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">Last sent OSC state</Typography>
                     {commandError && <Typography role="alert" variant="caption" color="error">Failed to send mute command</Typography>}
                 </Stack>
-                <Stack direction="row" spacing={0} height={104}>
+                <Stack direction="row" spacing={0} sx={{ height: 104 }}>
                     <Button sx={{ width: "50%", borderRadius: 0 }} color="error" size="large" variant={isMute === true ? "contained" : "outlined"} aria-pressed={isMute === true} onClick={() => mute(true)}>
                         Mute
                     </Button>

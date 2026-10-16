@@ -3,6 +3,7 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { playwright } from "@vitest/browser-playwright";
+import { msw } from "msw/vite";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -14,6 +15,8 @@ export default defineConfig({
       routeFileIgnorePattern: "\\.test\\.[jt]sx?$",
     }),
     react(),
+    // Serve mockServiceWorker.js for msw in browser-mode tests only (never shipped in builds).
+    ...(process.env.VITEST ? [msw({ mode: "worker-only" })] : []),
   ],
   test: {
     testTimeout: 3000,

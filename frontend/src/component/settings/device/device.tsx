@@ -49,14 +49,19 @@ function Device(prop: DeviceProp) {
 
     return (
         <Card style={{ padding: "5px" }} data-testid="DMXDevice">
-            <Stack gap={2}>
+            <Stack sx={{
+                gap: 2
+            }}>
                 <Grid container>
                     <Grid
                         size="grow"
-                        justifyContent="center"
-                        alignItems="center"
-                    >
-                        <Typography margin={1} variant="subtitle1">
+                        sx={{
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}>
+                        <Typography variant="subtitle1" sx={{
+                            margin: 1
+                        }}>
                             Index: {prop.index + 1}
                         </Typography>
                     </Grid>

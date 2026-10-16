@@ -11,7 +11,7 @@ import NumberField from "../../common/numberField";
 function InputTCP() {
     const { control, register } = useFormContext();
     return (
-        <Grid direction="column" spacing={1} data-testid="InputTCP">
+        <Grid sx={{ flexDirection: "column" }} spacing={1} data-testid="InputTCP">
             <Typography variant="h5">TCP</Typography>
             <FormGroup>
                 <FormControl margin="normal">

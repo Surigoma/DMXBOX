@@ -7,8 +7,14 @@ import InputTCP from "./input/tcp";
 function Inputs() {
     const { control } = useFormContext();
     return (
-        <Grid container spacing={2} direction="column" data-testid="Inputs">
-            <Grid container margin={2} spacing={2} alignItems="center">
+        <Grid sx={{ flexDirection: "column" }} container spacing={2} data-testid="Inputs">
+            <Grid
+                container
+                spacing={2}
+                sx={{
+                    margin: 2,
+                    alignItems: "center"
+                }}>
                 <InputLabel>
                     <Typography variant="h5">Modules: </Typography>
                 </InputLabel>
@@ -27,8 +33,9 @@ function Inputs() {
                 <Grid
                     container
                     spacing={2}
-                    margin={2}
-                    direction={{ xs: "column", md: "row" }}
+                    sx={{ flexDirection: { xs: "column", md: "row" },
+                        margin: 2
+                    }}
                 >
                     <Watch
                         control={control}

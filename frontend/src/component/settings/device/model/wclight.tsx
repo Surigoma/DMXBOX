@@ -107,9 +107,10 @@ function WCLight(prop: WCLightProp) {
                 <Typography
                     variant="caption"
                     noWrap={true}
-                    width="50px"
-                    textAlign="right"
-                >
+                    sx={{
+                        width: "50px",
+                        textAlign: "right"
+                    }}>
                     {(dimmer * 100).toFixed(0)} %
                 </Typography>
             </Stack>
