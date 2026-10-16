@@ -102,13 +102,14 @@ function Group(prop: GroupProp) {
     }
     return (
         <Card variant="outlined">
-            <Grid container direction="column">
+            <Grid sx={{ flexDirection: "column" }} container>
                 <Grid
                     container
                     direction="row"
-                    justifyContent="center"
-                    alignItems="center"
-                >
+                    sx={{
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}>
                     <Grid size="grow">
                         <CardHeader
                             title={group.name + " (" + prop.name + ")"}
@@ -137,10 +138,10 @@ function Group(prop: GroupProp) {
                 </Grid>
                 <Grid
                     container
-                    gap={1}
-                    margin={2}
-                    direction={{ xs: "column", md: "row" }}
-                >
+                    sx={{ flexDirection: { xs: "column", md: "row" },
+                        gap: 1,
+                        margin: 2
+                    }}>
                     {group.devices.map((v, i) => (
                         <Grid
                             key={v.model + "_" + i}

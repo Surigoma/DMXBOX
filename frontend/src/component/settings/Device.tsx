@@ -18,14 +18,15 @@ function Devices() {
     const groups = useWatch({ control, name: parent }) as TDMXGroupMap;
     const groupKeys = Object.keys(groups ?? {});
     return (
-        <Grid container spacing={2} direction="column" data-testid="Devices">
+        <Grid sx={{ flexDirection: "column" }} container spacing={2} data-testid="Devices">
             <Grid>
                 <Typography variant="h6">Global Options</Typography>
                 <FormGroup>
                     <Grid
                         container
-                        direction={{ xs: "column", md: "row" }}
-                        gap={2}
+                        sx={{ flexDirection: { xs: "column", md: "row" },
+                            gap: 2
+                        }}
                     >
                         <FormControl margin="normal">
                             <Controller

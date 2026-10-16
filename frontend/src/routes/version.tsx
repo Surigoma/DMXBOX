@@ -36,16 +36,24 @@ function ControlPage() {
         return (
             <Grid
                 container
-                justifyContent="center"
-                alignItems="center"
-                padding="10px"
-            >
+                sx={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    padding: "10px"
+                }}>
                 <a>Loading...</a>
             </Grid>
         );
     }
     return (
-        <Grid container justifyContent="center" alignItems="center" direction="column" gap={2} margin="10px">
+        <Grid
+            container
+            sx={{ flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 2,
+                margin: "10px"
+            }}>
             <Typography variant="h5">Version information</Typography>
             <TableContainer component={Paper} sx={{ maxWidth: "650px" }}>
                 <Table>

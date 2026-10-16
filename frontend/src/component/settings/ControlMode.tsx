@@ -52,7 +52,9 @@ function ControlModeSettings() {
                     />
                 }
             />
-            <Typography id="browser-only-description" variant="body2" color="text.secondary">
+            <Typography id="browser-only-description" variant="body2" sx={{
+                color: "text.secondary"
+            }}>
                 Use browser controls for manual operation and block commands from TCP and other external controllers.
                 Changes take effect immediately, without pressing Update. This mode resets when the backend restarts.
             </Typography>

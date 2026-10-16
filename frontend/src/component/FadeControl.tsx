@@ -51,7 +51,14 @@ function FadeControl({ name, data, showCutin, state, onFade }: {
                         Failed to send {failedCommand.cutIn ? "Cut" : "Fade"} {failedCommand.isIn ? "In" : "Out"} for {data.name}. Check the output state before retrying.
                     </Alert>
                 )}
-                <Stack alignItems="center" sx={{ px: 2, py: 1, minHeight: 64, justifyContent: "center" }}>
+                <Stack
+                    sx={{
+                        alignItems: "center",
+                        px: 2,
+                        py: 1,
+                        minHeight: 64,
+                        justifyContent: "center"
+                    }}>
                     <Typography variant="h5" component="div" sx={{ textAlign: "center", overflowWrap: "anywhere", maxWidth: "100%" }}>
                         {data.name}
                     </Typography>
@@ -87,7 +94,9 @@ function FadeControl({ name, data, showCutin, state, onFade }: {
                     </Stack>
                 </Box>
                 {showCutin && (
-                    <Stack direction="row" spacing={0} height={44}>
+                    <Stack direction="row" spacing={0} sx={{
+                        height: 44
+                    }}>
                         <Button sx={{ width: "50%" }} color="primary" size="large" variant="text" onClick={() => fade(true, true)}>
                             Cut In
                         </Button>

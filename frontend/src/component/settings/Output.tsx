@@ -10,7 +10,13 @@ function Outputs() {
     const { control } = useFormContext();
     return (
         <Grid data-testid="Outputs">
-            <Grid container alignItems="center" spacing={2} margin={2}>
+            <Grid
+                container
+                spacing={2}
+                sx={{
+                    alignItems: "center",
+                    margin: 2
+                }}>
                 <InputLabel id="demo-multiple-chip-label">
                     <Typography variant="h5">Target: </Typography>
                 </InputLabel>
@@ -54,8 +60,9 @@ function Outputs() {
                             <Grid
                                 container
                                 spacing={2}
-                                margin={2}
-                                direction={{ xs: "column", md: "row" }}
+                                sx={{ flexDirection: { xs: "column", md: "row" },
+                                    margin: 2
+                                }}
                             >
                                 {result.length > 0 ? (
                                     result.map((e) => (

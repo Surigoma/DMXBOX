@@ -22,7 +22,7 @@ const Item = styled(Paper)(({ theme }) => ({
 function InputHTTP() {
     const { control, register, setValue } = useFormContext();
     return (
-        <Grid direction="column" spacing={1} data-testid="InputHTTP">
+        <Grid sx={{ flexDirection: "column" }} spacing={1} data-testid="InputHTTP">
             <Typography variant="h5">HTTP</Typography>
             <FormGroup>
                 <FormControl margin="normal">

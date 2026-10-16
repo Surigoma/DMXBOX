@@ -82,34 +82,39 @@ function ControlPanel() {
         return (
             <Grid
                 container
-                justifyContent="center"
-                alignItems="center"
-                padding="10px"
-            >
+                sx={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    padding: "10px"
+                }}>
                 <a>Loading...</a>
             </Grid>
         );
     }
     return (
-        <Grid container direction="column">
+        <Grid sx={{ flexDirection: "column" }} container>
             <Grid size="grow">
                 <Grid
                     container
                     direction="row"
-                    justifyContent="center"
-                    alignItems="center"
-                >
+                    sx={{
+                        justifyContent: "center",
+                        alignItems: "center"
+                    }}>
                     <Grid size="grow">
-                        <Typography variant="h5" margin={2}>
+                        <Typography variant="h5" sx={{
+                            margin: 2
+                        }}>
                             Control
                         </Typography>
                     </Grid>
                     <Grid size="auto" sx={{ mx: 2 }}><ControlModeStatus /></Grid>
                     <Grid
                         size="auto"
-                        justifyContent="center"
-                        alignContent="center"
-                    >
+                        sx={{
+                            justifyContent: "center",
+                            alignContent: "center"
+                        }}>
                         <FormGroup row>
                             <FormControlLabel
                                 label="CUT"
@@ -125,7 +130,9 @@ function ControlPanel() {
                         </FormGroup>
                     </Grid>
                 </Grid>
-                <Grid container spacing={3} padding={2}>
+                <Grid container spacing={3} sx={{
+                    padding: 2
+                }}>
                     {Object.keys(dmxInfo).map((k) => {
                         {
                             return (
@@ -147,16 +154,21 @@ function ControlPanel() {
                     <Grid
                         container
                         direction="row"
-                        justifyContent="center"
-                        alignItems="center"
-                    >
+                        sx={{
+                            justifyContent: "center",
+                            alignItems: "center"
+                        }}>
                         <Grid size="grow">
-                            <Typography variant="h5" margin={2}>
+                            <Typography variant="h5" sx={{
+                                margin: 2
+                            }}>
                                 Mute
                             </Typography>
                         </Grid>
                     </Grid>
-                    <Grid container spacing={3} padding={2}>
+                    <Grid container spacing={3} sx={{
+                        padding: 2
+                    }}>
                         <Grid size="grow">
                             <MuteControl />
                         </Grid>
