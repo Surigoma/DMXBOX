@@ -41,7 +41,7 @@ The frontend uses TanStack Router, Material UI, React Hook Form, SWR, and Zod. I
 
 - [Task](https://taskfile.dev/)
 - Go compatible with `backend/go.mod`
-- Node.js compatible with Vite 8
+- Node.js 24 (Active LTS; see `engines` in `frontend/package.json`)
 - Corepack and Yarn 4
 - Chromium for frontend browser tests
 
