@@ -30,12 +30,14 @@ export default defineConfig({
       provider: playwright(),
       headless: false,
       instances: [{ browser: "chromium" }],
+      // Vitest 5 locators are exact/case-sensitive by default; keep the v4 behavior.
+      locators: { exact: false },
     },
     coverage: {
       reportsDirectory: "./test/coverage/",
       provider: "v8",
-      include: ["./src/**/*.ts", "./src/**/*.tsx"],
-      exclude: ["./src/**/*.test.ts", "./src/**/*.test.tsx"],
+      include: ["src/**/*.{ts,tsx}"],
+      exclude: ["src/**/*.test.{ts,tsx}"],
     },
     reporters: ["default", "html"],
     outputFile: {

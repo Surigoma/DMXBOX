@@ -88,7 +88,7 @@ describe("Number Field", async () => {
             const { locator, getByRole } = await CreateTestComponent();
             const numberField = getByRole("textbox", { name: "test" });
             await expect.element(numberField).toBeVisible();
-            await expect.element(locator).not.toHaveTextContent("Enter value");
+            await expect.element(locator).not.toMatchTextContent("Enter value");
         });
         it("Show default message (Set min max)", async () => {
             const { getByText } = await CreateTestComponent(0, 100);

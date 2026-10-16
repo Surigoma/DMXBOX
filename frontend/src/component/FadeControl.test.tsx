@@ -158,7 +158,7 @@ describe("FadeControl", async () => {
                 const { getByRole } = await CreateTestComponent(undefined, true);
                 failure = kind;
                 await user.click(getByRole("button", { name: "Cut Out" }));
-                await expect.element(getByRole("alert")).toHaveTextContent("Failed to send Cut Out for test.");
+                await expect.element(getByRole("alert")).toMatchTextContent("Failed to send Cut Out for test.");
                 await expect.element(getByRole("button", { name: "Cut Out" })).toBeEnabled();
                 failure = undefined;
                 await user.click(getByRole("button", { name: "Retry" }));

@@ -60,47 +60,47 @@ describe("MuteControl", async () => {
     describe("Components", async () => {
         it("Shows the last sent state and highlights one button at a time", async () => {
             const { getByRole } = await CreateTestComponent();
-            await expect.element(getByRole("status")).toHaveTextContent("State unavailable");
+            await expect.element(getByRole("status")).toMatchTextContent("State unavailable");
             const mute = getByRole("button", { name: "Mute", exact: true });
             const unmute = getByRole("button", { name: "Unmute", exact: true });
             await user.click(mute);
-            await expect.element(getByRole("status")).toHaveTextContent("Muted");
+            await expect.element(getByRole("status")).toMatchTextContent("Muted");
             await expect.element(mute).toHaveAttribute("aria-pressed", "true");
             await expect.element(unmute).toHaveAttribute("aria-pressed", "false");
             await user.click(unmute);
-            await expect.element(getByRole("status")).toHaveTextContent("Unmuted");
+            await expect.element(getByRole("status")).toMatchTextContent("Unmuted");
             await expect.element(unmute).toHaveAttribute("aria-pressed", "true");
             await expect.element(mute).toHaveAttribute("aria-pressed", "false");
         });
         it("Follows external commands and recovers after status retrieval fails", async () => {
             isMute = true;
             const { getByRole } = await CreateTestComponent();
-            await expect.element(getByRole("status")).toHaveTextContent("Muted");
+            await expect.element(getByRole("status")).toMatchTextContent("Muted");
             vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
             stateStatus = 503;
-            await expect.element(getByRole("status")).toHaveTextContent("State unavailable");
+            await expect.element(getByRole("status")).toMatchTextContent("State unavailable");
             await expect.element(getByRole("button", { name: "Mute", exact: true })).toBeEnabled();
             isMute = false;
             stateStatus = 200;
             await vi.advanceTimersByTimeAsync(3000);
             vi.useRealTimers();
-            await expect.element(getByRole("status")).toHaveTextContent("Unmuted");
+            await expect.element(getByRole("status")).toMatchTextContent("Unmuted");
         });
         it("Preserves the known state when a command is rejected", async () => {
             isMute = false;
             postStatus = 500;
             const { getByRole } = await CreateTestComponent();
-            await expect.element(getByRole("status")).toHaveTextContent("Unmuted");
+            await expect.element(getByRole("status")).toMatchTextContent("Unmuted");
             await user.click(getByRole("button", { name: "Mute", exact: true }));
-            await expect.element(getByRole("alert")).toHaveTextContent("Failed to send mute command");
-            await expect.element(getByRole("status")).toHaveTextContent("Unmuted");
+            await expect.element(getByRole("alert")).toMatchTextContent("Failed to send mute command");
+            await expect.element(getByRole("status")).toMatchTextContent("Unmuted");
         });
         it("Keeps the status above both buttons at mobile width", async () => {
             await page.viewport(360, 500);
             try {
                 isMute = true;
                 const { getByRole, getByTestId } = await render(<ControlStateProvider><div style={{ width: 320 }}><MuteControl /></div></ControlStateProvider>);
-                await expect.element(getByRole("status")).toHaveTextContent("Muted");
+                await expect.element(getByRole("status")).toMatchTextContent("Muted");
                 expect(getByRole("status").element().getBoundingClientRect().bottom).toBeLessThan(getByRole("button", { name: "Mute", exact: true }).element().getBoundingClientRect().top);
                 await getByTestId("MuteControl").screenshot();
             } finally {
