@@ -75,7 +75,7 @@ describe("Configuration control mode", () => {
             await expect.element(toggle).toBeEnabled();
             failure = kind;
             await user.click(toggle);
-            await expect.element(getByRole("alert")).toHaveTextContent("Failed to change control mode.");
+            await expect.element(getByRole("alert")).toMatchTextContent("Failed to change control mode.");
             await expect.element(toggle).toBeEnabled();
             await expect.element(toggle).not.toBeChecked();
             failure = undefined;
@@ -106,14 +106,14 @@ describe("Configuration control mode", () => {
         await expect.element(toggle).toBeChecked();
         expect(configSaves).toBe(0);
         await user.click(getByRole("button", { name: "Update", exact: true }));
-        await expect.element(getByRole("alert")).toHaveTextContent("Success");
+        await expect.element(getByRole("alert")).toMatchTextContent("Success");
         expect(configSaves).toBe(1);
         await expect.element(toggle).toBeChecked();
     });
     it("Allows configuration use while control mode retrieval fails", async () => {
         loadFailure = true;
         const { getByRole } = await createPage();
-        await expect.element(getByRole("alert")).toHaveTextContent("Failed to load control mode.");
+        await expect.element(getByRole("alert")).toMatchTextContent("Failed to load control mode.");
         await expect.element(getByRole("switch", { name: "Browser only" })).toBeDisabled();
         await expect.element(getByRole("button", { name: "Update", exact: true })).toBeEnabled();
         loadFailure = false;
