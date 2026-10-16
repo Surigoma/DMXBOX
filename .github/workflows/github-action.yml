@@ -16,7 +16,7 @@ jobs:
       - name: "Frontend: Use Node.js"
         uses: actions/setup-node@v4
         with:
-          node-version: "25.x"
+          node-version: "24.x"
       - name: "Frontend: Enable corepack"
         run: corepack enable
       - name: "Frontend: Install dependencies"

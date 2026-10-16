@@ -41,7 +41,7 @@ DMXサーバーは512バイトのユニバースを保持します。デバイ�
 
 - [Task](https://taskfile.dev/)
 - `backend/go.mod`と互換性のあるGo
-- Vite 8と互換性のあるNode.js
+- Node.js 24（Active LTS。`frontend/package.json` の `engines` を参照）
 - CorepackとYarn 4
 - フロントエンドのブラウザテスト用Chromium
 
