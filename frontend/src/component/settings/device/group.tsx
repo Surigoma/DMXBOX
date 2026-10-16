@@ -39,7 +39,7 @@ export function AddEditGroup(prop: AddGroupProp) {
     const [title, setTitle] = useState(()=>getValues(prop.name + ".name") ?? "");
     const [id, setId] = useState(()=>prop.name?.split(".").pop() ?? "");
     const originalId = prop.name?.split(".").pop();
-    const idError = !id.trim() || /[.\[\]]/.test(id) || ["__proto__", "constructor", "prototype"].includes(id)
+    const idError = !id.trim() || /[.[\]]/.test(id) || ["__proto__", "constructor", "prototype"].includes(id)
         ? "Enter an ID without dots or brackets."
         : id !== originalId && Object.hasOwn(groups ?? {}, id)
           ? "This ID is already in use."
