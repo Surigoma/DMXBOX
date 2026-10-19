@@ -8,3 +8,10 @@ updates:
    directory: "/frontend"
    schedule:
      interval: weekly
+   ignore:
+     # typescript-eslint (used by `yarn lint`) only supports TypeScript <6.1.
+     # TS 7 ships no JS API, so typescript-eslint throws on 7.x and lint breaks.
+     # Remove this once typescript-eslint supports TS 7
+     # (https://github.com/typescript-eslint/typescript-eslint/issues/10940).
+     - dependency-name: "typescript"
+       versions: [">=7.0.0"]
