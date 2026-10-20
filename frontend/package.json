@@ -43,7 +43,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "@vitest/browser-playwright": "^5.0.4",
     "@vitest/coverage-v8": "^5.0.4",
-    "@vitest/ui": "^5.0.4",
+    "@vitest/ui": "^5.0.5",
     "csstype": "^3.2.3",
     "eslint": "^10.11.0",
     "eslint-plugin-react-hooks": "^7.1.1",
