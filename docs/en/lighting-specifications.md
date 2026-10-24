@@ -1,6 +1,12 @@
+---
+title: Lighting and Output Specifications
+nav_order: 2
+parent: Configuration and Hardware
+---
+
 # DMXBOX Lighting and Output Specifications
 
-[日本語](../ja/lighting-specifications.md) | [Documentation index](README.md) | [Configuration Reference](configuration.md)
+[Documentation index](README.md) | [Configuration Reference](configuration.md)
 
 ## Scope
 
@@ -115,6 +121,8 @@ Example port names:
 - Linux: `/dev/ttyUSB0`
 
 ## Art-Net
+
+See the [Art-Net Connection Guide](artnet-guide.md) for setup steps and configuration examples.
 
 DMXBOX sends ArtDMX UDP packets.
 
