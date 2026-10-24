@@ -1,12 +1,11 @@
 ---
 title: DMXBOX開発者ガイド
-parent: 日本語
 nav_order: 5
 ---
 
 # DMXBOX開発者ガイド
 
-[English](../en/developer-guide.md) | [ドキュメント一覧](README.md)
+[ドキュメント一覧](README.md)
 
 ## ソース構成
 

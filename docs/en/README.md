@@ -1,12 +1,12 @@
 ---
-title: English
-nav_order: 3
+title: Documentation index
+nav_order: 0
 permalink: /en/
 ---
 
 # DMXBOX Documentation
 
-[日本語](../ja/README.md) | [Project overview](https://github.com/Surigoma/DMXBOX#readme)
+[Project overview](https://github.com/Surigoma/DMXBOX#readme)
 
 ## For Users
 

@@ -1,12 +1,11 @@
 ---
 title: DMXBOX Developer Guide
-parent: English
 nav_order: 5
 ---
 
 # DMXBOX Developer Guide
 
-[日本語](../ja/developer-guide.md) | [Documentation index](README.md)
+[Documentation index](README.md)
 
 ## Source Tree
 

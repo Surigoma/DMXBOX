@@ -1,12 +1,11 @@
 ---
 title: DMXBOX Configuration Reference
-parent: English
 nav_order: 2
 ---
 
 # DMXBOX Configuration Reference
 
-[日本語](../ja/configuration.md) | [Documentation index](README.md)
+[Documentation index](README.md)
 
 DMXBOX reads `config.json` from the backend working directory. In a source checkout, the development file is `backend/config.json`. Saving from the browser replaces the complete configuration and reloads backend modules.
 

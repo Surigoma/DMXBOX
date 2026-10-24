@@ -1,12 +1,11 @@
 ---
 title: DMXBOX利用者ガイド
-parent: 日本語
 nav_order: 1
 ---
 
 # DMXBOX利用者ガイド
 
-[English](../en/user-guide.md) | [ドキュメント一覧](README.md)
+[ドキュメント一覧](README.md)
 
 ## 想定する利用環境
 

@@ -1,12 +1,11 @@
 ---
 title: DMXBOX Lighting and Output Specifications
-parent: English
 nav_order: 4
 ---
 
 # DMXBOX Lighting and Output Specifications
 
-[日本語](../ja/lighting-specifications.md) | [Documentation index](README.md) | [Configuration Reference](configuration.md)
+[Documentation index](README.md) | [Configuration Reference](configuration.md)
 
 ## Scope
 

@@ -36,3 +36,7 @@ defaults:
       path: ja
     values:
       lang: ja
+  - scope:
+      path: en
+    values:
+      lang: en

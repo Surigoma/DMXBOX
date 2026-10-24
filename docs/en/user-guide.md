@@ -1,12 +1,11 @@
 ---
 title: DMXBOX User Guide
-parent: English
 nav_order: 1
 ---
 
 # DMXBOX User Guide
 
-[日本語](../ja/user-guide.md) | [Documentation index](README.md)
+[Documentation index](README.md)
 
 ## Intended Environment
 

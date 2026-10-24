@@ -1,12 +1,11 @@
 ---
 title: DMXBOX TCPプロトコル仕様
-parent: 日本語
 nav_order: 3
 ---
 
 # DMXBOX TCPプロトコル仕様
 
-[English](../en/tcp-protocol.md) | [ドキュメント一覧](README.md) | [設定リファレンス](configuration.md)
+[ドキュメント一覧](README.md) | [設定リファレンス](configuration.md)
 
 ## 目的
 

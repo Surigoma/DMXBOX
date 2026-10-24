@@ -1,12 +1,11 @@
 ---
 title: DMXBOX設定リファレンス
-parent: 日本語
 nav_order: 2
 ---
 
 # DMXBOX設定リファレンス
 
-[English](../en/configuration.md) | [ドキュメント一覧](README.md)
+[ドキュメント一覧](README.md)
 
 DMXBOXはバックエンドのカレントディレクトリにある`config.json`を読み込みます。ソースツリー内の開発用ファイルは`backend/config.json`です。ブラウザから保存すると設定全体が置き換えられ、バックエンドモジュールが再読み込みされます。
 

@@ -1,3 +1,12 @@
+{% assign document_name = page.path | split: '/' | last %}
+{% assign english_path = 'en/' | append: document_name %}
+{% assign japanese_path = 'ja/' | append: document_name %}
+{% assign english_page = site.html_pages | where: 'path', english_path | first %}
+{% assign japanese_page = site.html_pages | where: 'path', japanese_path | first %}
+<nav class="language-switcher" aria-label="{% if page.lang == 'ja' %}言語{% else %}Language{% endif %}">
+  <a href="{{ japanese_page.url | default: '/ja/' | relative_url }}" lang="ja" hreflang="ja"{% if page.lang == 'ja' %} aria-current="true"{% endif %}>日本語</a>
+  <a href="{{ english_page.url | default: '/en/' | relative_url }}" lang="en" hreflang="en"{% if page.lang != 'ja' %} aria-current="true"{% endif %}>English</a>
+</nav>
 <button type="button" id="theme-toggle" class="btn btn-outline mx-3" aria-pressed="false" hidden>
   {% if page.lang == 'ja' %}ダークモード{% else %}Dark mode{% endif %}
 </button>

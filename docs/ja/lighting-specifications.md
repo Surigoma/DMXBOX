@@ -1,12 +1,11 @@
 ---
 title: DMXBOX照明機材・出力仕様
-parent: 日本語
 nav_order: 4
 ---
 
 # DMXBOX照明機材・出力仕様
 
-[English](../en/lighting-specifications.md) | [ドキュメント一覧](README.md) | [設定リファレンス](configuration.md)
+[ドキュメント一覧](README.md) | [設定リファレンス](configuration.md)
 
 ## 対象範囲
 
