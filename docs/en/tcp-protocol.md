@@ -1,6 +1,12 @@
+---
+title: TCP Protocol
+nav_order: 2
+parent: External Integration
+---
+
 # DMXBOX TCP Protocol
 
-[日本語](../ja/tcp-protocol.md) | [Documentation index](README.md) | [Configuration Reference](configuration.md)
+[Documentation index](README.md) | [Configuration Reference](configuration.md)
 
 ## Purpose
 

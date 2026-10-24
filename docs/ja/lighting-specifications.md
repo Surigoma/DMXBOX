@@ -1,6 +1,12 @@
+---
+title: 照明機材・出力仕様
+nav_order: 2
+parent: 設定・機材
+---
+
 # DMXBOX照明機材・出力仕様
 
-[English](../en/lighting-specifications.md) | [ドキュメント一覧](README.md) | [設定リファレンス](configuration.md)
+[ドキュメント一覧](README.md) | [設定リファレンス](configuration.md)
 
 ## 対象範囲
 
@@ -115,6 +121,8 @@ DMXループは`dmx.fps`で動作します。デバイス値が変化した場�
 - Linux：`/dev/ttyUSB0`
 
 ## Art-Net
+
+接続手順と設定例は[Art-Net接続ガイド](artnet-guide.md)を参照してください。
 
 DMXBOXはArtDMX UDPパケットを送信します。
 

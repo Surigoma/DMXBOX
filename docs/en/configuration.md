@@ -1,6 +1,12 @@
+---
+title: Configuration Reference
+nav_order: 1
+parent: Configuration and Hardware
+---
+
 # DMXBOX Configuration Reference
 
-[日本語](../ja/configuration.md) | [Documentation index](README.md)
+[Documentation index](README.md)
 
 DMXBOX reads `config.json` from the backend working directory. In a source checkout, the development file is `backend/config.json`. Saving from the browser replaces the complete configuration and reloads backend modules.
 
@@ -161,11 +167,45 @@ Each key in `dmx.groups` is used by the HTTP and TCP control APIs. A group conta
 Device layouts:
 
 - `dimmer`: one channel; `max` requires one value.
-- `wclight`: three channels: cool white, warm white, and flash. The flash channel is currently always zero.
+- `wclight`: three channels: cool white, warm white, and flash. The frontend normally keeps flash at zero.
 
 The complete device must fit within the 512-channel universe. For example, `wclight` can start no later than channel 510.
 
 See [Lighting and Output Specifications](lighting-specifications.md) for serial DMX, Art-Net, device behavior, fades, and shutdown behavior.
+
+## Building a Configuration
+
+Apply these changes to the complete example. Do not replace the whole file with a partial object.
+
+| Use case | Settings to change | Verify after saving |
+| --- | --- | --- |
+| No hardware | `output.target: ["console"]` | Gauges, logs, and group IDs |
+| Serial DMX | `output.target: ["ftdi"]`, `output.ftdi.port` | OS port name and fixture response |
+| Art-Net | `output.target: ["artnet"]`, `output.artnet` | Sender NIC, destination, and all three address fields |
+| TCP control | `input.modules: ["http", "tcp"]`, `input.tcp` | Listener after restarting and newline-delimited commands |
+| Additional OSC | Add `osc` alongside a DMX output in `output.target` | Mute/Unmute on the mixer after restarting |
+
+You can select `console`, `ftdi`, and `artnet` together.
+Each receives the same DMX universe; they do not provide independent channel layouts.
+
+### Planning Channels
+
+If a dimmer occupies channel 1 and a wclight occupies 10–12, channels 2–9 remain unused.
+Place the next device outside occupied ranges.
+Registering the same fixture in multiple groups lets multiple operations write its channels,
+so those groups cannot be assumed to operate independently.
+
+`max` contains values from 0 to 255, not percentages.
+For example, `[128]` is approximately half of 255, but the output gauge shows 100% at that configured maximum.
+A wclight requires three values; keep the third at zero when not using its strobe channel.
+
+### Values Rejected on Save
+
+The backend rejects `dmx.fps` at or below zero or above 1000, negative fade times or delays,
+unsupported model names, devices outside channels 1–512, missing `max` values, and maximum values above 255.
+Group IDs cannot contain `.`, `[`, or `]`, or equal `__proto__`, `constructor`, or `prototype`.
+For convenient TCP integration, use IDs such as `stage` with no whitespace.
+Overlapping channels and mismatches with fixture modes are not validated; check them against your patch sheet.
 
 ## Development Frontend Configuration
 

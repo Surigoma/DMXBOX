@@ -1,0 +1,5 @@
+{% assign navigation_language = page.lang | default: site.lang %}
+{% assign language_pages = site.html_pages | where: 'lang', navigation_language %}
+<nav aria-label="{% if navigation_language == 'ja' %}ドキュメント{% else %}Documentation{% endif %}" id="site-nav" class="site-nav">
+  {% include components/nav/pages.html pages=language_pages %}
+</nav>
