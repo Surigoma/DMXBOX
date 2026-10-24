@@ -1,5 +1,5 @@
 ---
-title: DMXBOX開発者ガイド
+title: 開発者ガイド
 nav_order: 5
 ---
 

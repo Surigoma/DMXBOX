@@ -1,6 +1,7 @@
 ---
-title: DMXBOX TCPプロトコル仕様
-nav_order: 3
+title: TCPプロトコル
+nav_order: 2
+parent: 外部連携
 ---
 
 # DMXBOX TCPプロトコル仕様

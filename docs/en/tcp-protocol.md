@@ -1,6 +1,7 @@
 ---
-title: DMXBOX TCP Protocol
-nav_order: 3
+title: TCP Protocol
+nav_order: 2
+parent: External Integration
 ---
 
 # DMXBOX TCP Protocol

@@ -1,5 +1,5 @@
 ---
-title: DMXBOX Developer Guide
+title: Developer Guide
 nav_order: 5
 ---
 

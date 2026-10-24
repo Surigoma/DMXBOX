@@ -1,5 +1,5 @@
 ---
-title: DMXBOX利用者ガイド
+title: はじめに
 nav_order: 1
 ---
 
@@ -11,7 +11,7 @@ nav_order: 1
 
 DMXBOXは、バックエンドとブラウザ画面を同じPC上で動かす構成を主な利用形態としています。デフォルトのHTTP待受は`127.0.0.1:8080`であり、設定を変更しない限り、ほかのPCには公開されません。
 
-リリースビルドはWindows x86-64、Linux x86-64、Linux ARM64向けです。
+リリースビルドはWindows x86-64、Linux x86-64／ARM64、macOS x86-64／Apple Silicon向けです。
 
 ## リリース内容
 
@@ -34,6 +34,35 @@ DMXBOXはカレントディレクトリを基準に`config.json`と`static/`を�
 5. 本番の照明機器を接続・有効化する前に設定内容を確認します。
 
 `config.json`がない場合は、カレントディレクトリにデフォルト設定が生成されます。デフォルトの出力先は`console`で、DMXハードウェアを接続せずに動作確認できます。
+
+## 機器なしで最初のグループを試す
+
+初回生成される設定の`dmx.groups`は空です。そのままでは操作するグループは表示されません。
+次の例は1チャンネルの調光器をソフトウェア上で試す手順です。
+
+1. DMXBOXを一度終了し、生成された`config.json`をバックアップします。
+2. `output.target`が`["console"]`であることを確認します。
+3. `dmx.groups`を次のオブジェクトに置き換えます。ほかの設定は残します。
+4. 保存してDMXBOXを起動し、ブラウザーを再読み込みします。
+
+```json
+{
+  "stage": {
+    "name": "Stage",
+    "devices": [{ "model": "dimmer", "channel": 1, "max": [128] }]
+  }
+}
+```
+
+これは`config.json`全体ではなく`dmx.groups`の値です。
+コントロール画面にStageが表示され、Fade Inでゲージが増え、Fade Outで減ることを確認します。
+最大値128まで出力したとき、ゲージは100%になります。
+続けてCut In／Outで即時に切り替わることを確認します。
+`console`では物理機器へDMXは送信されません。
+
+機器を接続する段階では、出力先とチャンネル配置を[設定リファレンス](configuration.md)に従って変更します。
+設定画面で編集する場合も、ID`stage`と表示名Stageの違いを意識してください。
+外部制御では表示名ではなくIDを使用します。
 
 ## 画面
 
@@ -109,6 +138,8 @@ Mute／Unmuteの上には、最後にOSC送信した状態を`Muted`／`Unmuted`
 
 ## 関連ドキュメント
 
+- [運用・トラブル対応](operations-guide.md) — 運用前確認、手動切り替え、操作ログ、復旧
+- [HTTP API・外部連携](http-api.md) — curlによる制御、状態ストリーム、応答の意味
 - [設定リファレンス](configuration.md)
 - [TCPプロトコル仕様](tcp-protocol.md)
 - [照明機材・出力仕様](lighting-specifications.md)

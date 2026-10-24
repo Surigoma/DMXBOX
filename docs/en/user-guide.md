@@ -1,5 +1,5 @@
 ---
-title: DMXBOX User Guide
+title: Getting Started
 nav_order: 1
 ---
 
@@ -11,7 +11,7 @@ nav_order: 1
 
 DMXBOX is primarily designed to run its backend and browser interface on the same computer. The default HTTP listener is `127.0.0.1:8080`, so it is not exposed to other computers unless the configuration is changed.
 
-Release builds are provided for Windows x86-64, Linux x86-64, and Linux ARM64.
+Release builds target Windows x86-64, Linux x86-64/ARM64, and macOS x86-64/Apple Silicon.
 
 ## Release Contents
 
@@ -34,6 +34,35 @@ DMXBOX resolves `config.json` and `static/` relative to the current working dire
 5. Confirm the configuration before connecting or enabling production lighting hardware.
 
 If `config.json` is missing, DMXBOX creates a default one in the working directory. The default output is `console`, which is useful for checking operation without DMX hardware.
+
+## Try Your First Group without Hardware
+
+The generated default configuration has an empty `dmx.groups` object, so it initially shows no control groups.
+Use this example to try a single-channel dimmer in software.
+
+1. Stop DMXBOX and back up the generated `config.json`.
+2. Confirm that `output.target` is `["console"]`.
+3. Replace the value of `dmx.groups` with the object below, keeping the other settings.
+4. Save the file, start DMXBOX, and reload the browser.
+
+```json
+{
+  "stage": {
+    "name": "Stage",
+    "devices": [{ "model": "dimmer", "channel": 1, "max": [128] }]
+  }
+}
+```
+
+This is the value of `dmx.groups`, not a complete configuration file.
+Confirm that Stage appears, Fade In increases the gauge, and Fade Out decreases it.
+The gauge reaches 100% when output reaches the configured maximum of 128.
+Then try Cut In and Cut Out to verify immediate transitions.
+The `console` output does not send DMX to physical hardware.
+
+When connecting fixtures, update the output destination and channel layout using the [Configuration Reference](configuration.md).
+The same distinction between group ID `stage` and display name Stage applies in the settings UI:
+external control uses the ID.
 
 ## Screens
 
@@ -109,6 +138,8 @@ Runtime diagnostics are written to standard output. Include the relevant log lin
 
 ## Further Reading
 
+- [Operations and Troubleshooting](operations-guide.md) — preflight checks, manual control, operation logs, and recovery
+- [HTTP API and Integration](http-api.md) — curl commands, streaming state, and response semantics
 - [Configuration Reference](configuration.md)
 - [TCP Protocol](tcp-protocol.md)
 - [Lighting and Output Specifications](lighting-specifications.md)
