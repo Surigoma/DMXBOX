@@ -1,19 +1,20 @@
 .language-switcher {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
   margin-left: 1rem;
-  white-space: nowrap;
 
-  a {
-    display: inline-flex;
-    align-items: center;
+  select {
     min-height: 2.75rem;
+    padding: 0.375rem 0.5rem;
+    color: $body-text-color;
+    font: inherit;
+    background-color: $body-background-color;
+    border: 1px solid $border-color;
+    border-radius: 0.25rem;
   }
 
-  [aria-current] {
-    font-weight: 600;
-    text-decoration: underline;
-    text-underline-offset: 0.25em;
+  select:focus-visible {
+    outline: 2px solid $link-color;
+    outline-offset: 2px;
   }
 }
