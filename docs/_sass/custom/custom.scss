@@ -18,3 +18,25 @@
     outline-offset: 2px;
   }
 }
+
+.theme-toggle {
+  align-self: center;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.5rem;
+  line-height: 1;
+
+  svg {
+    vertical-align: middle;
+  }
+
+  &[data-theme="light"] .theme-icon-dark,
+  &[data-theme="dark"] .theme-icon-light {
+    display: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $link-color;
+    outline-offset: 2px;
+  }
+}

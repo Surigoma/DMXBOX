@@ -9,6 +9,15 @@
     <option value="{{ english_page.url | default: '/en/' | relative_url }}" lang="en"{% if page.lang != 'ja' %} selected{% endif %}>English</option>
   </select>
 </div>
-<button type="button" id="theme-toggle" class="btn btn-outline mx-3" aria-pressed="false" hidden>
-  {% if page.lang == 'ja' %}ダークモード{% else %}Dark mode{% endif %}
+<button type="button" id="theme-toggle" class="btn btn-outline mx-3 theme-toggle" data-theme="light"
+  data-light-label="{% if page.lang == 'ja' %}ライトモードに切り替え{% else %}Switch to light mode{% endif %}"
+  data-dark-label="{% if page.lang == 'ja' %}ダークモードに切り替え{% else %}Switch to dark mode{% endif %}"
+  aria-label="{% if page.lang == 'ja' %}ダークモードに切り替え{% else %}Switch to dark mode{% endif %}" hidden>
+  <svg class="theme-icon-light" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="4" />
+    <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5" />
+  </svg>
+  <svg class="theme-icon-dark" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+    <path d="M20.5 14A9 9 0 0 1 10 3.5 9 9 0 1 0 20.5 14Z" />
+  </svg>
 </button>
