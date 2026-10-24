@@ -1,6 +1,12 @@
+---
+title: English
+nav_order: 3
+permalink: /en/
+---
+
 # DMXBOX Documentation
 
-[日本語](../ja/README.md) | [Project overview](../../README.md)
+[日本語](../ja/README.md) | [Project overview](https://github.com/Surigoma/DMXBOX#readme)
 
 ## For Users
 

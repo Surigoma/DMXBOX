@@ -1,3 +1,9 @@
+---
+title: DMXBOX設定リファレンス
+parent: 日本語
+nav_order: 2
+---
+
 # DMXBOX設定リファレンス
 
 [English](../en/configuration.md) | [ドキュメント一覧](README.md)

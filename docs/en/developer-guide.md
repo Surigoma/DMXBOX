@@ -1,3 +1,9 @@
+---
+title: DMXBOX Developer Guide
+parent: English
+nav_order: 5
+---
+
 # DMXBOX Developer Guide
 
 [日本語](../ja/developer-guide.md) | [Documentation index](README.md)
@@ -188,4 +194,4 @@ Suggested checklist:
 - [Configuration Reference](configuration.md)
 - [TCP Protocol](tcp-protocol.md)
 - [Lighting and Output Specifications](lighting-specifications.md)
-- [Root README](../../README.md)
+- [Root README](https://github.com/Surigoma/DMXBOX#readme)

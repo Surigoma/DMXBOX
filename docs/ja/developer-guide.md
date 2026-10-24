@@ -1,3 +1,9 @@
+---
+title: DMXBOX開発者ガイド
+parent: 日本語
+nav_order: 5
+---
+
 # DMXBOX開発者ガイド
 
 [English](../en/developer-guide.md) | [ドキュメント一覧](README.md)
@@ -188,4 +194,4 @@ task
 - [設定リファレンス](configuration.md)
 - [TCPプロトコル仕様](tcp-protocol.md)
 - [照明機材・出力仕様](lighting-specifications.md)
-- [ルートREADME](../../README.ja.md)
+- [ルートREADME](https://github.com/Surigoma/DMXBOX/blob/main/README.ja.md)

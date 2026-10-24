@@ -1,3 +1,9 @@
+---
+title: DMXBOX TCP Protocol
+parent: English
+nav_order: 3
+---
+
 # DMXBOX TCP Protocol
 
 [日本語](../ja/tcp-protocol.md) | [Documentation index](README.md) | [Configuration Reference](configuration.md)

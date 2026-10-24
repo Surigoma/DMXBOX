@@ -1,3 +1,9 @@
+---
+title: DMXBOX Configuration Reference
+parent: English
+nav_order: 2
+---
+
 # DMXBOX Configuration Reference
 
 [日本語](../ja/configuration.md) | [Documentation index](README.md)

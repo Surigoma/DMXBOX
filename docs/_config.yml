@@ -1,0 +1,38 @@
+title: DMXBOX Documentation
+description: User guides and technical references for the DMXBOX lighting control system.
+url: https://surigoma.github.io
+baseurl: /DMXBOX
+repository: Surigoma/DMXBOX
+lang: en
+
+remote_theme: just-the-docs/just-the-docs@v0.12.0
+plugins:
+  - jekyll-remote-theme
+
+search_enabled: true
+search:
+  heading_level: 2
+  focus_shortcut_key: k
+
+aux_links:
+  GitHub:
+    - https://github.com/Surigoma/DMXBOX
+
+# These features are bundled and enabled by GitHub Pages.
+# Keep Markdown links usable both on GitHub and on the published site.
+relative_links:
+  enabled: true
+
+# README pages declare their own permalinks and navigation metadata.
+readme_index:
+  enabled: false
+
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+  - scope:
+      path: ja
+    values:
+      lang: ja
