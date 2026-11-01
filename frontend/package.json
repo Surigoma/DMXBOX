@@ -63,6 +63,7 @@
   },
   "packageManager": "yarn@4.18.1",
   "resolutions": {
-    "undici": "8.12.2"
+    "undici": "8.12.2",
+    "minimatch": "11.0.3"
   }
 }
