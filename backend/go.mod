@@ -4,7 +4,7 @@ go 1.27.3
 
 require (
 	github.com/SladkyCitron/slogcolor v1.9.0
-	github.com/gin-contrib/cors v1.7.9
+	github.com/gin-contrib/cors v1.7.10
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-playground/assert/v2 v2.2.0
 	github.com/hypebeast/go-osc v0.0.0-20220308234300-cec5a8a1e5f5
