@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && tsc -b",
-    "lint": "eslint .",
+    "lint": "oxlint .",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest watch",
@@ -30,7 +30,6 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
     "@tanstack/react-router-devtools": "^1.167.2",
     "@tanstack/router-devtools-core": "^1.168.2",
     "@tanstack/router-plugin": "^1.169.0",
@@ -45,15 +44,11 @@
     "@vitest/coverage-v8": "^5.0.5",
     "@vitest/ui": "^5.1.0",
     "csstype": "^3.2.3",
-    "eslint": "^10.15.0",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-react-refresh": "^0.5.7",
-    "globals": "^17.14.0",
     "msw": "^3.0.5",
+    "oxlint": "^1.94.0",
     "playwright": "^1.65.1",
     "react-syntax-highlighter": "^16.1.2",
-    "typescript": "~6.0.3",
-    "typescript-eslint": "^8.73.0",
+    "typescript": "~7.0.2",
     "vite": "^8.3.8",
     "vitest": "^5.1.0",
     "vitest-browser-react": "^2.3.0"
@@ -63,7 +58,6 @@
   },
   "packageManager": "yarn@4.18.1",
   "resolutions": {
-    "undici": "8.12.2",
-    "minimatch": "11.0.3"
+    "undici": "8.12.2"
   }
 }
