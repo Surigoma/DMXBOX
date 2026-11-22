@@ -44,7 +44,7 @@
     "@vitest/coverage-v8": "^5.0.5",
     "@vitest/ui": "^5.1.0",
     "csstype": "^3.2.3",
-    "msw": "^3.0.5",
+    "msw": "^3.0.7",
     "oxlint": "^1.94.0",
     "playwright": "^1.65.1",
     "react-syntax-highlighter": "^16.1.2",
