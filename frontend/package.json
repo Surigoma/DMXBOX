@@ -41,7 +41,7 @@
     "@types/react-syntax-highlighter": "^15.5.13",
     "@vitejs/plugin-react": "^6.3.0",
     "@vitest/browser-playwright": "^5.1.1",
-    "@vitest/coverage-v8": "^5.0.5",
+    "@vitest/coverage-v8": "^5.1.1",
     "@vitest/ui": "^5.1.1",
     "csstype": "^3.2.4",
     "msw": "^3.0.7",
@@ -50,7 +50,7 @@
     "react-syntax-highlighter": "^16.1.2",
     "typescript": "~7.0.2",
     "vite": "^8.3.8",
-    "vitest": "^5.1.0",
+    "vitest": "^5.1.1",
     "vitest-browser-react": "^2.3.0"
   },
   "engines": {
