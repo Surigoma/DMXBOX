@@ -43,7 +43,7 @@
     "@vitest/browser-playwright": "^5.1.1",
     "@vitest/coverage-v8": "^5.0.5",
     "@vitest/ui": "^5.1.0",
-    "csstype": "^3.2.3",
+    "csstype": "^3.2.4",
     "msw": "^3.0.7",
     "oxlint": "^1.94.0",
     "playwright": "^1.65.1",
