@@ -1099,13 +1099,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/history@npm:1.162.4":
-  version: 1.162.4
-  resolution: "@tanstack/history@npm:1.162.4"
-  checksum: 10c0/3a8bbe096e597f7945ac85f9da6b1bbd9f62c9df34c29526a3667189d715bb434fd077186333025a78ef6900adb943816cc58cc90b015527d4a916baedb09e44
-  languageName: node
-  linkType: hard
-
 "@tanstack/history@npm:1.162.5":
   version: 1.162.5
   resolution: "@tanstack/history@npm:1.162.5"
@@ -1158,7 +1151,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@tanstack/router-core@npm:1.171.39":
+"@tanstack/router-core@npm:1.171.39, @tanstack/router-core@npm:^1.171.39":
   version: 1.171.39
   resolution: "@tanstack/router-core@npm:1.171.39"
   dependencies:
@@ -1167,18 +1160,6 @@ __metadata:
     seroval: "npm:^1.6.7"
     seroval-plugins: "npm:^1.6.7"
   checksum: 10c0/2d67358028175051b3abd486581dd9bf74edced16f43ef5e14065c20b7aa5830f521a52ad43fdaf98dfda76232437260a544b3213f2c86b4f0d2bd0436109c4c
-  languageName: node
-  linkType: hard
-
-"@tanstack/router-core@npm:^1.171.34":
-  version: 1.171.34
-  resolution: "@tanstack/router-core@npm:1.171.34"
-  dependencies:
-    "@tanstack/history": "npm:1.162.4"
-    cookie-es: "npm:^3.0.0"
-    seroval: "npm:^1.6.7"
-    seroval-plugins: "npm:^1.6.7"
-  checksum: 10c0/d1d0154f9979b892e21ef73293805bf96e1b0136147991f7687b67ffcf268cd40364295fc8f0f026e6f6ac375378959045a16b9b1d889180960f2fa9e4894ce2
   languageName: node
   linkType: hard
 
@@ -2108,7 +2089,7 @@ __metadata:
     "@mui/material": "npm:^9.4.0"
     "@tanstack/react-router": "npm:^1.170.46"
     "@tanstack/react-router-devtools": "npm:^1.167.4"
-    "@tanstack/router-core": "npm:^1.171.34"
+    "@tanstack/router-core": "npm:^1.171.39"
     "@tanstack/router-devtools-core": "npm:^1.168.2"
     "@tanstack/router-plugin": "npm:^1.169.0"
     "@testing-library/dom": "npm:^10.4.2"
